@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
+use phpDocumentor\Reflection\Types\Collection;
 
 class Players extends Model
 {
@@ -44,9 +45,13 @@ class Players extends Model
     public function getLastPlayersKills()
     {
         $clans = new Clans();
+        $lastPlayers = collect([]);
 
-        return DB::table('sc_kills')->select('attacker','attacker_tag', 'victim', 'victim_tag')->get()->reverse()->splice(0, 10)->each(function ($player) use ($clans) {
-            return $clans->getHTMLColorTagByTag($player->attacker_tag);
+        DB::table('sc_kills')->select('attacker','attacker_tag', 'victim', 'victim_tag')->get()->reverse()->splice(0, 10)->each(function ($player, $indx) use ($lastPlayers, $clans) {
+            $player->attacker_colored_tag = $clans->getHTMLColorTagByTag($player->attacker_tag);
+            $player->victim_colored_tag = $clans->getHTMLColorTagByTag($player->victim_tag);
+            $lastPlayers->put($indx, $player);
         });
+        return $lastPlayers;
     }
 }

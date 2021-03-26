@@ -55,7 +55,6 @@
                         <tbody>
                         @foreach($players->getTopPlayersByKDR() as $id => $player)
                         <tr>
-
                             <th scope="row">{{ $id+1 }}</th>
                             <td>{{ $player['Name'] }}</td>
                             <td>{{ $player['KDR'] }}</td>
@@ -76,11 +75,10 @@
                         </thead>
                         <tbody>
                         @foreach($players->getLastPlayersKills() as $id => $player)
-                            {{ dd($player) }}
                         <tr>
                             <th scope="row">{{ $id+1 }}</th>
-                            <td><span class="badge bg-dark .rounded-pill">ClanTag</span> {{ $player->attacker }}</td>
-                            <td><span class="badge bg-dark .rounded-pill">ClanTag</span>{{ $player->victim }}</td>
+                            <td><span class="badge bg-dark .rounded-pill">{!! $player->attacker_colored_tag !!}</span> {{ $player->attacker }}</td>
+                            <td><span class="badge bg-dark .rounded-pill">{!! $player->victim_colorred_tag !!}</span> {{ $player->victim }}</td>
                         </tr>
                         @endforeach
                         </tbody>
