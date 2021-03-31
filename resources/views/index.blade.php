@@ -76,7 +76,6 @@
                         </thead>
                         <tbody>
                         @foreach($players->getLastPlayersKills() as $id => $player)
-                            {{ dd($player) }}
                         <tr>
                             <th scope="row">{{ $id+1 }}</th>
                             <td><span class="badge bg-dark .rounded-pill">ClanTag</span> {{ $player->attacker }}</td>
