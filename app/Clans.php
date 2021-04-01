@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class Clans extends Model
@@ -12,7 +13,7 @@ class Clans extends Model
         return DB::table('sc_clans');
     }
 
-    public function getClans()
+    public function getClans(): Collection
     {
         return $this->getTable()->get();
     }
@@ -22,9 +23,16 @@ class Clans extends Model
         return isset($tag) ? $this->getTable()->where('tag', '=', $tag)->get('color_tag')->first() : null;
     }
 
-    public function getHTMLColorTagByTag($tag = null)
+    public function getHTMLColorTagByTag($tag = null): ?string
     {
-        return isset($tag) ? $this->addColors($this->getTable()->where('tag', '=', $tag)->get('color_tag')->first()->color_tag) : null;
+        if (!isset($tag)) {
+            return null;
+        }
+        $row = $this->getTable()->where('tag', '=', $tag)->get('color_tag')->first();
+        if (isset($row)) {
+            return $this->addColors($row->color_tag);
+        }
+        return null;
     }
 
     /**
@@ -33,7 +41,8 @@ class Clans extends Model
      * @param $string - without colors.
      * @return string - with colors.
      */
-    private function addColors($string) {
+    private function addColors($string): string
+    {
         $colors = Array(
             "g" => "<span class=\"c0-font\">",
             "1" => "<span class=\"c1-font\">",
