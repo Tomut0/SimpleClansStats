@@ -5,7 +5,6 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use phpDocumentor\Reflection\Types\Collection;
 
 class Players extends Model
 {
@@ -24,6 +23,7 @@ class Players extends Model
         return $this->getPlayers()->where('tag', '=', $clan_tag);
     }
 
+    /** @noinspection PhpUnused */
     public function getTopPlayersByKDR(): array
     {
         $players = $this->getPlayers();

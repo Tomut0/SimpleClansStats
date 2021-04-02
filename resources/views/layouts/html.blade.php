@@ -16,6 +16,8 @@
     <!--  Bootstrap5 CSS  -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 
+    <script src="https://kit.fontawesome.com/6b5185c021.js" crossorigin="anonymous"></script>
+
     <script src="@yield('js')"></script>
 </head>
 <body>
@@ -23,4 +25,5 @@
 @yield('content')
 @include('layouts.footer')
 </body>
+@stack('scripts')
 </html>

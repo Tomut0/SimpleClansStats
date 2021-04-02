@@ -17,3 +17,4 @@ Route::get('/', 'ViewController@show');
 Route::get('/{locale}', 'ViewController@show');
 Route::get('/clans', 'ViewController@show')->name("clans");
 Route::get('/{locale}/clans', 'ViewController@show')->name("clans");
+// FIXME This matches URLs with /
