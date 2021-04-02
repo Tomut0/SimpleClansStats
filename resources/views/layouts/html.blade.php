@@ -19,6 +19,8 @@
     <script src="@yield('js')"></script>
 </head>
 <body>
+@include('layouts.header')
 @yield('content')
 </body>
+@include('layouts.footer')
 </html>

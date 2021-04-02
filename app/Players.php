@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Env;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use phpDocumentor\Reflection\Types\Collection;
 
@@ -14,26 +14,23 @@ class Players extends Model
         return DB::table('sc_players');
     }
 
-    public function getPlayers()
+    public function getPlayers(): Collection
     {
         return $this->getTable()->get();
     }
 
-    public function getTopPlayersByKDR()
+    public function getMembers($clan_tag): Collection
+    {
+        return $this->getPlayers()->where('tag', '=', $clan_tag);
+    }
+
+    public function getTopPlayersByKDR(): array
     {
         $topPlayers = $this->getPlayers()->map(function ($player) {
-            $neutral = $player->neutral_kills * doubleval(Env::get('KILL_NEUTRAL'));
-            $rival = $player->rival_kills * doubleval(Env::get('KILL_RIVAL'));
-            $civilian = $player->civilian_kills * doubleval(Env::get('KILL_CIVILIAN'));
+            $kdr = Utils::getKDR($player);
 
-            $kills = ($civilian + $rival + $neutral);
-
-            if ($player->deaths != 0) {
-                return ["Name" => $player->name, "KDR" => number_format($kills / $player->deaths, 2)];
-            }
-
-            if ($kills != 0.0) {
-                return ["Name" => $player->name, "KDR" => number_format($kills, 2)];
+            if ($kdr > 0) {
+                return ["Name" => $player->name, "KDR" => $kdr];
             }
 
             return null;
@@ -42,16 +39,18 @@ class Players extends Model
         return $topPlayers->filter()->sortBy('KDR')->reverse()->splice(0, 10)->all();
     }
 
-    public function getLastPlayersKills()
+    /** @noinspection PhpUnused */
+    public function getLastPlayersKills(): Collection
     {
         $clans = new Clans();
         $lastPlayers = collect([]);
 
-        DB::table('sc_kills')->select('attacker','attacker_tag', 'victim', 'victim_tag')->get()->reverse()->splice(0, 10)->each(function ($player, $indx) use ($lastPlayers, $clans) {
-            $player->attacker_colored_tag = $clans->getHTMLColorTagByTag($player->attacker_tag);
-            $player->victim_colored_tag = $clans->getHTMLColorTagByTag($player->victim_tag);
-            $lastPlayers->put($indx, $player);
-        });
+        DB::table('sc_kills')->select('attacker', 'attacker_tag', 'victim', 'victim_tag')->get()
+            ->reverse()->splice(0, 10)->each(function ($player, $indx) use ($lastPlayers, $clans) {
+                $player->attacker_colored_tag = $clans->getHTMLColorTagByTag($player->attacker_tag);
+                $player->victim_colored_tag = $clans->getHTMLColorTagByTag($player->victim_tag);
+                $lastPlayers->put($indx, $player);
+            });
         return $lastPlayers;
     }
 }
