@@ -22,9 +22,9 @@ class Clans extends Model
         return DB::table('sc_clans');
     }
 
-    public function getClans(): Collection
+    public function getClans(string $sortBy = "name"): Collection
     {
-        return $this->getTable()->get()->sortBy('name');
+        return $this->getTable()->get()->sortBy($sortBy);
     }
 
     /** @noinspection PhpUnused */

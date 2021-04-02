@@ -21,6 +21,6 @@
 <body>
 @include('layouts.header')
 @yield('content')
-</body>
 @include('layouts.footer')
+</body>
 </html>

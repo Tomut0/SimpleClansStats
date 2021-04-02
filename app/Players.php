@@ -26,7 +26,11 @@ class Players extends Model
 
     public function getTopPlayersByKDR(): array
     {
-        $topPlayers = $this->getPlayers()->map(function ($player) {
+        $players = $this->getPlayers();
+        if (!isset($players)) {
+            return [];
+        }
+        $topPlayers = $players->map(function ($player) {
             $kdr = Utils::getKDR($player);
 
             if ($kdr > 0) {
