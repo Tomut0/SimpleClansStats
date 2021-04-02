@@ -11,4 +11,10 @@
 |
 */
 
-Route::get('/{locale?}/', 'IndexController@view');
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', 'IndexController@view');
+Route::get('/{locale}', 'IndexController@view');
+Route::get('/clans', 'ClansController@view');
+Route::get('/{locale}/clans', 'ClansController@view');
+
