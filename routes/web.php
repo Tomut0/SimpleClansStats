@@ -13,8 +13,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', 'IndexController@view');
-Route::get('/{locale}', 'IndexController@view');
-Route::get('/clans', 'ClansController@view');
-Route::get('/{locale}/clans', 'ClansController@view');
-
+Route::get('/', 'ViewController@show');
+Route::get('/{locale}', 'ViewController@show');
+Route::get('/clans', 'ViewController@show')->name("clans");
+Route::get('/{locale}/clans', 'ViewController@show')->name("clans");
