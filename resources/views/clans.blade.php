@@ -7,27 +7,43 @@
                 <div class="col">
                     <div class="card">
                         <div class="card-header bg-primary">
-                            <h4 class="p-3 mb-0 text-white">Clan List</h4>
-                            <form class="d-flex">
-                                <input id="filter" class="form-control mb-3 w-25" type="search" placeholder="Filter"
-                                       aria-label="Filter">
-                            </form>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h4 class="p-3 mb-0 text-white">Clan List</h4>
+                                    </div>
+                                    <div class="col-sm">
+                                        <form class="d-flex p-3 w-75 float-end">
+                                            <input id="filter" class="form-control " type="search"
+                                                   placeholder="Filter"
+                                                   aria-label="Filter">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
                             <table class="table w-100">
                                 <thead>
                                 <tr>
-                                    <th scope="col"># <i class="fas fa-sort"></i></th>
-                                    <th scope="col">{{ __('messages.clans.clanTag') }} <i class="fas fa-sort"></i></th>
-                                    <th scope="col">{{ __('messages.main.clanName') }} <i class="fas fa-sort"></i></th>
-                                    <th scope="col">{{ __('messages.main.clanKDR') }} <i class="fas fa-sort"></i></th>
-                                    <th scope="col">{{ __('messages.clans.clanLeaders') }} <i class="fas fa-sort"></i>
+                                    <th class="col" scope="col"># <i class="fas fa-sort"></i></th>
+                                    <th class="col" scope="col">{{ __('messages.clans.clanTag') }} <i
+                                            class="fas fa-sort"></i></th>
+                                    <th class="col-2" scope="col">{{ __('messages.main.clanName') }} <i
+                                            class="fas fa-sort"></i></th>
+                                    <th class="col-2" scope="col">{{ __('messages.main.clanKDR') }} <i
+                                            class="fas fa-sort"></i></th>
+                                    <th class="col-1" scope="col">{{ __('messages.clans.clanLeaders') }} <i
+                                            class="fas fa-sort"></i>
                                     </th>
-                                    <th scope="col">{{ __('messages.main.clanMembers') }} <i class="fas fa-sort"></i>
+                                    <th class="col-2" scope="col">{{ __('messages.main.clanMembers') }} <i
+                                            class="fas fa-sort"></i>
                                     </th>
-                                    <th scope="col">{{ __('messages.clans.clanFounded') }} <i class="fas fa-sort"></i>
+                                    <th class="col-1" scope="col">{{ __('messages.clans.clanFounded') }} <i
+                                            class="fas fa-sort"></i>
                                     </th>
-                                    <th scope="col">{{ __('messages.clans.clanLastUsed') }} <i class="fas fa-sort"></i>
+                                    <th class="col-2" scope="col">{{ __('messages.clans.clanLastUsed') }} <i
+                                            class="fas fa-sort"></i>
                                     </th>
                                 </tr>
                                 </thead>
@@ -50,6 +66,17 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="card-footer">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-end">
+                                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -57,25 +84,5 @@
     </main>
 @endsection
 @push('scripts')
-    <script>
-        function filter(rows, text) {
-            outter:
-                for (const row of rows) {
-                    for (const column of row.children) {
-                        if (column.innerText.toLowerCase().includes(text.toLowerCase())) {
-                            row.hidden = false;
-                            continue outter;
-                        }
-                    }
-                    row.hidden = true;
-                }
-        }
-
-        let filterInput = document.getElementById("filter");
-        filterInput.addEventListener("input", function () {
-            let text = filterInput.value;
-            const rows = document.getElementsByClassName("data_row");
-            filter(rows, text);
-        });
-    </script>
+    <script src="{{asset("assets/js/filter.js")}}" defer></script>
 @endpush
