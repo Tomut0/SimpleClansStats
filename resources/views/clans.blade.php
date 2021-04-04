@@ -5,40 +5,84 @@
         <div class="container-fluid">
             <div class="row text-center">
                 <div class="col">
-                    <h4 class="bg-primary text-white p-3 mb-0">Clan List</h4>
-                    <table class="table table-primary table-striped w-100">
-                        <thead>
-                        <tr>
-                            {{--                            <th scope="col">#</th>--}}
-                            <th scope="col">{{ __('messages.clans.clanTag') }}</th>
-                            <th scope="col">{{ __('messages.main.clanName') }}</th>
-                            <th scope="col">{{ __('messages.main.clanKDR') }}</th>
-                            <th scope="col">{{ __('messages.clans.clanLeaders') }}</th>
-                            <th scope="col">{{ __('messages.main.clanMembers') }}</th>
-                            <th scope="col">{{ __('messages.clans.clanFounded') }}</th>
-                            <th scope="col">{{ __('messages.clans.clanLastUsed') }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($clans->getTopClans(100, "KDR") as $index => $clan)
-                            @if(empty($clan['name']) || !array_key_exists('color_tag', $clan))
-                                @continue
-                            @endif
-                            <tr>
-                                {{--                                <th scope="row">{{ $index + 1 }}</th>--}}
-                                <td>{!! $clan['color_tag'] !!}</td>
-                                <td>{{ $clan['name'] }}</td>
-                                <td>{{ number_format($clan['KDR'], 2) }}</td>
-                                <td>{{ sizeof($clan['leaders']) }}</td>
-                                <td>{{ sizeof($clan['members']) }}</td>
-                                <td> {{ date("d/m/Y",$clan['founded'] / 1000) }}</td>
-                                <td>{{ date("d/m/Y - H:i", $clan['last_used'] / 1000) }}</td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
+                    <div class="card">
+                        <div class="card-header bg-primary">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h4 class="p-3 mb-0 text-white">Clan List</h4>
+                                    </div>
+                                    <div class="col-sm">
+                                        <form class="d-flex p-3 w-75 float-end">
+                                            <input id="filter" class="form-control " type="search"
+                                                   placeholder="Filter"
+                                                   aria-label="Filter">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <table class="table w-100">
+                                <thead>
+                                <tr>
+                                    <th class="col" scope="col"># <i class="fas fa-sort"></i></th>
+                                    <th class="col" scope="col">{{ __('messages.clans.clanTag') }} <i
+                                            class="fas fa-sort"></i></th>
+                                    <th class="col-2" scope="col">{{ __('messages.main.clanName') }} <i
+                                            class="fas fa-sort"></i></th>
+                                    <th class="col-2" scope="col">{{ __('messages.main.clanKDR') }} <i
+                                            class="fas fa-sort"></i></th>
+                                    <th class="col-1" scope="col">{{ __('messages.clans.clanLeaders') }} <i
+                                            class="fas fa-sort"></i>
+                                    </th>
+                                    <th class="col-2" scope="col">{{ __('messages.main.clanMembers') }} <i
+                                            class="fas fa-sort"></i>
+                                    </th>
+                                    <th class="col-1" scope="col">{{ __('messages.clans.clanFounded') }} <i
+                                            class="fas fa-sort"></i>
+                                    </th>
+                                    <th class="col-2" scope="col">{{ __('messages.clans.clanLastUsed') }} <i
+                                            class="fas fa-sort"></i>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($clans->getTopClans(999999, "KDR") as $index => $clan)
+                                    @if(empty($clan['name']) || !array_key_exists('color_tag', $clan))
+                                        @continue
+                                    @endif
+                                    <tr class="data_row">
+                                        <th scope="row">{{ $clan['rank'] }}</th>
+                                        <td>{!! $clan['color_tag'] !!}</td>
+                                        <td>{{ $clan['name'] }}</td>
+                                        <td>{{ number_format($clan['KDR'], 2) }}</td>
+                                        <td>{{ sizeof($clan['leaders']) }}</td>
+                                        <td>{{ sizeof($clan['members']) }}</td>
+                                        <td> {{ date("d/m/Y",$clan['founded'] / 1000) }}</td>
+                                        <td>{{ date("d/m/Y - H:i", $clan['last_used'] / 1000) }}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-end">
+                                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 @endsection
+@push('scripts')
+    <script src="{{asset("assets/js/filter.js")}}" defer></script>
+@endpush

@@ -28,9 +28,10 @@ class Clans extends Model
     }
 
     /** @noinspection PhpUnused */
-    public function getTopClans(int $length = 10, string $sortBy = "KDR"): Collection
+    public function getTopClans(int $length = 10, string $sortBy = "KDR", bool $asc = false): Collection
     {
         $clans = collect([]);
+        //looping through sc_players table to get KDR, members and leaders which are not available in sc_clans
         foreach (self::$players->getPlayers() as $player) {
             $tag = $player->tag;
             if (empty($tag)) {
@@ -49,10 +50,13 @@ class Clans extends Model
             $clan["KDR"] += $KDR;
             $clans->put($tag, $clan);
         }
-        $clans = $clans->sortByDesc($sortBy)->splice(0, $length);
-        $rank = 1;
-        foreach ($clans as $tag => $clan) {
-            $clan_row = $this->getClans()->where('tag', '=', $tag)->first();
+        //looping through sc_clans to complete the clan data fetched in sc_players
+        foreach ($this->getClans() as $clan_row) {
+            $tag = $clan_row->tag;
+            $clan = $clans->get($tag);
+            if (!isset($clan)) {
+                continue;
+            }
             $clan += (array) $clan_row;
             $clan['color_tag'] = !array_key_exists('color_tag', $clan) ? '' : $this->addColors($clan['color_tag']);
             $clan['founded'] = !array_key_exists('founded', $clan) ? 0 : $clan['founded'];
@@ -62,6 +66,12 @@ class Clans extends Model
             } else {
                 $clan['name'] = "Error: no clan";
             }
+            $clans->put($tag, $clan);
+        }
+        $clans = $clans->sortBy($sortBy, SORT_REGULAR, !$asc)->splice(0, $length);
+        //setting ranks
+        $rank = 1;
+        foreach ($clans as $tag => $clan) {
             $clan['rank'] = $rank;
             $clans->put($tag, $clan);
             $rank++;
