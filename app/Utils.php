@@ -73,27 +73,27 @@ class Utils
     public static function addColors($string): string
     {
         $colors = array(
-            "g" => "<span class=\"c0-font\">",
-            "1" => "<span class=\"c1-font\">",
-            "2" => "<span class=\"c2-font\">",
-            "3" => "<span class=\"c3-font\">",
-            "4" => "<span class=\"c4-font\">",
-            "5" => "<span class=\"c5-font\">",
-            "6" => "<span class=\"c6-font\">",
-            "7" => "<span class=\"c7-font\">",
-            "8" => "<span class=\"c8-font\">",
-            "9" => "<span class=\"c9-font\">",
-            "a" => "<span class=\"ca-font\">",
-            "b" => "<span class=\"cb-font\">",
-            "c" => "<span class=\"cc-font\">",
-            "d" => "<span class=\"cd-font\">",
-            "e" => "<span class=\"ce-font\">",
-            "f" => "<span class=\"cf-font\">",
-            "l" => "<span class=\"cl-font\">",
-            "m" => "<span class=\"cm-font\">",
-            "n" => "<span class=\"cn-font\">",
-            "o" => "<span class=\"co-font\">",
-            "k" => "<span class=\"ck-font\">"
+            "g" => "<span class=\"color-black\">",
+            "1" => "<span class=\"color-dark_blue\">",
+            "2" => "<span class=\"color-dark_green\">",
+            "3" => "<span class=\"color-dark_aqua\">",
+            "4" => "<span class=\"color-dark_red\">",
+            "5" => "<span class=\"color-dark_purple\">",
+            "6" => "<span class=\"color-gold\">",
+            "7" => "<span class=\"color-gray\">",
+            "8" => "<span class=\"color-dark_gray\">",
+            "9" => "<span class=\"color-blue\">",
+            "a" => "<span class=\"color-green\">",
+            "b" => "<span class=\"color-aqua\">",
+            "c" => "<span class=\"color-red\">",
+            "d" => "<span class=\"color-light_purple\">",
+            "e" => "<span class=\"color-yellow\">",
+            "f" => "<span class=\"color-white\">",
+            "l" => "<span class=\"bold\">",
+            "m" => "<span class=\"strikethrough\">",
+            "n" => "<span class=\"underline\">",
+            "o" => "<span class=\"italic\">",
+            "k" => "<span class=\"obfuscated\">"
         );
 
         $string = str_replace("§0", "§g", $string);
