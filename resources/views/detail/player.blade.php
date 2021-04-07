@@ -5,8 +5,9 @@
     <table class="w-100">
         <tbody>
         <tr>
-            <td class="align-top w-100"><img src="https://mc-heads.net/player/{{$player['name']}}"
-                                              alt="{{$player['name']}}'s skin"></td>
+            <td class="align-top w-auto">
+                <img src="https://mc-heads.net/player/{{$player['name']}}" alt="{{$player['name']}}'s skin">
+            </td>
             <td>
                 <table class="table table-striped">
                     <tr>
