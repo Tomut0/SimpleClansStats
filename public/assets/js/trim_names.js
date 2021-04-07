@@ -13,5 +13,5 @@ function trimNames(className, maxLength, split = false) {
         }
     }
 }
-trimNames("player_name", 16, true);
+trimNames("player_name", 15, true);
 trimNames("clan_name", 20);

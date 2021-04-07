@@ -1,0 +1,66 @@
+.colored {
+    background-color: #262626;
+    text-align: center;
+    padding: 3px;
+    border-radius: 5px
+}
+
+.c0-font {
+    color: #000;
+    text-shadow: 1px 1px 0 #000;
+    filter: dropshadow(color=#000000, offx=1, offy=1)
+}
+
+.c1-font {
+    color: #2400b1;
+    text-shadow: 1px 1px 0 #03002c;
+    filter: dropshadow(color=#03002C, offx=1, offy=1)
+}
+
+.c2-font {
+    color: #40ad00;
+    text-shadow: 1px 1px 0 #0a2b00;
+    filter: dropshadow(color=#0A2B00, offx=1, offy=1)
+}
+
+.c3-font {
+    color: #47aaaa;
+    text-shadow: 1px 1px 0 #0b2a2a;
+    filter: dropshadow(color=#0B2A2A, offx=1, offy=1)
+}
+
+.c4-font {
+    color: #9e000f;
+    text-shadow: 1px 1px 0 #260001;
+    filter: dropshadow(color=#260001, offx=1, offy=1)
+}
+
+.c5-font {
+    color: #a000b1;
+    text-shadow: 1px 1px 0 #26002c;
+    filter: dropshadow(color=#26002C, offx=1, offy=1)
+}
+
+.c6-font {
+    color: #f3ad10;
+    text-shadow: 1px 1px 0 #292b00;
+    filter: dropshadow(color=#292B00, offx=1, offy=1)
+}
+
+.c7-font {
+    color: #aaa;
+    text-shadow: 1px 1px 0 #2a2a2a;
+    filter: dropshadow(color=#2A2A2A, offx=1, offy=1)
+}
+
+.c8-font {
+    color: #555;
+    text-shadow: 1px 1px 0 #151515;
+    filter: dropshadow(color=#151515, offx=1, offy=1)
+}
+
+.c9-font {
+    color: #5f40ff;
+    text-shadow: 1px 1px 0 #171042;
+    filter: dropshadow(color=#171042, offx=1, offy=1)
+}
