@@ -19,7 +19,6 @@
 
     <script src="https://kit.fontawesome.com/6b5185c021.js" crossorigin="anonymous"></script>
     @stack('scripts')
-    <script src="@yield('js')"></script>
 </head>
 <body>
 @include('layouts.header')

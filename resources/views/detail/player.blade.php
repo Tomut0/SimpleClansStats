@@ -2,10 +2,10 @@
 @isset($player)
     @section('modal-title', $player['name'])
 @section('modal-content')
-    <table width="100%">
+    <table class="w-100">
         <tbody>
         <tr>
-            <td valign="top" width="150"><img src="https://mc-heads.net/player/{{$player['name']}}"
+            <td class="align-top w-100"><img src="https://mc-heads.net/player/{{$player['name']}}"
                                               alt="{{$player['name']}}'s skin"></td>
             <td>
                 <table class="table table-striped">
@@ -61,10 +61,10 @@
         </tr>
         </tbody>
     </table>
-    <table width="100%">
+    <table class="w-100">
         <tbody>
         <tr>
-            <td width="50%" valign="top">
+            <td class="w-50 align-top">
                 <h4>Last 5 Kills</h4>
                 <table class="table table-striped">
                     <thead>
@@ -85,7 +85,7 @@
                     </tbody>
                 </table>
             </td>
-            <td width="50%" valign="top">
+            <td class="w-50 align-top">
                 <h4>Last 5 Deaths</h4>
                 <table class="table table-striped">
                     <thead>

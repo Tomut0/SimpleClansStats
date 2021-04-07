@@ -2,11 +2,11 @@
 @isset($clan)
     @section('modal-title', $clan["name"])
 @section('modal-content')
-    {{--    TODO Update HTML and translate messages--}}
-    <table width="100%">
+    {{--    TODO translate messages--}}
+    <table class="w-100">
         <tbody>
         <tr>
-            <td valign="top">
+            <td class="align-top">
                 <h3>Members</h3>
                 <table class="table table-striped">
                     <tbody>
@@ -20,7 +20,7 @@
                     </tbody>
                 </table>
             </td>
-            <td valign="top">
+            <td class="align-top">
                 <h3>Info</h3>
                 <table class="table">
                     <tbody>
