@@ -54,15 +54,13 @@ function showClan(tag) {
 function registerModalOpeners() {
     let elements = document.querySelectorAll(".modal-opener");
     for (let element of elements) {
-        element.onclick = function () {
-            let tag = element.dataset.tag;
-            let nick = element.dataset.nick;
-            if (tag) {
-                showClan(tag);
-            } else {
-                showPlayer(nick);
-            }
-        };
+        let tag = element.dataset.tag;
+        let nick = element.dataset.nick;
+        if (tag) {
+            element.onclick = () => showClan(tag)
+        } else if (nick) {
+            element.onclick = () => showPlayer(nick);
+        }
     }
 }
 
