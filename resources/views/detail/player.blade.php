@@ -76,10 +76,8 @@
                     <tbody>
                     @foreach($player['last_kills'] as $kill)
                         <tr>
-                            <td style="cursor: pointer"
-                                onclick="showClan('{{$kill->victim_tag}}');">{{$kill->victim_tag}}</td>
-                            <td style="cursor: pointer"
-                                onclick="showPlayer('{{$kill->victim}}');">{{$kill->victim}}</td>
+                            <td class="modal-opener" data-tag="{{$kill->victim_tag}}">{{$kill->victim_tag}}</td>
+                            <td class="modal-opener" data-nick="{{$kill->victim}}">{{$kill->victim}}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -97,10 +95,8 @@
                     <tbody>
                     @foreach($player['last_deaths'] as $death)
                         <tr>
-                            <td style="cursor: pointer"
-                                onclick="showClan('{{$death->attacker_tag}}');">{{$death->attacker_tag}}</td>
-                            <td style="cursor: pointer"
-                                onclick="showPlayer('{{$death->attacker}}');">{{$death->attacker}}</td>
+                            <td class="modal-opener" data-tag="{{$death->attacker_tag}}">{{$death->attacker_tag}}</td>
+                            <td class="modal-opener" data-nick="{{$death->attacker}}">{{$death->attacker}}</td>
                         </tr>
                     @endforeach
                     </tbody>

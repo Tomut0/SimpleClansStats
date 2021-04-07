@@ -55,7 +55,7 @@
                                     <tr class="data_row">
                                         <th scope="row">{{ $clan['rank'] }}</th>
                                         <td>{!! $clan['color_tag'] !!}</td>
-                                        <td style="cursor: pointer" onclick="showClan('{{$clan["tag"]}}');">{{ $clan['name'] }}</td>
+                                        <td class="modal-opener clan_name" data-tag='{{$clan["tag"]}}'>{{ $clan['name'] }}</td>
                                         <td>{{ number_format($clan['KDR'], 2) }}</td>
                                         <td>{{ sizeof($clan['leaders']) }}</td>
                                         <td>{{ sizeof($clan['members']) }}</td>

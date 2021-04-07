@@ -20,7 +20,7 @@
                         @foreach($clans->getTopClans() as $index => $clan)
                             <tr>
                                 <th scope="row">{{ $clan['rank'] }}</th>
-                                <td class="clan_name" style="cursor: pointer" onclick="showClan('{{$clan["tag"]}}');">{{$clan['name']}}</td>
+                                <td class="modal-opener clan_name" data-tag='{{$clan["tag"]}}'>{{$clan['name']}}</td>
                                 <td class="text-center">{{ number_format($clan['KDR'] ,2) }}</td>
                                 <td class="text-center">{{ sizeof($clan['members']) }}</td>
                             </tr>
@@ -42,7 +42,7 @@
                         @foreach($players->getTopPlayersByKDR() as $id => $player)
                             <tr>
                                 <th scope="row">{{ $id+1 }}</th>
-                                <td style="cursor: pointer" onclick="showPlayer('{{$player["Name"]}}');">
+                                <td class="modal-opener" data-nick='{{$player["Name"]}}'>
                                     <img src="https://mc-heads.net/avatar/{{ $player['Name'] }}/16/"
                                          alt="{{ $player['Name'] }}'s Avatar"> {{ $player['Name'] }}</td>
                                 <td class="text-center">{{ number_format($player['KDR'], 2) }}</td>
@@ -65,10 +65,10 @@
                         @foreach($players->getLastPlayersKills() as $id => $kill)
                             <tr>
                                 <th scope="row">{{ $id+1 }}</th>
-                                <td style="cursor: pointer" onclick="showPlayer('{{$kill->attacker}}');" class="player_name"><span
+                                <td class="modal-opener player_name" data-nick='{{$kill->attacker}}'><span
                                         class="badge bg-dark .rounded-pill">{!! $kill->attacker_colored_tag !!}</span> {{ $kill->attacker }}
                                 </td>
-                                <td style="cursor: pointer" onclick="showPlayer('{{$kill->victim}}');" class="player_name"><span
+                                <td class="modal-opener player_name" data-nick='{{$kill->victim}}'><span
                                         class="badge bg-dark .rounded-pill">{!! $kill->victim_colored_tag !!}</span> {{ $kill->victim }}
                                 </td>
                             </tr>

@@ -14,7 +14,7 @@
                         <tr>
                             <td><img src="https://mc-heads.net/avatar/{{ $member }}/16/"
                                      alt="{{ $member }}s Avatar"></td>
-                            <td style="cursor: pointer" onclick="showPlayer('{{$member}}');">{{ $member }}</td>
+                            <td class="modal-opener" data-nick="{{$member}}">{{ $member }}</td>
                         </tr>
                     @endforeach
                     </tbody>

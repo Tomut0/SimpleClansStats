@@ -38,6 +38,8 @@ function showModal(url, id) {
     }).then(function (text) {
         document.querySelector('#modalHolder').innerHTML = text;
         getModal().show();
+        //registering again, in case the modal has modal-openers
+        registerModalOpeners();
     });
 }
 
@@ -48,3 +50,20 @@ function showPlayer(name) {
 function showClan(tag) {
     showModal(baseClanUrl, tag);
 }
+
+function registerModalOpeners() {
+    let elements = document.querySelectorAll(".modal-opener");
+    for (let element of elements) {
+        element.onclick = function () {
+            let tag = element.dataset.tag;
+            let nick = element.dataset.nick;
+            if (tag) {
+                showClan(tag);
+            } else {
+                showPlayer(nick);
+            }
+        };
+    }
+}
+
+registerModalOpeners();
