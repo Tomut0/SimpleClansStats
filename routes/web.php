@@ -13,8 +13,9 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/clans', 'ViewController@show')->name('clans');
+Route::get('/{locale}/clans', 'ViewController@show')->name('clans');
+Route::get('/detail/clan/{tag}', 'ViewController@detail')->name('clan');
+Route::get('/detail/player/{name}', 'ViewController@detail')->name('player');
 Route::get('/', 'ViewController@show');
 Route::get('/{locale}', 'ViewController@show');
-Route::get('/clans', 'ViewController@show')->name("clans");
-Route::get('/{locale}/clans', 'ViewController@show')->name("clans");
-// FIXME This matches URLs with /

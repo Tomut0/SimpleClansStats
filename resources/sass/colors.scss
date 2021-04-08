@@ -1,0 +1,44 @@
+$minecraft-color: (
+    black: (#000, rgb(0,0,0)),
+    dark_blue: (#0000AA, rgb(0,0,42)),
+    dark_green: (#00AA00, rgb(0,42,0)),
+    dark_aqua: (#00AAAA, rgb(0,42,42)),
+    dark_red: (#AA0000, rgb(42,0,0)),
+    dark_purple: (#AA00AA, rgb(42,0,42)),
+    gold: (#FFAA00, rgb(64,42,0)),
+    gray: (#AAA, rgb(42,42,42)),
+    dark_gray: (#555, rgb(21,21,21)),
+    blue: (#5555FF, rgb(21,21,63)),
+    green: (#55FF55, rgb(21,63,21)),
+    aqua: (#55FFFF, rgb(21,63,63)),
+    red: (#FF5555, rgb(63,21,63)),
+    light_purple: (#FF55FF, rgb(63,21,21)),
+    yellow: (#FFFF55, rgb(63,63,21)),
+    white: (#FFFFFF, rgb(63,63,63)),
+);
+
+.color {
+    @each $colorName, $colors in $minecraft-color {
+
+        &-#{$colorName} {
+            color: nth($colors, 1);
+            text-shadow: 1px 1px nth($colors, 2);
+        }
+    }
+
+    &-bold {
+        font-weight: bold;
+    }
+
+    &-italic {
+        font-style: italic;
+    }
+
+    &-underline {
+        text-decoration: underline;
+    }
+
+    &-strikethrough {
+        text-decoration: line-through;
+    }
+}

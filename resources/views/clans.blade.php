@@ -55,12 +55,12 @@
                                     <tr class="data_row">
                                         <th scope="row">{{ $clan['rank'] }}</th>
                                         <td>{!! $clan['color_tag'] !!}</td>
-                                        <td>{{ $clan['name'] }}</td>
+                                        <td class="modal-opener clan_name" data-tag='{{$clan["tag"]}}'>{{ $clan['name'] }}</td>
                                         <td>{{ number_format($clan['KDR'], 2) }}</td>
                                         <td>{{ sizeof($clan['leaders']) }}</td>
                                         <td>{{ sizeof($clan['members']) }}</td>
-                                        <td> {{ date("d/m/Y",$clan['founded'] / 1000) }}</td>
-                                        <td>{{ date("d/m/Y - H:i", $clan['last_used'] / 1000) }}</td>
+                                        <td> {{ \App\Utils::formatDate($clan['founded']) }}</td>
+                                        <td>{{ \App\Utils::formatDateTime($clan['last_used']) }}</td>
                                     </tr>
                                 @endforeach
                                 </tbody>
@@ -85,4 +85,5 @@
 @endsection
 @push('scripts')
     <script src="{{asset("assets/js/filter.js")}}" defer></script>
+    <script src="{{asset("assets/js/detail_modal.js")}}" defer></script>
 @endpush

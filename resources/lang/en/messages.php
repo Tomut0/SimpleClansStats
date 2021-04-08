@@ -14,5 +14,7 @@ return [
     'clans.clanTag' => 'Tag',
     'clans.clanLeaders' => 'Leaders',
     'clans.clanFounded' => 'Founded',
-    'clans.clanLastUsed' => 'Last Used'
+    'clans.clanLastUsed' => 'Last Used',
+    'detail.error' => 'Error',
+    'detail.dataNotFound' => 'Data not found'
 ];

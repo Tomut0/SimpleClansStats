@@ -23,4 +23,9 @@ class ApiController extends Controller
 
         return $this->clans->getTopClans($length, $sortBy, $order);
     }
+
+    public function getClan(string $tag): array
+    {
+        return (array) $this->clans->getClan($tag);
+    }
 }
