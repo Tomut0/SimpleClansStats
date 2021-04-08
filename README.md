@@ -18,4 +18,4 @@ To install SimpleClansStats interface, please follow the next simple steps:
 2. [SCSS documentation](https://sass-scss.ru/documentation/)
 ## License
 
-This project is under [Apache2 licence](https://github.com/Tomut0/SimpleClansStats/blob/main/LICENSE).
+This project is under [Apache2 licence](https://github.com/Tomut0/SimpleClansStats/blob/master/LICENSE).
