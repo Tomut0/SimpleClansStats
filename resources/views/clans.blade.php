@@ -10,11 +10,12 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-sm">
+                                        <!-- Todo: add translation for card title -->
                                         <h4 class="p-3 mb-0 text-white">Clan List</h4>
                                     </div>
                                     <div class="col-sm">
                                         <form class="d-flex p-3 w-75 float-end">
-                                            <input id="filter" class="form-control " type="search"
+                                            <input id="filter" class="form-control" type="search"
                                                    placeholder="Filter"
                                                    aria-label="Filter">
                                         </form>
@@ -59,8 +60,8 @@
                                         <td>{{ number_format($clan['KDR'], 2) }}</td>
                                         <td>{{ sizeof($clan['leaders']) }}</td>
                                         <td>{{ sizeof($clan['members']) }}</td>
-                                        <td> {{ \App\Utils::formatDate($clan['founded']) }}</td>
-                                        <td>{{ \App\Utils::formatDateTime($clan['last_used']) }}</td>
+                                        <td> {{ Utils::formatDate($clan['founded']) }}</td>
+                                        <td>{{ Utils::formatDateTime($clan['last_used']) }}</td>
                                     </tr>
                                 @endforeach
                                 </tbody>
