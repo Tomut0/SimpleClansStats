@@ -1,13 +1,20 @@
 <?php
 
 return [
-    'header.home' => 'Главная',
-    'header.clans' => 'Кланы',
-    'header.players' => 'Игроки',
-    'main.clanName' => 'Название',
-    'main.clanMembers' => 'Участники',
-    'main.playerName' => 'Никнейм',
-    'main.playerKDR' => 'Убийства/смерти',
-    'main.victim' => 'Жертва',
-    'main.attacker' => 'Убийца'
+    'header.home' => 'Home',
+    'header.clans' => 'Clans',
+    'header.players' => 'Players',
+    'main.clanName' => 'Name',
+    'main.clanKDR' => 'Kills/Deaths',
+    'main.clanMembers' => 'Members',
+    'main.playerName' => 'Nickname',
+    'main.playerKDR' => 'Kills/Deaths',
+    'main.victim' => 'Victim',
+    'main.attacker' => 'Attacker',
+    'clans.clanTag' => 'Tag',
+    'clans.clanLeaders' => 'Leaders',
+    'clans.clanFounded' => 'Founded',
+    'clans.clanLastUsed' => 'Last Used',
+    'detail.error' => 'Error',
+    'detail.dataNotFound' => 'Data not found'
 ];
