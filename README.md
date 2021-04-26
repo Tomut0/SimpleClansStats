@@ -19,3 +19,5 @@ To install SimpleClansStats interface, please follow the next simple steps:
 ## License
 
 This project is under [Apache2 licence](https://github.com/Tomut0/SimpleClansStats/blob/master/LICENSE).
+
+[![Crowdin](https://badges.crowdin.net/simpleclansstats/localized.svg)](https://crowdin.com/project/simpleclansstats)
