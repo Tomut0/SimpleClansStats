@@ -7,14 +7,14 @@ return [
     'main.clanName' => 'Название',
     'main.clanKDR' => 'Убийств/Смертей',
     'main.clanMembers' => 'Участников',
-    'main.playerName' => 'Nickname',
+    'main.playerName' => 'Ник',
     'main.playerKDR' => 'Убийств/Смертей',
-    'main.victim' => 'Victim',
-    'main.attacker' => 'Attacker',
-    'clans.clanTag' => 'Tag',
-    'clans.clanLeaders' => 'Leaders',
-    'clans.clanFounded' => 'Founded',
-    'clans.clanLastUsed' => 'Last Used',
-    'detail.error' => 'Error',
-    'detail.dataNotFound' => 'Data not found'
+    'main.victim' => 'Жертва',
+    'main.attacker' => 'Убийца',
+    'clans.clanTag' => 'Тег',
+    'clans.clanLeaders' => 'Лидеры',
+    'clans.clanFounded' => 'Основан',
+    'clans.clanLastUsed' => 'Онлайн',
+    'detail.error' => 'Ошибка',
+    'detail.dataNotFound' => 'Данные не найдены'
 ];
