@@ -1,14 +1,14 @@
 <?php
 
 return [
-    'header.home' => 'Home',
-    'header.clans' => 'Clans',
-    'header.players' => 'Players',
-    'main.clanName' => 'Name',
-    'main.clanKDR' => 'Kills/Deaths',
-    'main.clanMembers' => 'Members',
+    'header.home' => 'Главная',
+    'header.clans' => 'Кланы',
+    'header.players' => 'Игроки',
+    'main.clanName' => 'Название',
+    'main.clanKDR' => 'Убийств/Смертей',
+    'main.clanMembers' => 'Участников',
     'main.playerName' => 'Nickname',
-    'main.playerKDR' => 'Kills/Deaths',
+    'main.playerKDR' => 'Убийств/Смертей',
     'main.victim' => 'Victim',
     'main.attacker' => 'Attacker',
     'clans.clanTag' => 'Tag',
