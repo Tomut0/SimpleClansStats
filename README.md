@@ -15,10 +15,15 @@ To install SimpleClansStats interface, please follow the next simple steps:
 2. Install [PHP](https://www.php.net/downloads) >= 7.4
 3. Make sure you have [NGINX](https://www.nginx.com/) or [Apache](https://httpd.apache.org/) as one of your web server.
 4. Unpack zip archieve with any ZIP explorer program (such as [WinRar](https://www.win-rar.com/download.html?&L=0) or [7-Zip](https://www.7-zip.org/download.html)) to web server's home folder.
+5. Run `composer install`
 5. Make copy of `.env.example` to `.env` and set up it.
+```shell
+cp .env.example .env
+php artisan key:generate
+```
 > **Note** <br>
 > The database is mandatory and must have tables `sc_players` and `sc_clans` to work fine.
-6. Have a fun!
+6. Profit! 😃
 ### Local
 WIP.
 ## Useful links
