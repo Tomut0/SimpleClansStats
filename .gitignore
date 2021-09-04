@@ -15,3 +15,4 @@ composer.lock
 /.idea
 _ide_helper.php
 package-lock.json
+public/assets
