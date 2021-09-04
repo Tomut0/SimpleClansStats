@@ -1,4 +1,15 @@
 {
+    "author": {
+        "email": "minat0_@outlook.com",
+        "name": "Minat0_"
+    },
+    "repository": "https://github.com/Tomut0/SimpleClansStats",
+    "bugs": "https://github.com/Tomut0/SimpleClansStats/issues",
+    "contributors": [
+        "RoinujNosde"
+    ],
+    "version": "0.1.0",
+    "license": "Apache-2.0",
     "private": true,
     "scripts": {
         "dev": "npm run development",

@@ -1,5 +1,5 @@
-const baseClanUrl = "/detail/clan/";
-const basePlayerUrl = "/detail/player/";
+const baseClanUrl = "/detail/clan/",
+    basePlayerUrl = "/detail/player/";
 
 function setupModalHolder() {
     let modalHolder = document.getElementById("modalHolder");
