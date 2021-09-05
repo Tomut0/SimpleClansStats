@@ -1,5 +1,7 @@
 <?php
 
+use App\Clan;
+use App\Player;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,6 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
+        $clans = factory(Clan::class, 10)->create();
+        $clans->each(function ($clan) {
+            $clan->players()->createMany(factory(Player::class, 10)->create(['clan_id' => $clan->id])->toArray());
+        });
     }
 }
