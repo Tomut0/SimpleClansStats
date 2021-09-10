@@ -84,7 +84,3 @@
         </div>
     </main>
 @endsection
-@push('scripts')
-    <script src="{{asset("assets/js/filter.js")}}" defer></script>
-    <script src="{{asset("assets/js/detail_modal.js")}}" defer></script>
-@endpush

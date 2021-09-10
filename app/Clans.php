@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class Clans extends Model
 {
 
-    private static $players;
+    private static Players $players;
 
     function __construct(array $attributes = [])
     {
@@ -49,6 +49,7 @@ class Clans extends Model
     public function getTopClans(int $length = 10, string $sortBy = "KDR", bool $asc = false): Collection
     {
         $clans = collect([]);
+
         //looping through sc_players table to get KDR, members and leaders which are not available in sc_clans
         foreach (self::$players->getPlayers() as $player) {
             $tag = $player->tag;
@@ -68,6 +69,7 @@ class Clans extends Model
             $clan["KDR"] += $KDR;
             $clans->put($tag, $clan);
         }
+
         //looping through sc_clans to complete the clan data fetched in sc_players
         foreach ($this->getClans() as $clan_row) {
             $tag = $clan_row->tag;
@@ -75,7 +77,7 @@ class Clans extends Model
             if (!isset($clan)) {
                 continue;
             }
-            $clan += (array) $clan_row;
+            $clan = array_merge($clan, (array) $clan_row);
             $clan['color_tag'] = !array_key_exists('color_tag', $clan) ? '' : Utils::addColors($clan['color_tag']);
             $clan['founded'] = !array_key_exists('founded', $clan) ? 0 : $clan['founded'];
             $clan['last_used'] = !array_key_exists('last_used', $clan) ? 0 : $clan['last_used'];
