@@ -15,9 +15,10 @@ class CreatePlayersTable extends Migration
     {
         Schema::create('sc_players', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('clan_id')->unique();
-            $table->text('uuid');
+            $table->string('tag', 16);
+            $table->string('uuid', 36);
             $table->string('name', 16);
+            $table->tinyInteger('leader')->default(0);
             $table->tinyInteger('friendly_fire')->default(0);
             $table->integer('neutral_kills')->nullable();
             $table->integer('rival_kills')->nullable();
@@ -42,6 +43,6 @@ class CreatePlayersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('players');
+        Schema::dropIfExists('sc_players');
     }
 }

@@ -26,7 +26,7 @@ class Player extends Model
      * @var array
      */
     protected $fillable = [
-        'uuid', 'clan_id', 'name', 'last_seen', 'join_date', 'locale', 'neutral_kills', 'rival_kills', 'ally_kills', 'deaths'
+        'tag', 'uuid', 'leader', 'name', 'last_seen', 'join_date', 'locale', 'neutral_kills', 'rival_kills', 'ally_kills', 'deaths'
     ];
 
     /**

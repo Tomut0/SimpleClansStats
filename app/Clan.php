@@ -43,8 +43,17 @@ class Clan extends Model
         'fee_balance' => 0,
     ];
 
+    /**
+     * @param Clan $clan The other clan to equals
+     * @return bool true if clans are the same
+     */
+    public function equals(Clan $clan): bool
+    {
+        return $clan->tag === $this->tag;
+    }
+
     public function players(): HasMany
     {
-        return $this->hasMany('App\Player');
+        return $this->hasMany('App\Player', 'tag', 'tag');
     }
 }

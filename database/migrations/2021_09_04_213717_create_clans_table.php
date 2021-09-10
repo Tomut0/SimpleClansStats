@@ -15,7 +15,7 @@ class CreateClansTable extends Migration
     {
         Schema::create('sc_clans', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->tinyInteger('verified');
+            $table->tinyInteger('verified')->default(0);
             $table->string('tag', 5);
             $table->string('name', 25);
             $table->text('description')->nullable();
@@ -24,12 +24,12 @@ class CreateClansTable extends Migration
             $table->bigInteger('last_used');
             $table->text('packed_allies')->nullable();
             $table->text('packed_rivals')->nullable();
-            $table->mediumText('packed_bb');
+            $table->mediumText('packed_bb')->nullable();
             $table->text('cape_url')->nullable();
             $table->double('balance')->default(0.0);
             $table->tinyInteger('fee_enabled')->default(0);
             $table->double('fee_balance')->default(0.0);
-            $table->text('ranks');
+            $table->text('ranks')->nullable();
             $table->text('banner')->nullable();
         });
     }
