@@ -2,8 +2,6 @@
 
 namespace App;
 
-use Illuminate\Support\Env;
-
 class Utils
 {
 
@@ -13,29 +11,10 @@ class Utils
         return $player['neutral_kills'] + $player['rival_kills'] + $player['civilian_kills'];
     }
 
-    public static function getKDR($player): float
-    {
-        $player = (array)$player;
-        $neutral = $player['neutral_kills'] * doubleval(Env::get('KILL_NEUTRAL'));
-        $rival = $player['rival_kills'] * doubleval(Env::get('KILL_RIVAL'));
-        $civilian = $player['civilian_kills'] * doubleval(Env::get('KILL_CIVILIAN'));
-
-        $kills = ($civilian + $rival + $neutral);
-
-        $deaths = $player['deaths'] == 0 ? 1 : $player['deaths'];
-
-        return $kills / $deaths;
-    }
-
     public static function getWarringFromFlags($flags): string
     {
         $flags = json_decode($flags, true);
         return implode(", ", $flags['warring']);
-    }
-
-    public static function getFormattedKDR($player): string
-    {
-        return number_format(self::getKDR($player), 2);
     }
 
     public static function unpackClans($clans): string
@@ -50,18 +29,6 @@ class Utils
             $clan = self::addColors($clan);
         }
         return implode(", ", $packed_clans);
-    }
-
-    public static function formatDate($founded)
-    {
-        // TODO get format from env
-        return date("d/m/Y", $founded / 1000);
-    }
-
-    public static function formatDateTime($last_seen)
-    {
-        // TODO get format from env
-        return date("d/m/Y - H:i", $last_seen / 1000);
     }
 
     /**
@@ -130,6 +97,18 @@ class Utils
             $spans--;
         }
         return $colored . "</span>";
+    }
+
+    public static function formatDate($founded)
+    {
+        // TODO get format from env
+        return date("d/m/Y", $founded / 1000);
+    }
+
+    public static function formatDateTime($last_seen)
+    {
+        // TODO get format from env
+        return date("d/m/Y - H:i", $last_seen / 1000);
     }
 
 }

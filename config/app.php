@@ -1,5 +1,10 @@
 <?php
 
+use App\Clan;
+use App\Clans;
+use App\Player;
+use App\Players;
+
 return [
 
     /*
@@ -39,7 +44,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -174,6 +179,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\HelperServiceProvider::class,
 
     ],
 
@@ -226,6 +232,10 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Utils' => App\Utils::class,
+        'Clan' => Clan::class,
+        'Player' => Player::class,
+        'Players' => Players::class,
+        'Clans' => Clans::class,
     ],
 
 ];

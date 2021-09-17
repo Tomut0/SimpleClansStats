@@ -5,21 +5,24 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $tag the clan tag prop
+ */
 class Clan extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'sc_clans';
-
     /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'sc_clans';
 
     /**
      * The attributes that are mass assignable.
@@ -52,6 +55,9 @@ class Clan extends Model
         return $clan->tag === $this->tag;
     }
 
+    /**
+     * @return HasMany All players from clan
+     */
     public function players(): HasMany
     {
         return $this->hasMany('App\Player', 'tag', 'tag');
