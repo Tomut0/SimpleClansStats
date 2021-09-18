@@ -2,15 +2,10 @@
 
 namespace App;
 
+use Illuminate\Support\Collection;
+
 class Utils
 {
-
-    public static function getAllKills($player): int
-    {
-        $player = (array)$player;
-        return $player['neutral_kills'] + $player['rival_kills'] + $player['civilian_kills'];
-    }
-
     public static function getWarringFromFlags($flags): string
     {
         $flags = json_decode($flags, true);
@@ -109,6 +104,35 @@ class Utils
     {
         // TODO get format from env
         return date("d/m/Y - H:i", $last_seen / 1000);
+    }
+
+    /* TODO: use Facade instead of Utils?
+     * It might be something like Statistics or Leaderboard
+     */
+    public static function getTopClans(int $length = 10, string $sortBy = "KDR", bool $asc = false): Collection
+    {
+        return Clan::all()->each(function ($clan) {
+            $clan->KDR = $clan->getKDR();
+            $clan->color_tag = Utils::addColors($clan->tag);
+            $clan->leaders = $clan->players()->getResults()->filter(function ($player) {
+                return $player->leader == 1;
+            });
+        })->sortBy($sortBy, SORT_REGULAR, !$asc)->splice(0, $length);
+    }
+
+    /**
+     * @deprecated will be replaced to Utils::addColors($tag);
+     */
+    public function getHTMLColorTagByTag($tag = null): ?string
+    {
+        if (!isset($tag)) {
+            return null;
+        }
+        $row = Clan::all()->where('tag', $tag)->get('color_tag')->first();
+        if (isset($row)) {
+            return Utils::addColors($row->color_tag);
+        }
+        return null;
     }
 
 }

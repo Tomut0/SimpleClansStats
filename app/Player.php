@@ -50,4 +50,12 @@ class Player extends Model
     {
         return KDR::of($this);
     }
+
+    /**
+     * @return int the count of all player' kills
+     */
+    public function getAllKills(): int
+    {
+        return ($this->ally_kills + $this->civilian_kills + $this->rival_kills + $this->neutral_kills);
+    }
 }

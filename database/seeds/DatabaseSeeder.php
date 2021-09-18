@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         factory(Clan::class, 10)->create()->each(function ($clan) {
-            factory(Player::class, 5)->create(['tag' => $clan->tag]);
+            factory(Player::class, mt_rand(0, 5))->create(['tag' => $clan->tag]);
         });
     }
 }

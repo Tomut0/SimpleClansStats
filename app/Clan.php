@@ -16,14 +16,12 @@ class Clan extends Model
      * @var bool
      */
     public $timestamps = false;
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'sc_clans';
-
     /**
      * The attributes that are mass assignable.
      *
@@ -31,9 +29,8 @@ class Clan extends Model
      */
     protected $fillable = [
         'verified', 'tag', 'name', 'members', 'description', 'founded', 'last_used', 'packed_allies',
-        'packed_rivals', 'packet_bb', 'ranks', 'KDR'
+        'packed_rivals', 'packet_bb', 'ranks'
     ];
-
     /**
      * The model's default values for attributes.
      *
@@ -47,19 +44,31 @@ class Clan extends Model
     ];
 
     /**
+     * Retrieves KDR of all players in this clan
+     * @return float
+     */
+    public function getKDR(): float
+    {
+        return self::players()->getResults()->map(function ($player) {
+            return $player->getKDR()->asFloat();
+        })->sum();
+    }
+
+    /**
+     * Retrieves all players from clan
+     * @return HasMany
+     */
+    public function players(): HasMany
+    {
+        return $this->hasMany('App\Player', 'tag', 'tag');
+    }
+
+    /**
      * @param Clan $clan The other clan to equals
      * @return bool true if clans are the same
      */
     public function equals(Clan $clan): bool
     {
         return $clan->tag === $this->tag;
-    }
-
-    /**
-     * @return HasMany All players from clan
-     */
-    public function players(): HasMany
-    {
-        return $this->hasMany('App\Player', 'tag', 'tag');
     }
 }
