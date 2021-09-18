@@ -13,7 +13,13 @@ class HelperServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        require_once app_path('Helpers/KDR.php');
+        $helpers_path = app_path('Helpers');
+        $helpers = array_slice(scandir($helpers_path), 2);
+
+        foreach ($helpers as $helper) {
+            require_once ($helpers_path . '/' . $helper);
+        }
+
     }
 
     /**
