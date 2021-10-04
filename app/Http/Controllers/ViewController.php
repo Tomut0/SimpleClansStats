@@ -2,34 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Clans;
 use App\Players;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\View;
 
 class ViewController extends Controller
 {
-    private $clans;
-    private $players;
-
-    public function __construct()
-    {
-        $this->clans = new Clans();
-        $this->players = new Players();
-    }
-
     public function show($locale = 'en')
     {
         $view_name = Route::currentRouteName();
         if (!isset($view_name)) {
             $view_name = "index";
         }
+
         App::setLocale($locale);
 
-        return view($view_name, ['clans' => $this->clans, 'players' => $this->players, 'locale' => $locale]);
+        return view($view_name, ['locale' => $locale]);
     }
 
-    //TODO locale
+    /*
+     * TODO locale
+     */
+
+    /**
+     * @param string $id
+     * @return Application|Factory|View
+     */
     public function detail(string $id)
     {
         $detail_name = Route::currentRouteName();

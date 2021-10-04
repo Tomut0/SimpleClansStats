@@ -6,10 +6,21 @@ use App\Clan;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
+/*
+ * TODO: Add all column to factory
+ * - color_tag | doesn't have colors now
+ * - packed_allies
+ * - packed_rivals
+ * - cape_url
+ * - banner
+ */
 $factory->define(Clan::class, function (Faker $faker) {
+    $tag = $faker->unique()->word();
+
     return [
         'verified' => mt_rand(0, 1),
-        'tag' => $faker->unique()->word(),
+        'tag' => $tag,
+        'color_tag' => $tag,
         'name' => $faker->words(mt_rand(1, 3), true),
         'description' => $faker->optional()->text(255),
         'founded' => $faker->unixTime(),

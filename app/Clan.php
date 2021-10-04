@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\KDR;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -16,21 +17,24 @@ class Clan extends Model
      * @var bool
      */
     public $timestamps = false;
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'sc_clans';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'verified', 'tag', 'name', 'members', 'description', 'founded', 'last_used', 'packed_allies',
+        'verified', 'tag', 'color_tag', 'name', 'members', 'description', 'founded', 'last_used', 'packed_allies',
         'packed_rivals', 'packet_bb', 'ranks'
     ];
+
     /**
      * The model's default values for attributes.
      *
@@ -44,14 +48,32 @@ class Clan extends Model
     ];
 
     /**
-     * Retrieves KDR of all players in this clan
-     * @return float
+     * Get the color tag of clan
+     *
+     * @param $key
+     * @return string the HTML representation of color tag
      */
-    public function getKDR(): float
+    public function getColorTagAttribute($key): string
     {
-        return self::players()->getResults()->map(function ($player) {
-            return $player->getKDR()->asFloat();
-        })->sum();
+        return Utils::addColors($key);
+    }
+
+    /**
+     * Retrieves KDR of all players in clan
+     * @return KDR
+     */
+    public function getKDR(): KDR
+    {
+        return KDR::ofClan($this);
+    }
+
+    /**
+     * Retrieves all leaders from clan
+     * @return HasMany
+     */
+    public function leaders(): HasMany
+    {
+        return $this->players()->where('leader', '=', 1);
     }
 
     /**

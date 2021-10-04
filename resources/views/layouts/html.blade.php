@@ -26,7 +26,6 @@
 </head>
 <body>
 @include('layouts.header')
-@include('layouts.error')
 @yield('content')
 @include('layouts.footer')
 </body>

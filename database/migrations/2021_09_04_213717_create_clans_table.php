@@ -16,7 +16,8 @@ class CreateClansTable extends Migration
         Schema::create('sc_clans', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->tinyInteger('verified')->default(0);
-            $table->string('tag', 5);
+            $table->string('tag', 25);
+            $table->string('color_tag', 25)->nullable();
             $table->string('name', 25);
             $table->text('description')->nullable();
             $table->tinyInteger('friendly_fire')->default(0);

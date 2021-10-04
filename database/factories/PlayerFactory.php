@@ -6,6 +6,12 @@ use App\Player;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
+/*
+ * TODO: Add next columns to factory
+ * - flags
+ * - packed_past_clans
+ * - resign_times
+ */
 $factory->define(Player::class, function (Faker $faker) {
     return [
         'uuid' => $faker->uuid(),

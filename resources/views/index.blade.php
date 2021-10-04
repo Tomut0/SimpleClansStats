@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row text-start">
                 <div class="col">
-                    {{--                    TODO: Translate table titles--}}
+                    {{-- TODO: Translate table titles --}}
                     <h4 class="bg-primary text-white p-3 mb-0 text-center">Top 10 Clans</h4>
                     <table class="table table-primary table-striped w-100">
                         <thead>
@@ -17,12 +17,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($clans->getTopClans() as $index => $clan)
+                        @foreach(Utils::getTopClans() as $index => $clan)
                             <tr>
-                                <th scope="row">{{ $clan['rank'] }}</th>
-                                <td class="modal-opener clan_name" data-tag='{{$clan["tag"]}}'>{{$clan['name']}}</td>
-                                <td class="text-center">{{ number_format($clan['KDR'] ,2) }}</td>
-                                <td class="text-center">{{ sizeof($clan['members']) }}</td>
+                                <th scope="row">{{ $index+1 }}</th>
+                                <td class="modal-opener clan_name" data-tag='{{ $clan->tag }}'>{{ $clan->name }}</td>
+                                <td class="text-center">{{ $clan->KDR }}</td>
+                                <td class="text-center">{{ $clan->players()->count() }}</td>
                             </tr>
                         @endforeach
                         </tbody>
@@ -39,13 +39,13 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($players->getTopPlayersByKDR() as $id => $player)
+                        @foreach(Utils::getTopPlayersByKDR() as $index => $player)
                             <tr>
-                                <th scope="row">{{ $id+1 }}</th>
-                                <td class="modal-opener" data-nick='{{$player["Name"]}}'>
-                                    <img src="https://mc-heads.net/avatar/{{ $player['Name'] }}/16/"
-                                         alt="{{ $player['Name'] }}'s Avatar"> {{ $player['Name'] }}</td>
-                                <td class="text-center">{{ number_format($player['KDR'], 2) }}</td>
+                                <th scope="row">{{ $index+1 }}</th>
+                                <td class="modal-opener" data-nick='{{ $player->name }}'>
+                                    <img src="https://mc-heads.net/avatar/{{ $player->name }}/16/"
+                                         alt="{{ $player->name }}'s Avatar"> {{ $player->name }}</td>
+                                <td class="text-center">{{ $player->KDR }}</td>
                             </tr>
                         @endforeach
                         </tbody>
@@ -62,14 +62,14 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($players->getLastPlayersKills() as $id => $kill)
+                        @foreach(Utils::getLastPlayersKills() as $index => $kill)
                             <tr>
-                                <th scope="row">{{ $id+1 }}</th>
+                                <th scope="row">{{ $index+1 }}</th>
                                 <td class="modal-opener player_name" data-nick='{{$kill->attacker}}'><span
-                                        class="badge bg-dark .rounded-pill">{!! $kill->attacker_colored_tag !!}</span> {{ $kill->attacker }}
+                                        class="badge bg-dark .rounded-pill">{!! $kill->mAttacker->clan->color_tag !!}</span> {{ $kill->attacker }}
                                 </td>
                                 <td class="modal-opener player_name" data-nick='{{$kill->victim}}'><span
-                                        class="badge bg-dark .rounded-pill">{!! $kill->victim_colored_tag !!}</span> {{ $kill->victim }}
+                                        class="badge bg-dark .rounded-pill">{!! $kill->mVictim->clan->color_tag !!}</span> {{ $kill->victim }}
                                 </td>
                             </tr>
                         @endforeach
@@ -80,7 +80,3 @@
         </div>
     </main>
 @endsection
-@push('scripts')
-    <script src="{{asset("assets/js/detail_modal.js")}}" defer></script>
-    <script defer src="{{asset("assets/js/trim_names.js")}}"></script>
-@endpush

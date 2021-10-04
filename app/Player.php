@@ -4,6 +4,8 @@ namespace App;
 
 use App\Helpers\KDR;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int neutral_kills
@@ -20,12 +22,14 @@ class Player extends Model
      * @var bool
      */
     public $timestamps = false;
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'sc_players';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -48,7 +52,7 @@ class Player extends Model
 
     public function getKDR(): KDR
     {
-        return KDR::of($this);
+        return KDR::ofPlayer($this);
     }
 
     /**
@@ -57,5 +61,23 @@ class Player extends Model
     public function getAllKills(): int
     {
         return ($this->ally_kills + $this->civilian_kills + $this->rival_kills + $this->neutral_kills);
+    }
+
+    /**
+     * Retrieves the clan of player
+     * @return BelongsTo
+     */
+    public function clan(): BelongsTo
+    {
+        return $this->belongsTo('App\Clan', 'tag', 'tag');
+    }
+
+    /**
+     * Retrieves all kills of player
+     * @return HasMany
+     */
+    public function kills(): HasMany
+    {
+        return $this->hasMany('App\Kill', 'attacker', 'kill_id');
     }
 }
