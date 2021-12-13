@@ -1,4 +1,85 @@
+@import url('~normalize.css');
 @import "colors";
+@import "header";
+
+$blockWidth: 720px;
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: $light-gray;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+    li {
+        list-style-type: none;
+    }
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .block {
+        width: $blockWidth;
+        margin-top: 1em;
+    }
+
+    .search-box {
+        position: relative;
+
+        label {
+            > span {
+                position: absolute;
+                top: 50%;
+                left: .5em;
+                transform: translateY(-50%);
+            }
+
+            > input {
+                width: 100%;
+                height: 40px;
+                border: none;
+                border-radius: 1em;
+                padding: 0 2.5em;
+            }
+        }
+    }
+
+    .leaderboard {
+        .heading {
+            display: flex;
+
+            > div {
+                display: inherit;
+                align-items: center;
+                justify-content: end;
+                width: 100%;
+
+                h3 {
+                    padding: 0;
+                    margin: 0 1em;
+                    font-weight: normal;
+                    color: $gray;
+                }
+            }
+        }
+
+        .sorted-by {
+            background: white;
+            padding: .5em;
+
+            ul {
+                display: flex;
+                li span {
+                    color: gray;
+                }
+            }
+        }
+    }
+}
 
 .modal-opener {
     cursor: pointer;

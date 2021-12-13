@@ -1,0 +1,45 @@
+header {
+    position: relative;
+    background: white;
+    height: 60px;
+
+    > nav {
+        ul {
+            display: flex;
+            justify-content: center;
+            height: inherit;
+        }
+        width: 100%;
+        height: 100%;
+
+        li {
+            align-self: center;
+
+            // SimpleClansStats Logo
+            &:nth-child(2) > a {
+                color: black;
+                font-size: 1.5em;
+            }
+
+            a {
+                text-decoration: none;
+                font-size: 1em;
+                margin: 0 1em;
+                color: $gray;
+            }
+        }
+    }
+    > ul {
+        display: flex;
+        position: absolute;
+        top: 50%;
+        right: 0;
+        margin-right: 1em;
+        transform: translateY(-50%);
+        span {
+            margin: 0 .5em;
+            color: $gray;
+            cursor: pointer;
+        }
+    }
+}

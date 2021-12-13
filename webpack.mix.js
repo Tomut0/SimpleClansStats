@@ -11,11 +11,11 @@ const mix = require('laravel-mix');
  |
  */
 
-mix.sass('resources/sass/style.scss', 'public/assets/css', {
+mix.js('resources/js/app.js', 'public/js').sourceMaps().sass('resources/sass/style.scss', 'public/css', {
     sassOptions: {
         outputStyle: 'compressed'
     }
-}).js(['resources/js/detail_modal.js', 'resources/js/filter.js', 'resources/js/trim_names.js'], 'public/assets/js/app.js').sourceMaps();
+});
 
 if (mix.inProduction()) {
     mix.version();

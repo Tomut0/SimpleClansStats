@@ -49,8 +49,8 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach($clans->getTopClans(999999, "KDR") as $index => $clan)
-                                    @if(empty($clan['name']) || !array_key_exists('color_tag', $clan))
+                                @foreach(Utils::getTopClans(999999) as $index => $clan)
+                                    @if(empty($clan['name'])))
                                         @continue
                                     @endif
                                     <tr class="data_row">
@@ -58,8 +58,8 @@
                                         <td>{!! $clan['color_tag'] !!}</td>
                                         <td class="modal-opener clan_name" data-tag='{{$clan["tag"]}}'>{{ $clan['name'] }}</td>
                                         <td>{{ number_format($clan['KDR'], 2) }}</td>
-                                        <td>{{ sizeof($clan['leaders']) }}</td>
-                                        <td>{{ sizeof($clan['members']) }}</td>
+                                        <td>{{ $clan->leaders()->count() }}</td>
+                                        <td>{{ $clan->players()->count() }}</td>
                                         <td> {{ Utils::formatDate($clan['founded']) }}</td>
                                         <td>{{ Utils::formatDateTime($clan['last_used']) }}</td>
                                     </tr>

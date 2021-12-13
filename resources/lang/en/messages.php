@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'header.home' => 'Home',
     'header.clans' => 'Clans',
     'header.players' => 'Players',
     'main.clanName' => 'Name',
@@ -11,6 +10,8 @@ return [
     'main.playerKDR' => 'Kills/Deaths',
     'main.victim' => 'Victim',
     'main.attacker' => 'Attacker',
+    'main.search' => 'Search for player, clan...',
+    'main.leaderboard' => 'Leaderboard',
     'clans.clanTag' => 'Tag',
     'clans.clanLeaders' => 'Leaders',
     'clans.clanFounded' => 'Founded',
