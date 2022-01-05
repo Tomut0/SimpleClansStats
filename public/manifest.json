@@ -1,0 +1,15 @@
+{
+    "name": "SimpleClansStats",
+    "short_name": "SCStats",
+    "icons": [
+        {
+            "src": "/img/favicon-mask.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "display": "fullscreen"
+}

@@ -11,8 +11,12 @@
 
     <!--  Links  -->
     <link href="{{asset("css/style.css")}}" rel="stylesheet">
-    <link rel="shortcut icon" href="{{asset("img/favicon.png")}}" type="image/png">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    <link rel="icon" href="{{asset("img/favicon.svg")}}">
+    <link rel="apple-touch-icon" href="{{asset("img/favicon-mac.png")}}">
+    <link rel="manifest" href="{{asset("manifest.json")}}">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="white">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="black">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
           rel="stylesheet">
 
     @stack('scripts')
