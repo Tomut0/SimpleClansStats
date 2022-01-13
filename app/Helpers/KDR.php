@@ -38,10 +38,10 @@ class KDR
      */
     public static function ofPlayer(Player $player): KDR
     {
-        $neutral = $player->neutral_kills * doubleval(Env::get('KILL_NEUTRAL'));
-        $rival = $player->rival_kills * doubleval(Env::get('KILL_RIVAL'));
-        $civilian = $player->civilian_kills * doubleval(Env::get('KILL_CIVILIAN'));
-        $ally = $player->ally_kills * doubleval(Env::get('KILL_ALLY'));
+        $neutral = $player->neutral_kills * doubleval(Env::get('KILL_NEUTRAL', 1.0));
+        $rival = $player->rival_kills * doubleval(Env::get('KILL_RIVAL', 2.0));
+        $civilian = $player->civilian_kills * doubleval(Env::get('KILL_CIVILIAN', 0.0));
+        $ally = $player->ally_kills * doubleval(Env::get('KILL_ALLY', -1.0));
 
         return new KDR($neutral, $rival, $civilian, $ally, $player->deaths);
     }
@@ -101,7 +101,7 @@ class KDR
     {
         $kills = ($this->civilians + $this->rivals + $this->neutrals + $this->allies);
         $deaths = $this->deaths == 0 ? 1 : $this->deaths;
-        
+
         return $kills / $deaths;
     }
 
