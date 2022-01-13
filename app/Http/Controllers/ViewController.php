@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Players;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\App;
