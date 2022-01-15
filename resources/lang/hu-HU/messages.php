@@ -1,20 +1,20 @@
 <?php
 
 return [
-    'header.home' => 'Home',
-    'header.clans' => 'Clans',
-    'header.players' => 'Players',
-    'main.clanName' => 'Name',
-    'main.clanKDR' => 'Kills/Deaths',
-    'main.clanMembers' => 'Members',
-    'main.playerName' => 'Nickname',
-    'main.playerKDR' => 'Kills/Deaths',
-    'main.victim' => 'Victim',
-    'main.attacker' => 'Attacker',
-    'clans.clanTag' => 'Tag',
-    'clans.clanLeaders' => 'Leaders',
-    'clans.clanFounded' => 'Founded',
-    'clans.clanLastUsed' => 'Last Used',
-    'detail.error' => 'Error',
-    'detail.dataNotFound' => 'Data not found'
+    'header.home' => 'Otthon',
+    'header.clans' => 'Klánok',
+    'header.players' => 'Játékosok',
+    'main.clanName' => 'Név',
+    'main.clanKDR' => 'Ölések és Halálok',
+    'main.clanMembers' => 'Tagok',
+    'main.playerName' => 'Becenév',
+    'main.playerKDR' => 'Ölések és Halálok',
+    'main.victim' => 'Áldozat',
+    'main.attacker' => 'Támadó',
+    'clans.clanTag' => 'Címke',
+    'clans.clanLeaders' => 'Vezetők',
+    'clans.clanFounded' => 'Megalapítva',
+    'clans.clanLastUsed' => 'Utoljára használva',
+    'detail.error' => 'Hiba',
+    'detail.dataNotFound' => 'Nem található adat'
 ];
