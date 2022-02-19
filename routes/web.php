@@ -11,6 +11,8 @@
 |
 */
 
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Route;
 
@@ -31,3 +33,15 @@ if (Env::get('LANGUAGE_SELECTOR')) {
         Route::get('/clans', 'ViewController@show')->name('clans');
     });
 }
+
+Route::group(['prefix' => 'api'], function () {
+    Route::get('/player/{player}', function (Player $player) {
+        return new JsonResource($player);
+    });
+    Route::get('/clan/{clan}', function (Clan $clan) {
+        return new JsonResource($clan);
+    });
+    Route::get('/clans', function () {
+        return new ResourceCollection(Clan::all());
+    });
+});
