@@ -1,4 +1,5 @@
 const mix = require('laravel-mix');
+
 /*
  |--------------------------------------------------------------------------
  | Mix Asset Management
@@ -10,13 +11,11 @@ const mix = require('laravel-mix');
  |
  */
 
-// TODO: Replace all SCSS to PostCSS with plugins
-mix.js('resources/js/app.js', 'public/js').sourceMaps();
-mix.sass('resources/sass/style.scss', 'public/css', {
+mix.js('resources/js/app.js', 'public/js').sourceMaps().sass('resources/sass/style.scss', 'public/css', {
     sassOptions: {
         outputStyle: 'compressed'
     }
-}, [require("tailwindcss")]);
+});
 
 if (mix.inProduction()) {
     mix.version();
