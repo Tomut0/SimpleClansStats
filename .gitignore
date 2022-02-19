@@ -1,6 +1,8 @@
 /node_modules
 /public/hot
 /public/storage
+/public/js
+/public/css
 /storage/*.key
 /vendor
 .env
@@ -14,6 +16,4 @@ composer.phar
 composer.lock
 _ide_helper.php
 package-lock.json
-/database/SCStats.db
-/database/SCStats.db-journal
 .phpunit.cache
