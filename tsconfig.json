@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "es2022",
+        "moduleResolution": "node",
+        "target": "es5",
+        "sourceMap": true,
+        "strict": true,
+        "baseUrl": "./",
+        "skipLibCheck": true,
+    },
+    "exclude": [
+        "./node_modules"
+    ],
+    "include": ["resources/js/**/*"]
+}

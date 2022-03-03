@@ -11,11 +11,7 @@ const mix = require('laravel-mix');
  |
  */
 
-mix.js('resources/js/app.js', 'public/js').sourceMaps().sass('resources/sass/style.scss', 'public/css', {
-    sassOptions: {
-        outputStyle: 'compressed'
-    }
-});
+mix.ts('resources/js/app.ts', 'public/js').vue();
 
 if (mix.inProduction()) {
     mix.version();
