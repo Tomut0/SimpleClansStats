@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,8 +15,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/player/{id}', function (Player $player) {
+    return new JsonResource($player);
 });
-Route::get('/clans', 'ApiController@getClans');
-Route::get('/clans/{tag}', 'ApiController@getClan');
+
+Route::get('/clan/{id}', function (Clan $clan) {
+    return new JsonResource($clan);
+});
+
+Route::get('/clans', function () {
+    return new ResourceCollection(Clan::all());
+});
