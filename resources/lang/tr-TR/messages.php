@@ -1,20 +1,20 @@
 <?php
 
 return [
-    'header.home' => 'Home',
-    'header.clans' => 'Clans',
-    'header.players' => 'Players',
-    'main.clanName' => 'Name',
-    'main.clanKDR' => 'Kills/Deaths',
-    'main.clanMembers' => 'Members',
-    'main.playerName' => 'Nickname',
-    'main.playerKDR' => 'Kills/Deaths',
-    'main.victim' => 'Victim',
-    'main.attacker' => 'Attacker',
-    'clans.clanTag' => 'Tag',
-    'clans.clanLeaders' => 'Leaders',
-    'clans.clanFounded' => 'Founded',
-    'clans.clanLastUsed' => 'Last Used',
-    'detail.error' => 'Error',
-    'detail.dataNotFound' => 'Data not found'
+    'header.home' => 'Ana sayfa',
+    'header.clans' => 'Klanlar',
+    'header.players' => 'Oyuncular',
+    'main.clanName' => 'İsim',
+    'main.clanKDR' => 'Öldürme/Ölme',
+    'main.clanMembers' => 'Üyeler',
+    'main.playerName' => 'Kullanıcı adı',
+    'main.playerKDR' => 'Öldürme/Ölme',
+    'main.victim' => 'Kurban',
+    'main.attacker' => 'Saldıran',
+    'clans.clanTag' => 'Sıfat',
+    'clans.clanLeaders' => 'Liderler',
+    'clans.clanFounded' => 'Kuruluş',
+    'clans.clanLastUsed' => 'Son Kullanım',
+    'detail.error' => 'Hata',
+    'detail.dataNotFound' => 'Veri bulunamadı'
 ];
