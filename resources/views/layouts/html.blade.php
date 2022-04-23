@@ -10,14 +10,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!--  Links  -->
-    <link href="{{asset("css/style.css")}}" rel="stylesheet">
+    <link href="{{asset("css/app.css")}}" rel="stylesheet">
     <link rel="icon" href="{{asset("img/favicon.svg")}}">
     <link rel="apple-touch-icon" href="{{asset("img/favicon-mac.png")}}">
     <link rel="manifest" href="{{asset("manifest.json")}}">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="white">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="black">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
-          rel="stylesheet">
 
     @stack('scripts')
 </head>
