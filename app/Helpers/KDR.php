@@ -15,13 +15,15 @@ class KDR
     private int $deaths;
 
     /**
-     * @param $neutrals
-     * @param $rivals
-     * @param $civilians
-     * @param $allies
-     * @param $deaths
+     * Creates a new KDR (Kill death ratio) instance from basic parameters.
+     *
+     * @param $neutrals int The count of killed neutral players
+     * @param $rivals int The count of killed rivals
+     * @param $civilians int The count of killed civilians
+     * @param $allies int The count of killed allies
+     * @param $deaths int The count of deaths
      */
-    public function __construct($neutrals, $rivals, $civilians, $allies, $deaths)
+    public function __construct(int $neutrals, int $rivals, int $civilians, int $allies, int $deaths)
     {
         $this->neutrals = $neutrals;
         $this->rivals = $rivals;
@@ -38,10 +40,10 @@ class KDR
      */
     public static function ofPlayer(Player $player): KDR
     {
-        $neutral = $player->neutral_kills * doubleval(Env::get('KILL_NEUTRAL', 1.0));
-        $rival = $player->rival_kills * doubleval(Env::get('KILL_RIVAL', 2.0));
-        $civilian = $player->civilian_kills * doubleval(Env::get('KILL_CIVILIAN', 0.0));
-        $ally = $player->ally_kills * doubleval(Env::get('KILL_ALLY', -1.0));
+        $neutral = $player->neutral_kills * doubleval(config("app.kdr.neutral", 1.0));
+        $rival = $player->rival_kills * doubleval(config("app.kdr.rival", 2.0));
+        $civilian = $player->civilian_kills * doubleval(config("app.kdr.civilian", 0.0));
+        $ally = $player->ally_kills * doubleval(config("app.kdr.ally", -1.0));
 
         return new KDR($neutral, $rival, $civilian, $ally, $player->deaths);
     }
