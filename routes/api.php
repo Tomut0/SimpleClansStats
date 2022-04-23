@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/player/{id}', function (Player $player) {
-    return new JsonResource($player);
-});
+Route::get('/player/{id}', fn(Player $player) => new JsonResource($player));
+Route::get('/clans/{id}', fn(Clan $clan) => new JsonResource($clan));
+Route::get('/clans', fn() => new ResourceCollection(Clan::all()));
+
 
 Route::get('/clan/{id}', function (Clan $clan) {
     return new JsonResource($clan);
