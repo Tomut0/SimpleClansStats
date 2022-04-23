@@ -1,9 +1,5 @@
 <?php
 
-use App\Clan;
-use App\Clans;
-use App\Player;
-use App\Players;
 
 return [
 
@@ -59,7 +55,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'asset_url' => env('ASSET_URL', null),
+    'asset_url' => env('ASSET_URL'),
 
     /*
     |--------------------------------------------------------------------------
@@ -86,6 +82,30 @@ return [
     */
 
     'locale' => 'en',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Locale Selector
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
+
+    'locale_selector' => 'true',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application KDR settings
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
+    'kdr' => [
+          "civilian" => 0.0,
+          "neutral" => 1.0,
+          "ally" => -1.0,
+          "rival" => 2.0
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -231,11 +251,9 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        'Utils' => App\Utils::class,
+        'Utils' => Utils::class,
         'Clan' => Clan::class,
         'Player' => Player::class,
-        'Players' => Players::class,
-        'Clans' => Clans::class,
     ],
 
 ];

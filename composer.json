@@ -1,10 +1,11 @@
 {
-    "name": "laravel/laravel",
+    "name": "tomut0/simpleclansstats",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "A convenient web interface for SimpleClans plugin.",
     "keywords": [
-        "framework",
-        "laravel"
+        "web interface",
+        "single page application",
+        "simple clans"
     ],
     "license": "MIT",
     "require": {
