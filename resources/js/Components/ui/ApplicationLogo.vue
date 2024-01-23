@@ -7,6 +7,6 @@ const appName = inject('appName');
 <template>
     <div class="flex items-center">
         <img src="images/logo.svg" alt="logo">
-        <span class="ml-6 text-white font-bold text-2xl font-sans">{{ appName }}</span>
+        <span class="ml-6 text-white font-bold text-3xl font-sans">{{ appName }}</span>
     </div>
 </template>

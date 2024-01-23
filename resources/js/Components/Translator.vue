@@ -51,7 +51,7 @@ function searchLanguage(value) {
 
 <template>
     <div class="relative">
-        <LanguageIcon class="w-6 h-6 ease-in transition text-white hover:text-blue-700"
+        <LanguageIcon class="w-6 h-6 ease-in transition text-white cursor-pointer hover:text-blue-700"
                       :class="{ '!text-blue-700':showPopup }"
                       v-on:click="showPopup = !showPopup"/>
 
