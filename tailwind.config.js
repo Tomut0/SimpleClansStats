@@ -15,6 +15,12 @@ export default {
             fontFamily: {
                 sans: ['Ubuntu', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                darkside: {
+                    500: '#6E63F1',
+                    900: '#121434'
+                }
+            }
         },
     },
 
