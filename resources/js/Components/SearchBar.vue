@@ -26,9 +26,9 @@ const debouncedEmit = debounce((input) => {
 </script>
 
 <template>
-    <ExpandedButton is-absolute-icon :expanded="expanded" :disabled="disabled">
+    <ExpandedButton is-absolute-icon :isLocked="expanded" :disabled="disabled">
         <template #icon>
-            <MagnifyingGlassIcon class="w-6 h-6 text-white" :class="iconStyles"/>
+            <MagnifyingGlassIcon class="w-6 h-6" :class="iconStyles"/>
         </template>
 
         <input type="text" :placeholder="placeholder" :class="searchStyles" @input="debouncedEmit"

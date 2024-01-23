@@ -5,7 +5,6 @@ import Translator from "@/Components/Translator.vue";
 import SearchBar from "@/Components/SearchBar.vue";
 import {__} from "@/trans.js";
 import {ref} from "vue";
-import ExpandedButton from "@/Components/ExpandedButton.vue";
 
 const show = ref(true);
 </script>
@@ -15,7 +14,7 @@ const show = ref(true);
         <ApplicationLogo/>
 
         <nav class="flex items-center justify-center space-x-4">
-            <SearchBar :expanded="false" search-styles="pl-10 bg-transparent border-0 border-b-2 rounded-none
+            <SearchBar :expanded="false" icon-styles="text-white" search-styles="pl-10 bg-transparent border-0 border-b-2 rounded-none
                            focus:outline-none focus:ring-transparent focus:text-indigo-500 focus:border-indigo-500"
                        :placeholder="__('components.searchbar.clan.placeholder')"/>
             <Translator/>
