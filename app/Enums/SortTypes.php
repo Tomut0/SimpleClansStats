@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use Exception;
+
 enum SortTypes
 {
     case Kdr;

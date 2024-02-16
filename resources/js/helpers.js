@@ -12,6 +12,12 @@ function debounce(func, delay) {
     };
 }
 
+function queryValue(url, key) {
+    let queryString = url.split('?')[1];
+    let params = new URLSearchParams(queryString);
+    return params.get(key);
+}
+
 function omit(obj, keys) {
     return keys.reduce((acc, key) => {
         if (!acc[key]) {
@@ -21,4 +27,4 @@ function omit(obj, keys) {
     });
 }
 
-export {debounce, omit};
+export {debounce, queryValue};

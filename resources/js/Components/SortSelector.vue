@@ -64,8 +64,4 @@ function selectType(shown, sortType) {
 .sortType:last-child {
     border-radius: 0 0.5rem 0.5rem 0;
 }
-
-.active {
-    @apply bg-indigo-500
-}
 </style>

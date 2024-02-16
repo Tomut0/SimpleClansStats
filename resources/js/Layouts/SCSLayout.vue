@@ -1,8 +1,6 @@
 <script setup>
 
-import SortSelector from "@/Components/SortSelector.vue";
 import SCHeader from "@/Components/SCHeader.vue";
-import IntervalSelector from "@/Components/IntervalSelector.vue";
 import {Head} from "@inertiajs/vue3";
 </script>
 
@@ -17,13 +15,8 @@ import {Head} from "@inertiajs/vue3";
 
     <div class="px-16 pt-12">
         <SCHeader/>
+        <slot />
 
-        <div class="flex justify-between mt-8">
-            <SortSelector/>
-            <IntervalSelector/>
-        </div>
-
-        <slot/>
     </div>
 </template>
 

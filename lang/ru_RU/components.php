@@ -15,6 +15,11 @@ return [
         'members' => "Участники",
         'kdr' => "KDR",
     ],
+    'intervalselector' => [
+        'daily' => "День",
+        'weekly' => "Неделя",
+        'monthly' => "Месяц"
+    ],
     'translator' => [
         'locale_not_found' => "Нет языка с таким названием..."
     ]

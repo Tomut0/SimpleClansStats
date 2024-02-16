@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Period;
 use App\Enums\SortTypes;
 use App\Models\Clan;
+use Error;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -19,19 +20,30 @@ class LeaderboardController extends Controller
 {
     public function index(Request $request): Response|ResponseFactory
     {
-        $sortBy = $request->input('sortBy', 'balance');
-        $period = Period::from($request->input('period', 7));
+        $selectors = [
+            'sortSelector' => SortTypes::packed(),
+            'intervalSelector' => Period::packed(),
+        ];
+
+        $sortKeys = array_keys(SortTypes::packed());
+        $sortBy = $request->input('sortBy', $sortKeys[0]);
+
+        try {
+            $period = constant("App\Enums\Period::" . ucfirst($request->input('period')));
+        } catch (Error $ignored) {
+            $period = Period::from(Period::cases()[0]->value);
+        }
+
         $limit = $request->input('limit', 10);
         $data = Clan::data();
 
-        $sortTypes = array_column(SortTypes::cases(), 'name');
-
         // Sort and cache the data for the specified period
-        $sortedData = $this->sortTopAll($data, $sortTypes);
-        $cachedPastPositions = Cache::remember($period->name, now()->addDays($period->value), function () use ($sortedData, $limit, $sortBy) {
+        $sortedData = $this->sortTopAll($data, $sortKeys);
+        $cachedPastPositions = Cache::remember($period->name, now()->addDays($period->value), function () use ($sortedData) {
             return collect($sortedData)->toJson();
         });
 
+        // todo: extract to a new method (comparePositions, calculatePositions)
         // Retrieve past positions from cache
         $pastPositions = json_decode($cachedPastPositions, true);
 
@@ -51,7 +63,7 @@ class LeaderboardController extends Controller
             }
         }
 
-        return inertia('Dashboard', ['clans' => $newPositions, 'sortTypes' => $sortTypes]);
+        return inertia('Dashboard', ['clans' => $newPositions, 'selectors' => $selectors]);
     }
 
     function sortTopAll(Collection $clans, array $sortBy, int $limit = 10): array
