@@ -1,6 +1,10 @@
 import {usePage} from "@inertiajs/vue3";
 
 export function __(key, replacement = {}, locale = usePage().props.locale) {
+    if (!key) {
+        throw new Error("Translation key is undefined or null");
+    }
+
     const translations = JSON.parse(usePage().props.translations);
 
     let message = key.split('.').reduce((t, i) => (t && t[i]) ?
