@@ -25,7 +25,7 @@ class TranslationController extends Controller
 
     public static function jsonMessages()
     {
-        return Cache::rememberForever(CacheKeys::language_map->name, function () {
+        return Cache::rememberForever(CacheKeys::LanguageMap->name, function () {
             $files = File::allFiles(lang_path());
 
             $locales = [];
@@ -48,7 +48,7 @@ class TranslationController extends Controller
 
     public function localizationMap()
     {
-        return Cache::rememberForever(CacheKeys::localization_map->name, function () {
+        return Cache::rememberForever(CacheKeys::LocalizationMap->name, function () {
             // get default locale (English 'en' by default)
             $default = config("app.locale");
 

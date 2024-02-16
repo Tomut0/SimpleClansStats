@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum Period: int
 {
-    case DAILY = 1;
-    case WEEKLY = 7;
-    case MONTHLY = 30;
+    case Daily = 1;
+    case Weekly = 7;
+    case Monthly = 30;
 }
