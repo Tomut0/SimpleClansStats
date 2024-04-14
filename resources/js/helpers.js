@@ -13,8 +13,8 @@ function debounce(func, delay) {
 }
 
 function queryValue(url, key) {
-    let queryString = url.split('?')[1];
-    let params = new URLSearchParams(queryString);
+    const queryString = url.split('?')[1];
+    const params = new URLSearchParams(queryString);
     return params.get(key);
 }
 

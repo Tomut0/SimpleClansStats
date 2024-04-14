@@ -31,7 +31,7 @@ enum Period: int
                     "translation" => "components.intervalselector.monthly"
                 ],
             ],
-            default => throw new Exception('Unknown sort type'),
+            default => throw new Exception("Unknown period type"),
         };
     }
 
