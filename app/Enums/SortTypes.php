@@ -19,19 +19,19 @@ enum SortTypes
             SortTypes::Kdr => [
                 "kdr" => [
                     "icon" => "FireIcon",
-                    "translation" => "components.sortselector.kdr"
+                    "translation" => "general.clan.kdr"
                 ],
             ],
             SortTypes::Balance => [
                 "balance" => [
                     "icon" => "CircleStackIcon",
-                    "translation" => "components.sortselector.balance"
+                    "translation" => "general.clan.balance"
                 ],
             ],
             SortTypes::Members => [
                 "members" => [
                     "icon" => "UserGroupIcon",
-                    "translation" => "components.sortselector.members"
+                    "translation" => "general.clan.members"
                 ],
             ],
             default => throw new Exception('Unknown sort type'),
