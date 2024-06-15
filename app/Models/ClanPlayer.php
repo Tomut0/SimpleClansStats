@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $rival_kills
@@ -17,9 +17,9 @@ class ClanPlayer extends Model
     protected $table = 'sc_players';
     public $timestamps = 'false';
 
-    public function scopeByClan(Builder $query, string $clan)
+    public function clan(): BelongsTo
     {
-        $query->where('tag', $clan);
+        return $this->belongsTo(Clan::class, 'tag', 'tag');
     }
 
     public function kdr(): float|int
@@ -34,4 +34,5 @@ class ClanPlayer extends Model
 
         return $kills / $deaths;
     }
+
 }

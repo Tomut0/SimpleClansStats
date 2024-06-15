@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $tag
@@ -17,28 +19,29 @@ class Clan extends Model
     protected $table = 'sc_clans';
     public $timestamps = false;
 
-    public function members(): Collection
+    public function members(): HasMany
     {
-        return ClanPlayer::byClan($this->tag)->get();
+        return $this->hasMany(ClanPlayer::class, 'tag', 'tag');
     }
 
     public function countMembers(): int
     {
-        return sizeof($this->members());
+        return $this->members()->count();
     }
 
     public function kdr(): float|int
     {
-        return $this->members()->map(function (ClanPlayer $player) {
+        return $this->members()->get()->sum(function (ClanPlayer $player) {
             return $player->kdr();
-        })->sum();
+        });
     }
 
     public static function data(): Collection
     {
-        return Clan::all(['id', 'tag', 'balance'])->map(function (Clan $clan) {
+        return Clan::all(['id', 'tag', 'color_tag', 'name', 'balance', 'founded', 'verified'])->map(function (Clan $clan) {
             $clan->members = $clan->countMembers();
             $clan->kdr = $clan->kdr();
+            $clan->formatted_founded = Carbon::parse($clan->founded / 1000)->format('Y-m-d');
 
             return $clan;
         });
