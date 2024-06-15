@@ -15,15 +15,22 @@ use Inertia\ResponseFactory;
 // todo:
 // 1. TB support
 // 2. Overall leaderboard (by all sort types at the same time)
-
+// 3. Dashboard: Most active clans (by total time)
+// 4. Clan Page: Clan activity (now, 5 min ago, 15 min ago, 1 hour ago, 1 day ago)
+// 5. Clan Page: Clan rivalry analysis - use clans.packed_rivals
+// 6. Clan Page: Clan's founded (clans.founded)
+// 7. Player page: "Time in a clan: {current time - sc_players.join_date}"
+// 8. Player page: Player's loyalty
+// 9. Kill frequency - count kills per day/week/month to analyze activity patterns
+// 10. Death frequency - count deaths per player to see riskiest players
 class LeaderboardController extends Controller
 {
     public function index(Request $request): Response|ResponseFactory
     {
         $validatedData = $request->validate([
-            'sortBy' => ['bail', 'nullable', 'string'],
-            'period' => ['nullable', 'string'],
-            'limit' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'sortBy' => ['bail', 'string'],
+            'period' => ['string'],
+            'limit' => ['integer', 'min:1', 'max:100'],
         ]);
 
         $selectors = [
@@ -39,6 +46,11 @@ class LeaderboardController extends Controller
         } catch (Error $ignored) {
             $period = Period::from(Period::cases()[0]->value);
         }
+
+        $currentSelectors = [
+            'sortSelector' => $selectors['sortSelector'][$sortBy],
+            'intervalSelector' => $selectors['intervalSelector'][strtolower($period->name)],
+        ];
 
         $limit = $request->query('limit', 10);
 
@@ -60,7 +72,7 @@ class LeaderboardController extends Controller
         // Compare positions between past and new positions
         $comparedPositions = $this->comparePositions($sortBy, $pastPositions, $newPositions);
 
-        return inertia('Dashboard', ['clans' => $comparedPositions, 'selectors' => $selectors]);
+        return inertia('Dashboard', ['clans' => $comparedPositions, 'selectors' => ['current' => $currentSelectors, 'all' => $selectors]]);
     }
 
     /**
