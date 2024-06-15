@@ -1,9 +1,10 @@
 <script setup>
 
 import ExpandedButton from "@/Components/ExpandedButton.vue";
-import {router} from "@inertiajs/vue3";
-import {computed, defineAsyncComponent, ref} from "vue";
+import {router, usePage} from "@inertiajs/vue3";
+import {computed, ref} from "vue";
 import {__} from "@/trans.js";
+import {bakeIcon, queryValue} from "@/helpers.js";
 
 const props = defineProps({
     items: {
@@ -23,13 +24,11 @@ const props = defineProps({
     }
 });
 
-const selected = ref(Object.keys(props.items)[0]);
+const selected = ref(queryValue(usePage().url, props.query) ?? Object.keys(props.items)[0]);
 
 const bakeIcons = () => computed(() => {
     return Object.entries(props.items).reduce((acc, value) => {
-        acc[value[0]] = defineAsyncComponent(() => {
-            return import(`../../../node_modules/@heroicons/vue/24/solid/esm/${value[1].icon}.js`);
-        })
+        acc[value[0]] = bakeIcon(value[1].icon);
         return acc
     }, {})
 });
@@ -45,12 +44,11 @@ const select = (shown, selectedItem) => {
         shown.value = false;
     }
 
-    const data = {};
-    data[props.query] = selectedItem;
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set(props.query, selectedItem);
 
-    // todo: it changes only one query (like, only 'sortBy'), other ones gets deleted
     router.visit(props.href, {
-        data: data
+        data: currentParams,
     });
 };
 
@@ -87,6 +85,7 @@ const select = (shown, selectedItem) => {
 .selector-button {
     @apply px-4 py-2 text-white inline-flex bg-darkside-900
 }
+
 .selector-button:first-child {
     border-radius: 0.5rem 0 0 0.5rem;
 }
