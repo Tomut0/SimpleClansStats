@@ -2,6 +2,7 @@
 
 import SCHeader from "@/Components/SCHeader.vue";
 import {Head} from "@inertiajs/vue3";
+import SCFooter from "@/Components/SCFooter.vue";
 </script>
 
 <template>
@@ -13,11 +14,12 @@ import {Head} from "@inertiajs/vue3";
         <link rel="shortcut icon" href="/favicons/favicon.ico">
     </Head>
 
-    <div class="px-16 pt-12">
+    <div class="px-6 lg:px-16 pt-12">
         <SCHeader/>
         <slot />
-
     </div>
+
+    <SCFooter />
 </template>
 
 <style scoped>
