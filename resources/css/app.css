@@ -5,3 +5,13 @@
 body {
     background: linear-gradient(45deg, #181A4C, #212351);
 }
+
+::-webkit-scrollbar {
+    width: 6px;
+    background: #212351;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 1em;
+    background-color: white;
+}

@@ -1,3 +1,5 @@
+import '../css/minecraft-colors.css';
+
 /**
  * Get the text color based on the background color.
  *
@@ -31,14 +33,14 @@ function getColorByBgColor(bgColor, lightColor = '#FFF', darkColor = '#000') {
  */
 function extractFirstColor(coloredTag) {
     // Regular expression to find Minecraft color codes
-    const colorCodeRegex = /(&#[0-9A-Fa-f]{6}|&[0-9A-Fa-f])/;
+    const colorCodeRegex = /(&#[0-9A-Fa-f]{6}|§[0-9A-Fa-f])/;
     const match = coloredTag.match(colorCodeRegex);
 
     if (match) {
         const colorCode = match[0];
         if (colorCode.startsWith("&#")) {
             // If the color is in hexadecimal format
-            return colorCode.slice(1); // Remove the initial '&'
+            return colorCode.slice(1); // Remove the initial '§'
         } else {
             // If the color is in Minecraft code format
             switch (colorCode[1].toLowerCase()) {
@@ -117,6 +119,8 @@ function addColors(string) {
 
     string = string.replace(/§0/g, "§g");
     const motdarr = string.split("§");
+    if (motdarr.length === 1) return string;
+
     let colored = '<span class="colored">';
     let openSpans = 0;
 
@@ -124,6 +128,7 @@ function addColors(string) {
         if (row === "") continue;
 
         const colorCode = row[0].toLowerCase();
+
         const text = row.slice(1);
 
         if (colorCode === "r") {
@@ -131,7 +136,6 @@ function addColors(string) {
             openSpans = 0;
         } else if (colors[colorCode]) {
             colored += "</span>".repeat(openSpans);
-            openSpans = 0;
             colored += colors[colorCode];
             openSpans++;
         } else {

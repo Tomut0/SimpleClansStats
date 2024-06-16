@@ -1,0 +1,95 @@
+.color-black {
+    color: #000;
+    text-shadow: 1px 1px rgb(0, 0, 0);
+}
+
+.color-dark_blue {
+    color: #0000AA;
+    text-shadow: 1px 1px rgb(0, 0, 42);
+}
+
+.color-dark_green {
+    color: #00AA00;
+    text-shadow: 1px 1px rgb(0, 42, 0);
+}
+
+.color-dark_aqua {
+    color: #00AAAA;
+    text-shadow: 1px 1px rgb(0, 42, 42);
+}
+
+.color-dark_red {
+    color: #AA0000;
+    text-shadow: 1px 1px rgb(42, 0, 0);
+}
+
+.color-dark_purple {
+    color: #AA00AA;
+    text-shadow: 1px 1px rgb(42, 0, 42);
+}
+
+.color-gold {
+    color: #FFAA00;
+    text-shadow: 1px 1px rgb(64, 42, 0);
+}
+
+.color-gray {
+    color: #AAA;
+    text-shadow: 1px 1px rgb(42, 42, 42);
+}
+
+.color-dark_gray {
+    color: #555;
+    text-shadow: 1px 1px rgb(21, 21, 21);
+}
+
+.color-blue {
+    color: #5555FF;
+    text-shadow: 1px 1px rgb(21, 21, 63);
+}
+
+.color-green {
+    color: #55FF55;
+    text-shadow: 1px 1px rgb(21, 63, 21);
+}
+
+.color-aqua {
+    color: #55FFFF;
+    text-shadow: 1px 1px rgb(21, 63, 63);
+}
+
+.color-red {
+    color: #FF5555;
+    text-shadow: 1px 1px rgb(63, 21, 63);
+}
+
+.color-light_purple {
+    color: #FF55FF;
+    text-shadow: 1px 1px rgb(63, 21, 21);
+}
+
+.color-yellow {
+    color: #FFFF55;
+    text-shadow: 1px 1px rgb(63, 63, 21);
+}
+
+.color-white {
+    color: #FFFFFF;
+    text-shadow: 1px 1px rgb(63, 63, 63);
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.strikethrough {
+    text-decoration: line-through;
+}
