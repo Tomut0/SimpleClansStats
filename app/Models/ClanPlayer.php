@@ -59,9 +59,9 @@ class ClanPlayer extends Model
 
     public function kdr(): float|int
     {
-        $rival = $this->rival_kills * doubleval(env('KILL_RIVAL', 2.0));
-        $neutral = $this->neutral_kills * doubleval(env('KILL_NEUTRAL', 1.0));
-        $civilian = $this->civilian_kills * doubleval(env('KILL_CIVILIAN', 0.0));
+        $rival = $this->rival_kills * config('scstats.killWeight.rival');
+        $neutral = $this->neutral_kills * config('scstats.killWeight.neutral');
+        $civilian = $this->civilian_kills * config('scstats.killWeight.civilian');
 
         $kills = ($civilian + $rival + $neutral);
 
