@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\CacheKeys;
+use App\Enums\CacheKeys;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

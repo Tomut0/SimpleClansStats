@@ -72,7 +72,7 @@ const select = (shown, selectedItem) => {
 
         <button type="submit" v-else
                 v-for="(item, key) in items"
-                @click="select(null, key)"
+                @click="select(false, key)"
                 class="selector-button"
                 :class="{'!bg-indigo-500': selected === key}">
 

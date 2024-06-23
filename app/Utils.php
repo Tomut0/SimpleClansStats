@@ -2,7 +2,9 @@
 
 namespace App;
 
-use Exception;
+use App\Enums\Period;
+use App\Models\Clan;
+use Illuminate\Support\Facades\Cache;
 
 class Utils
 {
@@ -16,5 +18,21 @@ class Utils
     public static function lowerEnum(string $enum, string $column_key = 'name'): array
     {
         return array_map('strtolower', array_column($enum::cases(), $column_key));
+    }
+
+    public static function saveStatistics(Period $period): void
+    {
+        if (!Cache::has($period->name)) {
+            return;
+        }
+        $old = Cache::get($period->name);
+
+        // Collect data from the database
+        $old['statistics'][now()->toDayDateTimeString()] = [
+            "clans" => Clan::count(),
+            "balance" => Clan::avg('balance'),
+        ];
+
+        Cache::put($period->name, $old, $old['ttl']);
     }
 }
