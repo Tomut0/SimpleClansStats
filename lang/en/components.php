@@ -23,6 +23,11 @@ return [
     'translator' => [
         'locale_not_found' => "Can't find the language with this name..."
     ],
+    'charts' => [
+        'clans' => 'Total Clans',
+        'avg_balance' => 'Average Clans Balance',
+        'kills_by_type' => 'Kills by Type',
+    ],
     'footer' => [
         'copyright' => "© :year. All Rights Reserved",
         'credits' => "Made with <3 by Minat0_, RoinujNosde"

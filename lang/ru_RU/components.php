@@ -23,6 +23,11 @@ return [
     'translator' => [
         'locale_not_found' => "Нет языка с таким названием..."
     ],
+    'charts' => [
+        'clans' => 'Всего кланов',
+        'avg_balance' => 'Средний баланс кланов',
+        'kills_by_type' => 'Убийства по типу',
+    ],
     'footer' => [
         'copyright' => "© :year. Все права защищены.",
         'credits' => "Сделано с <3 от Minat0_, RoinujNosde."

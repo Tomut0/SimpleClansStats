@@ -20,6 +20,10 @@ return [
         'weekly' => "Weekly",
         'monthly' => "Monthly"
     ],
+    'charts' => [
+        'clans' => 'Total Clans',
+        'avg_balance' => 'Average Clans Balance',
+    ],
     'translator' => [
         'locale_not_found' => "Can't find the language with this name..."
     ]
