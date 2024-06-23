@@ -1,4 +1,5 @@
 import {defineAsyncComponent} from "vue";
+import {usePage} from "@inertiajs/vue3";
 
 function debounce(func, delay) {
     let timerId;
@@ -28,14 +29,30 @@ function queryValue(url, key) {
 }
 
 function formatNumber(num, locale = 'en-US', style = 'currency', minimumFractionDigits = 0, maximumFractionDigits = 1) {
+    locale = locale.replace('_', '-');
+
+    const currency = usePage().props.currency.code || 'USD';
+    const symbol = usePage().props.currency.symbol || '$';
+
     const formatter = new Intl.NumberFormat(locale, {
         style: style,
         notation: 'compact',
-        currency: 'USD', // this is the fallback value
-        compactDisplay: 'short',
+        currency: currency,
+        currencyDisplay: "narrowSymbol",
+        compactDisplay: 'short' ,
         minimumFractionDigits: minimumFractionDigits,
         maximumFractionDigits: maximumFractionDigits
     });
+
+    // slice and replace with currency symbol
+    if (style === 'currency') {
+        return formatter.formatToParts(num).map(part => {
+            if (part.type === 'currency') {
+                return symbol;
+            }
+            return part.value;
+        }).join('');
+    }
 
     return formatter.format(num);
 }
@@ -52,6 +69,21 @@ function bakeIcon(iconName) {
     })
 }
 
+function chartUnit(unit) {
+    switch (unit) {
+        case 'daily':
+            return 'hour';
+        case 'weekly':
+            return 'day';
+        case 'monthly':
+            return 'day';
+        case 'yearly':
+            return 'month';
+        default:
+            return 'hour';
+    }
+}
+
 function omit(obj, keys) {
     return keys.reduce((acc, key) => {
         if (!acc[key]) {
@@ -61,4 +93,9 @@ function omit(obj, keys) {
     });
 }
 
-export {debounce, queryValue, formatNumber, bakeIcon};
+function getKeyAndValue(obj) {
+    const key = Object.keys(obj)[0];
+    return { key: key, value: obj[key] };
+}
+
+export {debounce, queryValue, formatNumber, bakeIcon, getKeyAndValue, chartUnit};
