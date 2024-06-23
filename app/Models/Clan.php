@@ -9,7 +9,51 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * App\Models\Clan
+ *
  * @property string $tag
+ * @property int|null $id
+ * @property int|null $verified
+ * @property string $color_tag
+ * @property string $name
+ * @property string|null $description
+ * @property int|null $friendly_fire
+ * @property int $founded
+ * @property int $last_used
+ * @property string $packed_allies
+ * @property string $packed_rivals
+ * @property string $packed_bb
+ * @property string $cape_url
+ * @property string $flags
+ * @property float|null $balance
+ * @property int|null $fee_enabled
+ * @property float|null $fee_value
+ * @property string $ranks
+ * @property-read Collection<int, \App\Models\ClanPlayer> $members
+ * @property-read int|null $members_count
+ * @method static \Database\Factories\ClanFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereBalance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereCapeUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereColorTag($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereFeeEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereFeeValue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereFlags($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereFounded($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereFriendlyFire($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereLastUsed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan wherePackedAllies($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan wherePackedBb($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan wherePackedRivals($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereRanks($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereTag($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Clan whereVerified($value)
+ * @mixin \Eloquent
  */
 class Clan extends Model
 {
