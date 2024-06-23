@@ -14,9 +14,11 @@ const show = ref(true);
         <ApplicationLogo/>
 
         <nav class="flex items-center justify-center space-x-4">
-            <SearchBar :expanded="false" icon-styles="text-white" search-styles="pl-10 bg-transparent border-0 border-b-2 rounded-none
+            <!-- fixme: search bar is work in progress -->
+
+            <!--            <SearchBar :expanded="false" icon-styles="text-white" search-styles="pl-10 bg-transparent border-0 border-b-2 rounded-none
                            focus:outline-none focus:ring-transparent focus:text-indigo-500 focus:border-indigo-500"
-                       :placeholder="__('components.searchbar.clan.placeholder')"/>
+                       :placeholder="__('components.searchbar.clan.placeholder')"/>-->
             <Translator/>
         </nav>
     </header>

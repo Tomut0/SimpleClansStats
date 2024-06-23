@@ -29,7 +29,7 @@ return [
         'kills_by_type' => 'Kills by Type',
     ],
     'footer' => [
-        'copyright' => "© :year. All Rights Reserved",
+        'copyright' => "© 2023 - :year. All Rights Reserved",
         'credits' => "Made with <3 by Minat0_, RoinujNosde"
     ]
 ];

@@ -29,7 +29,7 @@ return [
         'kills_by_type' => 'Убийства по типу',
     ],
     'footer' => [
-        'copyright' => "© :year. Все права защищены.",
+        'copyright' => "© 2023 - :year. Все права защищены.",
         'credits' => "Сделано с <3 от Minat0_, RoinujNosde."
     ]
 ];

@@ -26,5 +26,9 @@ return [
     ],
     'translator' => [
         'locale_not_found' => "Can't find the language with this name..."
+    ],
+    'footer' => [
+        'copyright' => "© 2023 - :year. All Rights Reserved",
+        'credits' => "Made with <3 by Minat0_, RoinujNosde"
     ]
 ];
