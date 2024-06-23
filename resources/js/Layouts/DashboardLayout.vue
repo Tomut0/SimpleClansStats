@@ -6,7 +6,7 @@ const selectors = usePage().props.selectors;
 </script>
 
 <template>
-    <div class="flex justify-between mt-8">
+    <div class="flex flex-col items-center justify-between mt-8 space-y-4 lg:flex-row">
         <Selector :items="selectors.all.sortSelector" query="sortBy" can-bake-icons/>
         <Selector :items="selectors.all.intervalSelector" query="period"/>
     </div>
