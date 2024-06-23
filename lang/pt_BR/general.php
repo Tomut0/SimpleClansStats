@@ -1,5 +1,6 @@
 <?php
 return [
+    'killed' => "Killed",
     'clan' => [
         'tag' => "Tag",
         'name' => "Name",
@@ -8,5 +9,16 @@ return [
         'unverified' => "Unverified",
         'members' => "Members",
         'kdr' => "KDR",
+    ],
+    'kills' => [
+        'last' => "Последние убийства",
+        'attacker' => "Атакующий",
+        'victim' => "Жертва",
+        'types' => [
+            'civilian' => "Гражданский",
+            'neutral' => "Нейтральный",
+            'rival' => "Соперник",
+            'ally' => "Союзник",
+        ],
     ]
 ];
