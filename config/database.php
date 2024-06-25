@@ -36,11 +36,11 @@ return [
     'connections' => [
         'simpleclans' => [
             'driver' => env('SC_CONNECTION', 'mysql'),
-            'url' => env('DATABASE_URL'),
+            'url' => env('SC_URL'),
             'host' => env('SC_HOST', '127.0.0.1'),
             'port' => env('SC_PORT', '3306'),
-            'database' => env('SC_DATABASE', 'forge'),
-            'username' => env('SC_USERNAME', 'forge'),
+            'database' => env('SC_DATABASE', database_path('SimpleClans.db')),
+            'username' => env('SC_USERNAME', ''),
             'password' => env('SC_PASSWORD', ''),
         ],
 

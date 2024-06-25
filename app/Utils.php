@@ -28,7 +28,7 @@ class Utils
         $old = Cache::get($period->name);
 
         // Collect data from the database
-        $old['statistics'][now()->toDayDateTimeString()] = [
+        $old['statistics']['byTime'][now()->toDayDateTimeString()] = [
             "clans" => Clan::count(),
             "balance" => Clan::avg('balance'),
         ];

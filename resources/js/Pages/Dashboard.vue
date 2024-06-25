@@ -69,8 +69,8 @@ defineOptions({layout: [SCSLayout, DashboardLayout]});
     </div>
 
     <div v-motion-fade-visible class="grid grid-cols-1 grid-rows-1 lg:grid-cols-3 lg:grid-rows-1 mt-8 gap-8">
-        <KillsChart v-if="statistics" :statistics="statistics"/>
-        <BalanceChart v-if="statistics" :statistics="statistics" :unit="unit"/>
-        <ClansChart v-if="statistics" :statistics="statistics" :unit="unit"/>
+        <KillsChart v-if="statistics && !Array.isArray(statistics.kills)" :statistics="statistics"/>
+        <BalanceChart v-if="statistics && statistics.byTime" :statistics="statistics.byTime" :unit="unit"/>
+        <ClansChart v-if="statistics && statistics.byTime" :statistics="statistics.byTime" :unit="unit"/>
     </div>
 </template>
