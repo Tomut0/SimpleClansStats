@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/Tomut0/SimpleClansStats/compare/v1.0.0...v1.1.0) (2024-07-21)
+
+
+### Features
+
+* add Dockerfile and docker compose ([bc673ea](https://github.com/Tomut0/SimpleClansStats/commit/bc673ea05e028b9d23100ed1832d87f8550a67cd))
+
+
+### Bug Fixes
+
+* env for kill weight is not allowed outside of config files ([2301abc](https://github.com/Tomut0/SimpleClansStats/commit/2301abc3258b54610e1ac9c6bdc462181315ec99))
+
 ## 1.0.0 (2024-06-23)
 
 
