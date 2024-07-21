@@ -64,7 +64,7 @@ defineOptions({layout: [SCSLayout, DashboardLayout]});
 
     <div v-motion-fade-visible class="bg-darkside-900 p-4 rounded-xl mt-8">
         <h3 class="text-gray-400 text-xl font-bold text-center mb-4">{{ __('general.kills.last') }}</h3>
-        <Carousel :items="killCards" :show-count="3"
+        <Carousel :items="killCards" :show-count="cardsCount"
                   carousel-class="grid grid-flow-col auto-cols-fr w-full gap-4 text-white text-base lg:text-xl"/>
     </div>
 
