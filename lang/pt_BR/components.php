@@ -3,32 +3,33 @@
 return [
     'searchbar' => [
         'locale' => [
-            'placeholder' => "Pesquise o idioma..."
+            'placeholder' => "Procurar pelo idioma..."
         ],
         'clan' => [
-            'placeholder' => "Search for the clan..."
+            'placeholder' => "Procurar pelo clã..."
         ]
     ],
     'sortselector' => [
-        'score' => "Score",
-        'balance' => "Balance",
-        'members' => "Members",
+        'score' => "Pontuação",
+        'balance' => "Saldo",
+        'members' => "Membros",
         'kdr' => "KDR",
     ],
     'intervalselector' => [
-        'daily' => "Daily",
-        'weekly' => "Weekly",
-        'monthly' => "Monthly"
-    ],
-    'charts' => [
-        'clans' => 'Total Clans',
-        'avg_balance' => 'Average Clans Balance',
+        'daily' => "Diário",
+        'weekly' => "Semanal",
+        'monthly' => "Mensal"
     ],
     'translator' => [
-        'locale_not_found' => "Can't find the language with this name..."
+        'locale_not_found' => "Não foi possível encontrar o idioma com este nome..."
+    ],
+    'charts' => [
+        'clans' => 'Total de Clãs',
+        'avg_balance' => 'Saldo Médio dos Clãs',
+        'kills_by_type' => 'Abates por Tipo',
     ],
     'footer' => [
-        'copyright' => "© 2023 - :year. All Rights Reserved",
-        'credits' => "Made with <3 by Minat0_, RoinujNosde"
+        'copyright' => "© 2023 - :year. Todos os Direitos Reservados",
+        'credits' => "Feito com <3 por Minat0_, RoinujNosde"
     ]
 ];

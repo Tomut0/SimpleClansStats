@@ -3,17 +3,17 @@
 return [
     'searchbar' => [
         'locale' => [
-            'placeholder' => "Искать язык..."
+            'placeholder' => "Поиск языка..."
         ],
         'clan' => [
-            'placeholder' => "Искать клан..."
+            'placeholder' => "Поиск клана..."
         ]
     ],
     'sortselector' => [
-        'score' => "Очки",
+        'score' => "Счет",
         'balance' => "Баланс",
         'members' => "Участники",
-        'kdr' => "KDR",
+        'kdr' => "KDR", // Соотношение убийств/смертей
     ],
     'intervalselector' => [
         'daily' => "День",
@@ -21,7 +21,7 @@ return [
         'monthly' => "Месяц"
     ],
     'translator' => [
-        'locale_not_found' => "Нет языка с таким названием..."
+        'locale_not_found' => "Не удается найти язык с таким названием..."
     ],
     'charts' => [
         'clans' => 'Всего кланов',

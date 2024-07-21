@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'dashboard' => 'Дэшбоард'
+    'dashboard' => 'Панель управления'
 ];

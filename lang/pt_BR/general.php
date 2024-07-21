@@ -1,24 +1,24 @@
 <?php
 return [
-    'killed' => "Killed",
+    'killed' => "Abatido",
     'clan' => [
         'tag' => "Tag",
-        'name' => "Name",
-        'balance' => "Balance",
-        'verified' => "Verified",
-        'unverified' => "Unverified",
-        'members' => "Members",
+        'name' => "Nome",
+        'balance' => "Saldo",
+        'verified' => "Verificado",
+        'unverified' => "Não Verificado",
+        'members' => "Membros",
         'kdr' => "KDR",
     ],
     'kills' => [
-        'last' => "Последние убийства",
-        'attacker' => "Атакующий",
-        'victim' => "Жертва",
+        'last' => "Últimos Abates",
+        'attacker' => "Atacante",
+        'victim' => "Vítima",
         'types' => [
-            'civilian' => "Гражданский",
-            'neutral' => "Нейтральный",
-            'rival' => "Соперник",
-            'ally' => "Союзник",
+            'civilian' => "Civil",
+            'neutral' => "Neutro",
+            'rival' => "Rival",
+            'ally' => "Aliado",
         ],
     ]
 ];
