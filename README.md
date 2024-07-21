@@ -96,11 +96,10 @@ crontab -e
 
 ### mikasa.host
 
-mikasa.host is my game hosting, the perfect solution for launching your own Minecraft server. \
+It is my game hosting, the perfect solution for launching your own Minecraft server. \
 For just $1 in a month, you can create a powerful server featuring top-tier components like Ryzen 9 5950X
-processors, \DDR4 RAM, and NVMe disks. Mikasa.host offers convenient and speedy registration via Discord and supports
-hosting servers
-for a variety of games, not just Minecraft.
+processors, DDR4 RAM, and NVMe disks. Mikasa.host offers convenient and speedy registration via Discord and supports
+hosting servers for a variety of games, not just Minecraft.
 
 ## 😎 Thank you especially 
 
