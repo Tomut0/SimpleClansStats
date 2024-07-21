@@ -7,7 +7,7 @@ Laravel version: 10.15.0
 
 * Laravel [documentation](https://laravel.com/docs)
 * SimpleClans [plugin](https://github.com/RoinujNosde/SimpleClans)
-
+---
 ## Features
 
 * **Powerful Leaderboard**: \
@@ -15,22 +15,25 @@ Laravel version: 10.15.0
   and Member count.
 * **Updates clan positions daily, weekly, and monthly**: \
   Track your progress and see how your clan ranks over different time periods.
-* **Language Selector**: \
+* **Multi Language Support**: \
   Seamless language switching without page reload. \
-  Instantly translate the page into supported languages for a smoother user experience.
+  Instantly translate the page into supported languages for a smoother user experience. \
+  Currently supported languages are: English, Portuguese (Brazil), Russian.
 * **Comprehensive Statistics**: \
   Displays latest kills between clan players, provides detailed kills by types, shows average clan balance, \
   and tracks the total number of clans on the server.
 * **Extremely Fast and Configurable:**: \
   Built with Vue and Inertia for a smooth and dynamic user experience. \
   Easily deployable with Docker, allowing you to quickly set up and configure your environment to meet your needs.
-
+* **Adaptive Design**: \
+  Responsive layout that adjusts seamlessly to different screen sizes and devices, \
+  ensuring an optimal viewing experience on desktops and mobile phones.
 ## Support
 
 If you have faced any issues, I'll answer on any questions in official
 SimpleClans [discord](https://discord.gg/CkNwgdE).
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Docker
 
@@ -87,7 +90,7 @@ crontab -e
 
 7. Profit!
 
-## Sponsored By
+## ✨ Sponsored By
 
 <img align="left" width=125 style="margin-right: 12px" src="https://mikasa.host/images/favicon.png" alt="image">
 
@@ -99,9 +102,11 @@ processors, \DDR4 RAM, and NVMe disks. Mikasa.host offers convenient and speedy 
 hosting servers
 for a variety of games, not just Minecraft.
 
-## Thank you especially
+## 😎 Thank you especially 
 
-**RoinujNosde**, **Mehmet27**
+<a href="https://github.com/RoinujNosde"><img src="https://github.com/RoinujNosde.png" width="50px" alt="RoinujNosde" /></a>
+<a href="https://github.com/ToxicDuke"><img src="https://github.com/ToxicDuke.png" width="50px" alt="ToxicDuke" /></a>
+<a href="https://github.com/mehmet-27"><img src="https://github.com/mehmet-27.png" width="50px" alt="mehmet-27" /></a>
 
 ## License
 
