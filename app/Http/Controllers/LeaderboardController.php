@@ -99,8 +99,12 @@ class LeaderboardController extends Controller
 
         // Retrieve kills by type for the specified period
         $killsByType = Kill::whereNotNull('created_at')->get()
+            // check if kill has created_at added in SimpleClans 2.20.0
+            ->filter(function (Kill $kill) {
+                return isset($kill->created_at);
+            })
             ->filter(function (Kill $kill) use ($period) {
-                return Carbon::make($kill->created_at)->greaterThanOrEqualTo(now()->subDays($period->value));
+                    return Carbon::make($kill->created_at)->greaterThanOrEqualTo(now()->subDays($period->value));
             })->map(function (Kill $kill) {
                 return $kill->displayType();
             });
