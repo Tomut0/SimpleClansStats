@@ -14,7 +14,7 @@ const props = defineProps({
 
 const tag = props.languageTag.split("_"),
     locale = tag[0],
-    country = tag[0] === "en" ? `us` : tag[1].toLowerCase();
+    country = locale === "en" ? `us` : tag[1].toLowerCase();
 </script>
 
 <template>
@@ -23,7 +23,8 @@ const tag = props.languageTag.split("_"),
             <div :class="`fib fi-${country} flex-none`" class="w-12 h-12"></div>
             <div class="mx-4 shrink text-start leading-tight">{{ displayName }}</div>
         </div>
-        <div>{{ translationStatus }}</div>
+        <!-- fixme: some translation lines shouldn't be translated and current status doesn't consider it -->
+        <!-- <div>{{ translationStatus }}</div>-->
     </div>
 </template>
 
