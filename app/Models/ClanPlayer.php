@@ -65,6 +65,12 @@ class ClanPlayer extends Model
 
         $kills = ($civilian + $rival + $neutral);
 
+        // after SC 2.15.1
+        if (isset($this->ally_kills)) {
+            $ally = $this->ally_kills * config('scstats.killWeight.ally');
+            $kills += $ally;
+        }
+
         $deaths = $this->deaths == 0 ? 1 : $this->deaths;
 
         return $kills / $deaths;
