@@ -22,7 +22,7 @@
         "vue": "^3.2.41"
     },
     "dependencies": {
-        "@heroicons/vue": "^2.1.4",
+        "@heroicons/vue": "^2.1.5",
         "@vueuse/motion": "^2.2.3",
         "chart.js": "^4.4.3",
         "chartjs-adapter-moment": "^1.0.1",
