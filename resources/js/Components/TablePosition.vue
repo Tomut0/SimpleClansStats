@@ -3,7 +3,7 @@
 import {__} from "@/trans.js";
 import {ChevronUpIcon, ChevronDownIcon, MinusIcon} from "@heroicons/vue/24/solid/index.js";
 import {addColors} from "../colors.js";
-import {formatNumber} from "@/helpers.js";
+import {formatNumber, visitViaQuery} from "@/helpers.js";
 import {usePage} from "@inertiajs/vue3";
 
 const {locale} = usePage().props;
@@ -38,7 +38,8 @@ const props = defineProps({
         </thead>
         <tbody>
         <tr v-for="(clan, indx) in clans" :key="clan.tag"
-            class="h-12 text-gray-200 text-center odd:bg-darkside-600 even:bg-darkside-700">
+            @click="visitViaQuery(route('dashboard'), [{name: 'clanTag', value: clan.tag}], ['queryClan', 'selectors'])"
+            class="h-12 text-gray-200 text-center cursor-pointer hover:bg-darkside-500 odd:bg-darkside-600 even:bg-darkside-700">
             <td v-if="clan.position_status === 'raised'">
                 <ChevronUpIcon class="w-4 h-4 text-green-400 ml-4"/>
             </td>

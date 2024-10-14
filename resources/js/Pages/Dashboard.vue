@@ -11,8 +11,11 @@ import {computed, defineAsyncComponent, ref} from "vue";
 import KillsChart from "@/Components/charts/KillsChart.vue";
 import BalanceChart from "@/Components/charts/BalanceChart.vue";
 import ClansChart from "@/Components/charts/ClansChart.vue";
+import ClanModal from "@/Components/modals/ClanModal.vue";
 
-const {selectors, clans, lastKills, statistics} = usePage().props;
+const {selectors, clans, lastKills, statistics, queryClan} = usePage().props;
+
+const currentClan = ref(queryClan);
 
 const currentSort = getKeyAndValue(selectors.current.sortSelector);
 const currentInterval = getKeyAndValue(selectors.current.intervalSelector);
@@ -58,7 +61,8 @@ defineOptions({layout: [SCSLayout, DashboardLayout]});
     </div>
 
     <div v-motion-fade-visible class="grid grid-flow-col auto-cols-fr gap-8 mt-24">
-        <TablePosition v-if="otherClans.length > 3" :clans="otherClans" :current-sort="currentSort"
+        <TablePosition v-if="otherClans.length > 3" v-model="currentClan" :clans="otherClans"
+                       :current-sort="currentSort"
                        :add-to-index="tableIndex"/>
     </div>
 
@@ -73,4 +77,6 @@ defineOptions({layout: [SCSLayout, DashboardLayout]});
         <BalanceChart v-if="statistics && statistics.byTime" :statistics="statistics.byTime" :unit="unit"/>
         <ClansChart v-if="statistics && statistics.byTime" :statistics="statistics.byTime" :unit="unit"/>
     </div>
+
+    <ClanModal v-model="currentClan" />
 </template>

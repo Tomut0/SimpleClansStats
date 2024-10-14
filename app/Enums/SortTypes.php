@@ -2,10 +2,13 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumPackable;
 use Exception;
 
 enum SortTypes
 {
+    use EnumPackable;
+
     case Kdr;
     case Balance;
     case Members;
@@ -36,16 +39,5 @@ enum SortTypes
             ],
             default => throw new Exception('Unknown sort type'),
         };
-    }
-
-    public static function packed(): array
-    {
-        try {
-            return array_merge(SortTypes::Kdr->value(), SortTypes::Balance->value(), SortTypes::Members->value());
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-        }
-
-        return [];
     }
 }

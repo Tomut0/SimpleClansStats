@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ClanEntities;
 use App\Enums\Period;
 use App\Enums\SortTypes;
 use App\Models\Clan;
 use App\Models\Kill;
+use App\Utils;
 use Carbon\Carbon;
-use Error;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -22,9 +23,9 @@ use Inertia\ResponseFactory;
 // 5. Clan Page: Clan rivalry analysis - use clans.packed_rivals
 // 6. Clan Page: Clan's founded (clans.founded)
 // 7. Player page: "Time in a clan: {current time - sc_players.join_date}"
-// 8. Player page: Player's loyalty
+// 8. Player page: Player's loyalty (how much time player spent in a clan) (achievement system?)
 // 9. Kill frequency - count kills per day/week/month to analyze activity patterns
-// 10. Death frequency - count deaths per player to see riskiest players
+// 10. Death frequency - count deaths per player to see riskiest players (achievement system?)
 class LeaderboardController extends Controller
 {
     public function index(Request $request): Response|ResponseFactory
@@ -32,36 +33,42 @@ class LeaderboardController extends Controller
         $validatedData = $request->validate([
             'sortBy' => ['bail', 'string'],
             'period' => ['string'],
+            'clanTag' => ['string'],
+            'clanEntity' => ['string'],
             'limit' => ['integer', 'min:1', 'max:100'],
         ]);
 
         $selectors = [
             'sortSelector' => SortTypes::packed(),
             'intervalSelector' => Period::packed(),
+            'clanEntitySelector' => ClanEntities::packed(),
         ];
 
-        $sortKeys = array_keys(SortTypes::packed());
-        $sortBy = $validatedData['sortBy'] ?? $sortKeys[0];
+        $sortKeys = array_keys($selectors['sortSelector']);
 
-        try {
-            $period = constant("App\Enums\Period::" . ucfirst($validatedData['period'] ?? ""));
-        } catch (Error $ignored) {
-            $period = Period::from(Period::cases()[0]->value);
-        }
+        $sortBy = strtolower(Utils::resolveEnum(SortTypes::class, $validatedData['sortBy'] ?? "", SortTypes::cases()[0])->name);
+        $period = Utils::resolveEnum(Period::class, $validatedData['period'] ?? "", Period::cases()[0]);
+        $clanEntity = Utils::resolveEnum(ClanEntities::class, $validatedData['clanEntity'] ?? "", ClanEntities::cases()[0]);
 
         $currentSelectors = [
-            'sortSelector' => [
-                $sortBy => $selectors['sortSelector'][$sortBy]
-            ],
-            'intervalSelector' => [
-                strtolower($period->name) => $selectors['intervalSelector'][strtolower($period->name)]
-            ],
+            'sortSelector' => [$sortBy => $selectors['sortSelector'][$sortBy]],
+            'intervalSelector' => [strtolower($period->name) => $selectors['intervalSelector'][strtolower($period->name)]],
         ];
 
         $limit = $request->query('limit', 10);
 
-        // Sort data by specified sorting criteria
         $data = Clan::data();
+        $currentClan = isset($validatedData['clanTag']) ? $data->where('tag', $validatedData['clanTag'])->first() : null;
+
+        // add clan members / allies / rivals to current selector
+        if ($currentClan) {
+            $currentSelectors['clanEntitySelector'] = array_merge(
+                $selectors['clanEntitySelector'][strtolower($clanEntity->name)],
+                ["entity" => $clanEntity->getEntities($currentClan)->toArray()]
+            );
+        }
+
+        // Sort data by specified sorting criteria
         $sortedData = $this->sortTopAll($data, $sortKeys);
 
         // Initial cache over all periods
@@ -104,7 +111,7 @@ class LeaderboardController extends Controller
                 return isset($kill->created_at);
             })
             ->filter(function (Kill $kill) use ($period) {
-                    return Carbon::make($kill->created_at)->greaterThanOrEqualTo(now()->subDays($period->value));
+                return Carbon::make($kill->created_at)->greaterThanOrEqualTo(now()->subDays($period->value));
             })->map(function (Kill $kill) {
                 return $kill->displayType();
             });
@@ -115,7 +122,8 @@ class LeaderboardController extends Controller
         $statistics['kills'] = $killsByType->countBy()->toArray();
 
         return inertia('Dashboard', ['clans' => $comparedPositions, 'lastKills' => $lastKills,
-            'selectors' => ['current' => $currentSelectors, 'all' => $selectors], 'statistics' => $statistics
+            'selectors' => ['current' => $currentSelectors, 'all' => $selectors], 'statistics' => $statistics,
+            'queryClan' => $currentClan
         ]);
     }
 

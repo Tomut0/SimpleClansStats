@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * App\Models\Clan
@@ -68,6 +68,16 @@ class Clan extends Model
         return $this->hasMany(ClanPlayer::class, 'tag', 'tag');
     }
 
+    public function allies(): Collection
+    {
+        return $this->whereIn('tag', explode('|', $this->packed_allies))->get();
+    }
+
+    public function rivals(): Collection
+    {
+        return $this->whereIn('tag', explode('|', $this->packed_rivals))->get();
+    }
+
     public function countMembers(): int
     {
         return $this->members()->count();
@@ -82,12 +92,13 @@ class Clan extends Model
 
     public static function data(): Collection
     {
-        return Clan::all(['id', 'tag', 'color_tag', 'name', 'balance', 'founded', 'verified'])->map(function (Clan $clan) {
-            $clan->members = $clan->countMembers();
-            $clan->kdr = $clan->kdr();
-            $clan->formatted_founded = Carbon::parse($clan->founded / 1000)->format('Y-m-d');
+        return Clan::all(['id', 'tag', 'color_tag', 'name', 'description', 'balance', 'founded', 'verified', 'packed_allies', 'packed_rivals'])
+            ->map(function (Clan $clan) {
+                $clan->members = $clan->countMembers();
+                $clan->kdr = $clan->kdr();
+                $clan->formatted_founded = Carbon::parse($clan->founded / 1000)->format('Y-m-d');
 
-            return $clan;
-        });
+                return $clan;
+            });
     }
 }

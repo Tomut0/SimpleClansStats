@@ -1,7 +1,7 @@
 <script setup>
 import {CheckIcon, XMarkIcon, CalendarDaysIcon} from "@heroicons/vue/24/solid/index.js";
 import ShieldIcon from "@/Components/icons/ShieldIcon.vue";
-import {bakeIcon, formatNumber, queryValue} from "@/helpers.js";
+import {bakeIcon, formatNumber, visitViaQuery} from "@/helpers.js";
 import {usePage} from "@inertiajs/vue3";
 import {__} from "../trans.js";
 import {extractFirstColor, getColorByBgColor} from "@/colors.js";
@@ -40,7 +40,8 @@ const textColor = getColorByBgColor(extractFirstColor(props.clan.color_tag));
 
 <template>
     <div class="flex flex-col items-center relative h-full">
-        <div class="position-text flex flex-col items-center justify-evenly h-2/3">
+        <div class="position-text flex flex-col items-center cursor-pointer justify-evenly h-2/3"
+             @click="visitViaQuery(route('dashboard'), [{name: 'clanTag', value: clan.tag}], ['queryClan', 'selectors'])">
             <div class="flex flex-col space-x-4 items-center xl:flex-row">
                 <span v-if="clan.verified" class="flex items-center">
                     <CheckIcon class="w-4 h-4"/>
