@@ -68,7 +68,7 @@ defineOptions({layout: [SCSLayout, DashboardLayout]});
                   carousel-class="grid grid-flow-col auto-cols-fr w-full gap-4 text-white text-base lg:text-xl"/>
     </div>
 
-    <div v-motion-fade-visible class="grid grid-cols-1 grid-rows-1 lg:grid-cols-3 lg:grid-rows-1 mt-8 gap-8">
+    <div v-motion-fade-visible class="grid grid-flow-row auto-cols-fr lg:grid-flow-col lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))] mt-8 gap-8">
         <KillsChart v-if="statistics && !Array.isArray(statistics.kills)" :statistics="statistics"/>
         <BalanceChart v-if="statistics && statistics.byTime" :statistics="statistics.byTime" :unit="unit"/>
         <ClansChart v-if="statistics && statistics.byTime" :statistics="statistics.byTime" :unit="unit"/>
