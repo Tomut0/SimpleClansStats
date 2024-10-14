@@ -5,6 +5,8 @@
 Laravel based web interface for SimpleClans plugin. \
 Laravel version: 10.15.0
 
+Watch demo of the application [here](https://scstats.roinujnosde.me/).
+
 * Laravel [documentation](https://laravel.com/docs)
 * SimpleClans [plugin](https://github.com/RoinujNosde/SimpleClans)
 ---
