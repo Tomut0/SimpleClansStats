@@ -39,6 +39,11 @@ if (props.canBakeIcons) {
 }
 
 const select = (shown, selectedItem) => {
+    // avoid click on the same element
+    if (selected.value === selectedItem) {
+        return;
+    }
+
     selected.value = selectedItem;
     if (shown) {
         shown.value = false;
