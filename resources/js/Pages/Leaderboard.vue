@@ -2,7 +2,6 @@
 import SCSLayout from "@/Layouts/SCSLayout.vue";
 import {Head, usePage} from "@inertiajs/vue3";
 import {__} from "../trans.js";
-import DashboardLayout from "@/Layouts/DashboardLayout.vue";
 import ShieldPosition from "@/Components/ShieldPosition.vue";
 import {chartUnit, getKeyAndValue, queryValue} from "@/helpers.js";
 import TablePosition from "@/Components/TablePosition.vue";
@@ -12,6 +11,7 @@ import KillsChart from "@/Components/charts/KillsChart.vue";
 import BalanceChart from "@/Components/charts/BalanceChart.vue";
 import ClansChart from "@/Components/charts/ClansChart.vue";
 import ClanModal from "@/Components/modals/ClanModal.vue";
+import LeaderboardLayout from "@/Layouts/LeaderboardLayout.vue";
 
 const {selectors, clans, lastKills, statistics, queryClan} = usePage().props;
 
@@ -47,11 +47,11 @@ const killCards = lastKills.map(kill => {
     }
 });
 
-defineOptions({layout: [SCSLayout, DashboardLayout]});
+defineOptions({layout: [SCSLayout, LeaderboardLayout]});
 </script>
 
 <template>
-    <Head :title="__('pages.dashboard')"/>
+    <Head :title="__('pages.leaderboard')"/>
 
     <div class="grid-cols-3 grid-rows-1 mt-4 relative hidden lg:grid">
         <ShieldPosition v-for="(clan, index) in bestClans" :key="clan.tag"

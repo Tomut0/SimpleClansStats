@@ -41,7 +41,7 @@ const textColor = getColorByBgColor(extractFirstColor(props.clan.color_tag));
 <template>
     <div class="flex flex-col items-center relative h-full">
         <div class="position-text flex flex-col items-center cursor-pointer justify-evenly h-2/3"
-             @click="visitViaQuery(route('dashboard'), [{name: 'clanTag', value: clan.tag}], ['queryClan', 'selectors'])">
+             @click="visitViaQuery(route('leaderboard.index'), [{name: 'clanTag', value: clan.tag}], ['queryClan', 'selectors'])">
             <div class="flex flex-col space-x-4 items-center xl:flex-row">
                 <span v-if="clan.verified" class="flex items-center">
                     <CheckIcon class="w-4 h-4"/>

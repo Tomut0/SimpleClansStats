@@ -121,7 +121,7 @@ class LeaderboardController extends Controller
         $statistics = Cache::get($period->name)["statistics"] ?? [];
         $statistics['kills'] = $killsByType->countBy()->toArray();
 
-        return inertia('Dashboard', ['clans' => $comparedPositions, 'lastKills' => $lastKills,
+        return inertia('Leaderboard', ['clans' => $comparedPositions, 'lastKills' => $lastKills,
             'selectors' => ['current' => $currentSelectors, 'all' => $selectors], 'statistics' => $statistics,
             'queryClan' => $currentClan
         ]);

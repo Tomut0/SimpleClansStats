@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'dashboard' => 'Панель управления'
+    'leaderboard' => 'Таблица лидеров'
 ];

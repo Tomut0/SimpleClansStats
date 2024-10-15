@@ -38,7 +38,7 @@ const props = defineProps({
         </thead>
         <tbody>
         <tr v-for="(clan, indx) in clans" :key="clan.tag"
-            @click="visitViaQuery(route('dashboard'), [{name: 'clanTag', value: clan.tag}], ['queryClan', 'selectors'])"
+            @click="visitViaQuery(route('leaderboard.index'), [{name: 'clanTag', value: clan.tag}], ['queryClan', 'selectors'])"
             class="h-12 text-gray-200 text-center cursor-pointer hover:bg-darkside-500 odd:bg-darkside-600 even:bg-darkside-700">
             <td v-if="clan.position_status === 'raised'">
                 <ChevronUpIcon class="w-4 h-4 text-green-400 ml-4"/>

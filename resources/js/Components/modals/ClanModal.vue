@@ -16,7 +16,7 @@ const clanEntities = selectors.current?.clanEntitySelector?.entity;
 </script>
 
 <template>
-    <Modal :show="currentClan" closeable>
+    <Modal :show="currentClan != null" closeable>
         <div class="py-6 px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -25,7 +25,7 @@ const clanEntities = selectors.current?.clanEntitySelector?.entity;
                 </div>
 
                 <XMarkIcon class="h-6 w-6 cursor-pointer text-darkside-400"
-                           @click="visitViaQuery(route('dashboard'), [{name: 'clanTag', value: null}], ['queryClan'])"/>
+                           @click="visitViaQuery(route('leaderboard.index'), [{name: 'clanTag', value: null}], ['queryClan'])"/>
             </div>
 
             <div class="text-gray-400 text-xl">{{ currentClan.name }}</div>
