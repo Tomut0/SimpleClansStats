@@ -119,4 +119,11 @@ function getKeyAndValue(obj) {
     return {key: key, value: obj[key]};
 }
 
-export {debounce, queryValue, formatNumber, bakeIcon, getKeyAndValue, chartUnit, visitViaQuery};
+function createRow(elements, onclick) {
+    return {
+        elements: elements || [],   // default to an empty array if no value is provided
+        onclick: onclick || function() {} // default to a no-op function if none is provided
+    };
+}
+
+export {debounce, queryValue, formatNumber, bakeIcon, getKeyAndValue, chartUnit, visitViaQuery, createRow};

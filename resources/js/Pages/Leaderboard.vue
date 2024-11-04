@@ -4,7 +4,7 @@ import {Head, usePage} from "@inertiajs/vue3";
 import {__} from "../trans.js";
 import ShieldPosition from "@/Components/ShieldPosition.vue";
 import {chartUnit, getKeyAndValue, queryValue} from "@/helpers.js";
-import TablePosition from "@/Components/TablePosition.vue";
+import ClansTable from "@/Components/ClansTable.vue";
 import Carousel from "@/Components/Carousel.vue";
 import {computed, defineAsyncComponent, ref} from "vue";
 import KillsChart from "@/Components/charts/KillsChart.vue";
@@ -61,7 +61,7 @@ defineOptions({layout: [SCSLayout, LeaderboardLayout]});
     </div>
 
     <div v-motion-fade-visible class="grid grid-flow-col auto-cols-fr gap-8 mt-24">
-        <TablePosition v-if="otherClans.length > 3" v-model="currentClan" :clans="otherClans"
+        <ClansTable v-if="otherClans.length > 3" v-model="currentClan" :clans="otherClans"
                        :current-sort="currentSort"
                        :add-to-index="tableIndex"/>
     </div>
