@@ -86,43 +86,18 @@ class LeaderboardController extends Controller
         // Compare positions between past and new positions
         $comparedPositions = $this->comparePositions($sortBy, $pastPositions, $newPositions);
 
-        // Last 10 kills
-        $lastKills = Kill::with('victimClan', 'attackerClan')->get(['attacker', 'attacker_tag', 'victim', 'victim_tag'])
-            ->where('attacker_tag', '!=', '')->where('victim_tag', '!=', '')
-            ->reverse()->take($limit)->map(function (Kill $kill) {
-                if (!$kill->attackerClan || !$kill->victimClan) return null;
-
-                return [
-                    'attacker' => [
-                        'name' => $kill->attacker,
-                        'tag' => $kill->attackerClan->color_tag,
-                    ],
-                    'victim' => [
-                        'name' => $kill->victim,
-                        'tag' => $kill->victimClan->color_tag,
-                    ]
-                ];
-            })->filter(fn($kill) => !is_null($kill))->values()->toArray();
-
         // Retrieve kills by type for the specified period
-        $killsByType = Kill::whereNotNull('created_at')->get()
-            // check if kill has created_at added in SimpleClans 2.20.0
-            ->filter(function (Kill $kill) {
-                return isset($kill->created_at);
-            })
-            ->filter(function (Kill $kill) use ($period) {
-                return Carbon::make($kill->created_at)->greaterThanOrEqualTo(now()->subDays($period->value));
-            })->map(function (Kill $kill) {
-                return $kill->displayType();
-            });
-
+        $killsByType = $this->killsByType($period);
 
         // Retrieve statistics for charts
         $statistics = Cache::get($period->name)["statistics"] ?? [];
         $statistics['kills'] = $killsByType->countBy()->toArray();
 
-        return inertia('Leaderboard', ['clans' => $comparedPositions, 'lastKills' => $lastKills,
-            'selectors' => ['current' => $currentSelectors, 'all' => $selectors], 'statistics' => $statistics,
+        return inertia('Leaderboard', [
+            'clans' => $comparedPositions,
+            'lastKills' => $this->retrieveLastKills($limit),
+            'selectors' => ['current' => $currentSelectors, 'all' => $selectors],
+            'statistics' => $statistics,
             'queryClan' => $currentClan
         ]);
     }
@@ -175,5 +150,50 @@ class LeaderboardController extends Controller
         foreach ($sorted as $position => $clan) {
             $accumulator[$position][$sortBy] = $clan->toArray();
         }
+    }
+
+    /**
+     * Retrieve last kills based on limit
+     * @param int $limit
+     * @return mixed[]
+     */
+    public function retrieveLastKills(int $limit): array
+    {
+        return Kill::with('victimClan', 'attackerClan')->get(['attacker', 'attacker_tag', 'victim', 'victim_tag'])
+            ->where('attacker_tag', '!=', '')->where('victim_tag', '!=', '')
+            ->reverse()->take($limit)->map(function (Kill $kill) {
+                if (!$kill->attackerClan || !$kill->victimClan) return null;
+
+                return [
+                    'attacker' => [
+                        'name' => $kill->attacker,
+                        'tag' => $kill->attackerClan->color_tag,
+                    ],
+                    'victim' => [
+                        'name' => $kill->victim,
+                        'tag' => $kill->victimClan->color_tag,
+                    ]
+                ];
+            })->filter(fn($kill) => !is_null($kill))->values()->toArray();
+    }
+
+    /**
+     * Retrieve kills by type for the specified period
+     *
+     * @param mixed $period
+     * @return mixed
+     */
+    public function killsByType(mixed $period): mixed
+    {
+        return Kill::whereNotNull('created_at')->get()
+            // check if kill has created_at added in SimpleClans 2.20.0
+            ->filter(function (Kill $kill) {
+                return isset($kill->created_at);
+            })
+            ->filter(function (Kill $kill) use ($period) {
+                return Carbon::make($kill->created_at)->greaterThanOrEqualTo(now()->subDays($period->value));
+            })->map(function (Kill $kill) {
+                return $kill->displayType();
+            });
     }
 }
