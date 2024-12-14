@@ -7,28 +7,33 @@ import {CalendarDaysIcon, CheckIcon, CircleStackIcon, FireIcon, XMarkIcon} from 
 import {usePage} from "@inertiajs/vue3";
 import Selector from "@/Components/Selector.vue";
 import {__} from "@/trans.js";
+import ClanBanner from "@/Components/ClanBanner.vue";
 
 const {locale, selectors} = usePage().props;
 const currentClan = defineModel({required: true});
 
 const clanEntities = selectors.current?.clanEntitySelector?.entity;
-
 </script>
 
 <template>
     <Modal :show="currentClan != null" closeable>
         <div class="py-6 px-8">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <span class="text-2xl text-white" v-html="addColors(currentClan.color_tag)"></span>
-                    <CheckIcon v-if="currentClan.verified" class="ml-2 w-4 h-4 text-darkside-400"/>
+            <div class="flex">
+                <ClanBanner :clan="currentClan" class="mr-4" />
+                <div class="w-full">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-2xl text-white" v-html="addColors(currentClan.color_tag)"></span>
+                            <CheckIcon v-if="currentClan.verified" class="ml-2 w-4 h-4 text-darkside-400"/>
+                        </div>
+
+                        <XMarkIcon class="h-6 w-6 cursor-pointer text-darkside-400"
+                                   @click="visitViaQuery(route('leaderboard.index'), [{name: 'clanTag', value: null}], ['queryClan'])"/>
+                    </div>
+
+                    <div class="text-gray-400 text-xl">{{ currentClan.name }}</div>
                 </div>
-
-                <XMarkIcon class="h-6 w-6 cursor-pointer text-darkside-400"
-                           @click="visitViaQuery(route('leaderboard.index'), [{name: 'clanTag', value: null}], ['queryClan'])"/>
             </div>
-
-            <div class="text-gray-400 text-xl">{{ currentClan.name }}</div>
             <div class="flex my-2 gap-2 text-gray-300 font-semibold">
                 <div class="flex items-center">
                     <CalendarDaysIcon class="w-5 h-5 text-darkside-400 mr-1"/>

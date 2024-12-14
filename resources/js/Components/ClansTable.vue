@@ -53,7 +53,7 @@ const columns = ['#', 'general.clan.tag', 'general.clan.name', props.currentSort
 </script>
 
 <template>
-    <DataTable :rows="rows" :columns="columns"/>
+    <DataTable v-if="clans.length > 0" :rows="rows" :columns="columns" />
 </template>
 
 <style scoped>

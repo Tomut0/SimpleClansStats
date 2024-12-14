@@ -92,7 +92,7 @@ class Clan extends Model
 
     public static function data(): Collection
     {
-        return Clan::all(['id', 'tag', 'color_tag', 'name', 'description', 'balance', 'founded', 'verified', 'packed_allies', 'packed_rivals'])
+        return Clan::all(['id', 'tag', 'color_tag', 'name', 'description', 'balance', 'founded', 'verified', 'packed_allies', 'packed_rivals', 'banner'])
             ->map(function (Clan $clan) {
                 $clan->members = $clan->countMembers();
                 $clan->kdr = $clan->kdr();
