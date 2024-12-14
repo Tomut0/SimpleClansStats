@@ -15,5 +15,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [LeaderboardController::class, 'index'])->name('dashboard');
+Route::get('/', [LeaderboardController::class, 'index'])->name('leaderboard.index');
 Route::post('/locale', [TranslationController::class, "update"])->name("locale.update");

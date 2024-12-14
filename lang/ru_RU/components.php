@@ -20,6 +20,9 @@ return [
         'weekly' => "Неделя",
         'monthly' => "Месяц"
     ],
+    'clanmodal' => [
+        'entity_not_found' => ':entity не найдены.',
+    ],
     'translator' => [
         'locale_not_found' => "Не удается найти язык с таким названием..."
     ],

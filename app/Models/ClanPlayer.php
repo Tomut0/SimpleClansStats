@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -48,9 +49,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ClanPlayer extends Model
 {
+    use HasFactory;
+
     protected $connection = 'simpleclans';
-    protected $table = 'sc_players';
-    public $timestamps = 'false';
+
+    public $timestamps = false;
+
+    public function getTable(): string
+    {
+        return config('scstats.db_prefix', 'sc_') . 'players';
+    }
 
     public function clan(): BelongsTo
     {
@@ -65,9 +73,14 @@ class ClanPlayer extends Model
 
         $kills = ($civilian + $rival + $neutral);
 
-        $deaths = $this->deaths == 0 ? 1 : $this->deaths;
+        // after SC 2.15.1
+        if (isset($this->ally_kills)) {
+            $ally = $this->ally_kills * config('scstats.killWeight.ally');
+            $kills += $ally;
+        }
+
+        $deaths = $this->deaths ?: 1;
 
         return $kills / $deaths;
     }
-
 }

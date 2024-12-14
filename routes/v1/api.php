@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TranslationController;
@@ -26,3 +27,7 @@ Route::get('/search/language/{query}', [SearchController::class, 'language'])->n
 Route::get('/locales/status', [TranslationController::class, 'localizationMap'])->name('locales.status');
 
 Route::get('/clans', [LeaderboardController::class, 'index']);
+
+Route::prefix('images')->name('images.')->group(function () {
+    Route::get('/', [ImageController::class, 'index'])->name('index');
+});

@@ -13,7 +13,7 @@ let flags = ref(), sortedFlags = ref(new Proxy({}, {}));
 // Lazy loading languages
 watch(showPopup, async (value) => {
     if (value && !flags.value) {
-        const localesPromise = await axios.get(route("locales.status"));
+        const localesPromise = await axios.get(route("v1:locales.status"));
         flags.value = localesPromise.data;
         sortedFlags.value = flags.value;
     }

@@ -1,10 +1,10 @@
 <script setup>
 
 import ExpandedButton from "@/Components/ExpandedButton.vue";
-import {router, usePage} from "@inertiajs/vue3";
+import {usePage} from "@inertiajs/vue3";
 import {computed, ref} from "vue";
 import {__} from "@/trans.js";
-import {bakeIcon, queryValue} from "@/helpers.js";
+import {bakeIcon, queryValue, visitViaQuery} from "@/helpers.js";
 
 const props = defineProps({
     items: {
@@ -15,8 +15,15 @@ const props = defineProps({
         type: String,
         default: '/'
     },
-    query: {
+    selectQuery: {
         type: String,
+        required: true
+    },
+    additionalQuery: {
+        type: Array
+    },
+    only: {
+        type: Array
     },
     canBakeIcons: {
         type: Boolean,
@@ -24,7 +31,7 @@ const props = defineProps({
     }
 });
 
-const selected = ref(queryValue(usePage().url, props.query) ?? Object.keys(props.items)[0]);
+const selected = ref(queryValue(usePage().url, props.selectQuery) ?? Object.keys(props.items)[0]);
 
 const bakeIcons = () => computed(() => {
     return Object.entries(props.items).reduce((acc, value) => {
@@ -39,17 +46,20 @@ if (props.canBakeIcons) {
 }
 
 const select = (shown, selectedItem) => {
+    // avoid click on the same element
+    if (selected.value === selectedItem) {
+        return;
+    }
+
     selected.value = selectedItem;
     if (shown) {
         shown.value = false;
     }
 
-    const currentParams = new URLSearchParams(window.location.search);
-    currentParams.set(props.query, selectedItem);
-
-    router.visit(props.href, {
-        data: currentParams,
-    });
+    visitViaQuery(props.href, [{
+        name: props.selectQuery,
+        value: selectedItem
+    }, props.additionalQuery], props.only);
 };
 
 </script>
@@ -62,7 +72,7 @@ const select = (shown, selectedItem) => {
                         direction="right"
                         class="selector-button"
                         :is-locked="selected === key"
-                        :class="{'!bg-indigo-500': selected === key}">
+                        :class="{'selector-button-selected': selected === key}">
             <template #icon>
                 <component :is="icons[key]" class="w-6 h-6 transition mr-2 hover:text-darkside-500"/>
             </template>
@@ -74,7 +84,7 @@ const select = (shown, selectedItem) => {
                 v-for="(item, key) in items"
                 @click="select(false, key)"
                 class="selector-button"
-                :class="{'!bg-indigo-500': selected === key}">
+                :class="{'selector-button-selected': selected === key}">
 
             {{ __(item.translation) }}
         </button>
@@ -84,6 +94,10 @@ const select = (shown, selectedItem) => {
 <style scoped>
 .selector-button {
     @apply px-4 py-2 text-white inline-flex bg-darkside-900
+}
+
+.selector-button-selected {
+    @apply bg-indigo-500
 }
 
 .selector-button:first-child {

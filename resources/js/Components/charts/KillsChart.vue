@@ -3,7 +3,7 @@
 import {onMounted} from "vue";
 import {Chart} from "chart.js/auto";
 import ChartWrapper from "@/Components/charts/ChartWrapper.vue";
-import {__} from "../../trans.js";
+import {__} from "@/trans.js";
 
 const props = defineProps({
     statistics: {

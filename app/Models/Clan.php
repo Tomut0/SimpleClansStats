@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * App\Models\Clan
@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float|null $fee_value
  * @property string $ranks
  * @property-read Collection<int, \App\Models\ClanPlayer> $members
- * @property-read int|null $members_count
  * @method static \Database\Factories\ClanFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Clan newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Clan newQuery()
@@ -60,12 +59,26 @@ class Clan extends Model
     use HasFactory;
 
     protected $connection = 'simpleclans';
-    protected $table = 'sc_clans';
+
     public $timestamps = false;
+
+    protected $fillable = [
+        'balance'
+    ];
 
     public function members(): HasMany
     {
         return $this->hasMany(ClanPlayer::class, 'tag', 'tag');
+    }
+
+    public function allies(): Collection
+    {
+        return $this->whereIn('tag', explode('|', $this->packed_allies))->get();
+    }
+
+    public function rivals(): Collection
+    {
+        return $this->whereIn('tag', explode('|', $this->packed_rivals))->get();
     }
 
     public function countMembers(): int
@@ -82,12 +95,18 @@ class Clan extends Model
 
     public static function data(): Collection
     {
-        return Clan::all(['id', 'tag', 'color_tag', 'name', 'balance', 'founded', 'verified'])->map(function (Clan $clan) {
-            $clan->members = $clan->countMembers();
-            $clan->kdr = $clan->kdr();
-            $clan->formatted_founded = Carbon::parse($clan->founded / 1000)->format('Y-m-d');
+        return Clan::all(['id', 'tag', 'color_tag', 'name', 'description', 'balance', 'founded', 'verified', 'packed_allies', 'packed_rivals', 'banner'])
+            ->map(function (Clan $clan) {
+                $clan->members_count = $clan->countMembers();
+                $clan->kdr = $clan->kdr();
+                $clan->formatted_founded = Carbon::parse($clan->founded / 1000)->format('Y-m-d');
 
-            return $clan;
-        });
+                return $clan;
+            });
+    }
+
+    function getTable(): string
+    {
+        return config('scstats.db_prefix', 'sc_') . 'clans';
     }
 }

@@ -30,3 +30,15 @@ docker compose ps
 ```
 
 Browse to `http://{ip_or_domain_name}:8000` after started.
+# Building locally
+1. Clone from master branch or download from [release](https://github.com/Tomut0/SimpleClansStats/releases) page.
+2. **Only if you know what you do**: 
+make sure your BuildKit cache is empty and volumes are clear:
+```shell
+docker builder prune -af
+docker compose -f .\docker\Dockerfile down -v
+```
+3. Then from the project's root:
+```shell
+docker compose -f .\docker\Dockerfile up -d --build --force-recreate
+```
