@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Artisan;
 
 class Kernel extends ConsoleKernel
 {
@@ -14,7 +15,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('scstats:collect-monthly')->weekly();
         $schedule->command('scstats:collect-weekly')->daily();
-        $schedule->command('scstats:collect-daily')->hourly();
+        $schedule->command('scstats:collect-daily')->hourly()->after(fn() => Artisan::call('scstats:update-demo'));
     }
 
     /**
