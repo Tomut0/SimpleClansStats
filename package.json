@@ -23,7 +23,7 @@
     },
     "dependencies": {
         "@heroicons/vue": "^2.1.5",
-        "@vueuse/motion": "^2.2.5",
+        "@vueuse/motion": "^2.2.6",
         "chart.js": "^4.4.5",
         "chartjs-adapter-moment": "^1.0.1",
         "flag-icons": "^6.9.2",
