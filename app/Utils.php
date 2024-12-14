@@ -4,6 +4,7 @@ namespace App;
 
 use App\Enums\Period;
 use App\Models\Clan;
+use Error;
 use Illuminate\Support\Facades\Cache;
 
 class Utils
@@ -34,5 +35,14 @@ class Utils
         ];
 
         Cache::put($period->name, $old, $old['ttl']);
+    }
+
+    public static function resolveEnum(string $enumClass, ?string $key, $default): mixed
+    {
+        try {
+            return constant("{$enumClass}::" . ucfirst($key ?? ""));
+        } catch (Error $ignored) {
+            return $default;
+        }
     }
 }

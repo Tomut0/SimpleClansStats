@@ -1,6 +1,14 @@
 services:
   scstats:
     image: minat0/scstats:latest
+    # Uncomment to build locally
+    #
+    # build:
+    #  context: ..
+    #  dockerfile: "./docker/Dockerfile"
+    #  args:
+    #    IMAGE: "scstats"
+    #    VERSION: "latest"
     container_name: "SCStats"
     depends_on:
       - db

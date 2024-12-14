@@ -2,10 +2,13 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumPackable;
 use Exception;
 
 enum Period: int
 {
+    use EnumPackable;
+
     case Daily = 1;
     case Weekly = 7;
     case Monthly = 30;
@@ -33,17 +36,5 @@ enum Period: int
             ],
             default => throw new Exception("Unknown period type"),
         };
-    }
-
-
-    public static function packed(): array
-    {
-        try {
-            return array_merge(Period::Daily->value(), Period::Weekly->value(), Period::Monthly->value());
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-        }
-
-        return [];
     }
 }

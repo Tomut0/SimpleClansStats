@@ -1,5 +1,5 @@
 import {defineAsyncComponent} from "vue";
-import {usePage} from "@inertiajs/vue3";
+import {router, usePage} from "@inertiajs/vue3";
 
 function debounce(func, delay) {
     let timerId;
@@ -28,18 +28,39 @@ function queryValue(url, key) {
     return params.get(key);
 }
 
+function visitViaQuery(href, queries = [], only = []) {
+    const currentParams = new URLSearchParams(window.location.search);
+
+    for (const query of queries) {
+        if (query && query.name) {
+            if (!query.value) {
+                currentParams.delete(query.name);
+                continue;
+            }
+
+            currentParams.set(query.name, query.value);
+        }
+    }
+
+    router.visit(href, {
+        data: currentParams,
+        preserveScroll: true,
+        only: only
+    });
+}
+
 function formatNumber(num, locale = 'en-US', style = 'currency', minimumFractionDigits = 0, maximumFractionDigits = 1) {
     locale = locale.replace('_', '-');
 
     const currency = usePage().props.currency.code || 'USD';
     const symbol = usePage().props.currency.symbol || '$';
 
-    const formatter = new Intl.NumberFormat(locale, {
+    const formatter = new Intl.NumberFormat([locale, "en-US"], {
         style: style,
         notation: 'compact',
         currency: currency,
         currencyDisplay: "narrowSymbol",
-        compactDisplay: 'short' ,
+        compactDisplay: 'short',
         minimumFractionDigits: minimumFractionDigits,
         maximumFractionDigits: maximumFractionDigits
     });
@@ -95,7 +116,14 @@ function omit(obj, keys) {
 
 function getKeyAndValue(obj) {
     const key = Object.keys(obj)[0];
-    return { key: key, value: obj[key] };
+    return {key: key, value: obj[key]};
 }
 
-export {debounce, queryValue, formatNumber, bakeIcon, getKeyAndValue, chartUnit};
+function createRow(elements, onclick) {
+    return {
+        elements: elements || [],   // default to an empty array if no value is provided
+        onclick: onclick || function() {} // default to a no-op function if none is provided
+    };
+}
+
+export {debounce, queryValue, formatNumber, bakeIcon, getKeyAndValue, chartUnit, visitViaQuery, createRow};

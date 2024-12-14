@@ -8,7 +8,13 @@ return [
         'verified' => "Verified",
         'unverified' => "Unverified",
         'members' => "Members",
+        'allies' => "Allies",
+        'rivals' => "Rivals",
         'kdr' => "KDR",
+    ],
+    'clanplayer' => [
+        'leader' => "Leader",
+        'member' => "Member",
     ],
     'kills' => [
         'last' => "Last Kills",

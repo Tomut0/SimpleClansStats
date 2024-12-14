@@ -20,6 +20,9 @@ return [
         'weekly' => "Weekly",
         'monthly' => "Monthly"
     ],
+    'clanmodal' => [
+        'entity_not_found' => ':entity not found.',
+    ],
     'translator' => [
         'locale_not_found' => "Can't find the language with this name..."
     ],

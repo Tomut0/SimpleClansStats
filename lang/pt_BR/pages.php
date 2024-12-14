@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'dashboard' => 'Painel de Controle'
+    'leaderboard' => 'Tabela de classificação'
 ];

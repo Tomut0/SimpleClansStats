@@ -8,7 +8,13 @@ return [
         'verified' => "Подтвержденный",
         'unverified' => "Не подтвержденный",
         'members' => "Участники",
+        'allies' => "Союзники",
+        'rivals' => "Соперники",
         'kdr' => "KDR",
+    ],
+    'clanplayer' => [
+        'leader' => "Leader",
+        'member' => "Member",
     ],
     'kills' => [
         'last' => "Последние убийства",

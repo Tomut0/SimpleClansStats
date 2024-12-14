@@ -1,5 +1,81 @@
 import '../css/minecraft-colors.css';
 
+function toHex(color) {
+    switch (color.toLowerCase()) {
+        case 'white':
+            return '#FFFFFF'
+        case 'orange':
+            return '#D87F33'
+        case 'magenta':
+            return '#B24CD8'
+        case 'light_blue':
+            return '#6699D8'
+        case 'yellow':
+            return '#E5E533'
+        case 'lime':
+            return '#7FCC19'
+        case 'pink':
+            return '#F27FA5'
+        case 'gray':
+            return '#4C4C4C'
+        case 'light_gray':
+            return '#999999'
+        case 'cyan':
+            return '#4C7F99'
+        case 'purple':
+            return '#7F3FB2'
+        case 'red':
+            return '#993333'
+        case 'green':
+            return '#667F33'
+        case 'blue':
+            return '#334CB2'
+        case 'brown':
+            return '#664C33'
+        default:
+            return '#000000'
+    }
+}
+
+function translateColorCode(colorCode) {
+    switch (colorCode.toLowerCase()) {
+        case '0':
+            return '#000000'; // black
+        case '1':
+            return '#0000AA'; // dark blue
+        case '2':
+            return '#00AA00'; // dark green
+        case '3':
+            return '#00AAAA'; // dark aqua
+        case '4':
+            return '#AA0000'; // dark red
+        case '5':
+            return '#AA00AA'; // dark purple
+        case '6':
+            return '#FFAA00'; // gold
+        case '7':
+            return '#AAAAAA'; // gray
+        case '8':
+            return '#555555'; // dark gray
+        case '9':
+            return '#5555FF'; // blue
+        case 'a':
+            return '#55FF55'; // green
+        case 'b':
+            return '#55FFFF'; // aqua
+        case 'c':
+            return '#FF5555'; // red
+        case 'd':
+            return '#FF55FF'; // pink
+        case 'e':
+            return '#FFFF55'; // yellow
+        case 'f':
+            return '#FFFFFF'; // white
+        default:
+            return '#FFFFFF'; // unrecognized color code
+    }
+}
+
 /**
  * Get the text color based on the background color.
  *
@@ -32,6 +108,10 @@ function getColorByBgColor(bgColor, lightColor = '#FFF', darkColor = '#000') {
  * @returns {string}
  */
 function extractFirstColor(coloredTag) {
+    if (!coloredTag) {
+        return '#FFFFFF';
+    }
+
     // Regular expression to find Minecraft color codes
     const colorCodeRegex = /(&#[0-9A-Fa-f]{6}|§[0-9A-Fa-f])/;
     const match = coloredTag.match(colorCodeRegex);
@@ -43,42 +123,7 @@ function extractFirstColor(coloredTag) {
             return colorCode.slice(1); // Remove the initial '§'
         } else {
             // If the color is in Minecraft code format
-            switch (colorCode[1].toLowerCase()) {
-                case '0':
-                    return '#000000'; // black
-                case '1':
-                    return '#0000AA'; // dark blue
-                case '2':
-                    return '#00AA00'; // dark green
-                case '3':
-                    return '#00AAAA'; // dark aqua
-                case '4':
-                    return '#AA0000'; // dark red
-                case '5':
-                    return '#AA00AA'; // dark purple
-                case '6':
-                    return '#FFAA00'; // gold
-                case '7':
-                    return '#AAAAAA'; // gray
-                case '8':
-                    return '#555555'; // dark gray
-                case '9':
-                    return '#5555FF'; // blue
-                case 'a':
-                    return '#55FF55'; // green
-                case 'b':
-                    return '#55FFFF'; // aqua
-                case 'c':
-                    return '#FF5555'; // red
-                case 'd':
-                    return '#FF55FF'; // pink
-                case 'e':
-                    return '#FFFF55'; // yellow
-                case 'f':
-                    return '#FFFFFF'; // white
-                default:
-                    return '#FFFFFF'; // unrecognized color code
-            }
+            return translateColorCode(colorCode[1]);
         }
     }
     return '#FFFFFF'; // if no matches
@@ -149,4 +194,4 @@ function addColors(string) {
     return colored + "</span>";
 }
 
-export {getColorByBgColor, extractFirstColor, addColors};
+export {getColorByBgColor, extractFirstColor, addColors, translateColorCode, toHex};

@@ -37,8 +37,12 @@ class Kill extends Model
     use HasFactory;
 
     protected $connection = 'simpleclans';
-    protected $table = 'sc_kills';
     public $timestamps = false;
+
+    function getTable(): string
+    {
+        return config('scstats.db_prefix', 'sc_') . 'kills';
+    }
 
     public function scopeCivilian($query)
     {

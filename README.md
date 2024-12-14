@@ -5,6 +5,8 @@
 Laravel based web interface for SimpleClans plugin. \
 Laravel version: 10.15.0
 
+Watch demo of the application [here](https://scstats.roinujnosde.me/).
+
 * Laravel [documentation](https://laravel.com/docs)
 * SimpleClans [plugin](https://github.com/RoinujNosde/SimpleClans)
 ---
@@ -22,7 +24,7 @@ Laravel version: 10.15.0
 * **Comprehensive Statistics**: \
   Displays latest kills between clan players, provides detailed kills by types, shows average clan balance, \
   and tracks the total number of clans on the server.
-* **Extremely Fast and Configurable:**: \
+* **Extremely Fast and Configurable**: \
   Built with Vue and Inertia for a smooth and dynamic user experience. \
   Easily deployable with Docker, allowing you to quickly set up and configure your environment to meet your needs.
 * **Adaptive Design**: \
