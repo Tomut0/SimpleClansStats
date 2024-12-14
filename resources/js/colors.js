@@ -108,6 +108,10 @@ function getColorByBgColor(bgColor, lightColor = '#FFF', darkColor = '#000') {
  * @returns {string}
  */
 function extractFirstColor(coloredTag) {
+    if (!coloredTag) {
+        return '#FFFFFF';
+    }
+
     // Regular expression to find Minecraft color codes
     const colorCodeRegex = /(&#[0-9A-Fa-f]{6}|§[0-9A-Fa-f])/;
     const match = coloredTag.match(colorCodeRegex);

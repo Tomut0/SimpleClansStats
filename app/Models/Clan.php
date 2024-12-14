@@ -30,7 +30,6 @@ use Illuminate\Support\Collection;
  * @property float|null $fee_value
  * @property string $ranks
  * @property-read Collection<int, \App\Models\ClanPlayer> $members
- * @property-read int|null $members_count
  * @method static \Database\Factories\ClanFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Clan newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Clan newQuery()
@@ -63,6 +62,10 @@ class Clan extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'balance'
+    ];
+
     public function members(): HasMany
     {
         return $this->hasMany(ClanPlayer::class, 'tag', 'tag');
@@ -94,7 +97,7 @@ class Clan extends Model
     {
         return Clan::all(['id', 'tag', 'color_tag', 'name', 'description', 'balance', 'founded', 'verified', 'packed_allies', 'packed_rivals', 'banner'])
             ->map(function (Clan $clan) {
-                $clan->members = $clan->countMembers();
+                $clan->members_count = $clan->countMembers();
                 $clan->kdr = $clan->kdr();
                 $clan->formatted_founded = Carbon::parse($clan->founded / 1000)->format('Y-m-d');
 

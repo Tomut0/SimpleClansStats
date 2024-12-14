@@ -11,7 +11,7 @@ enum SortTypes
 
     case Kdr;
     case Balance;
-    case Members;
+    case Members_count;
 
     /**
      * @throws Exception if sort type is undefined
@@ -31,8 +31,8 @@ enum SortTypes
                     "translation" => "general.clan.balance"
                 ],
             ],
-            SortTypes::Members => [
-                "members" => [
+            SortTypes::Members_count => [
+                "members_count" => [
                     "icon" => "UserGroupIcon",
                     "translation" => "general.clan.members"
                 ],
