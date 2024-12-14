@@ -60,7 +60,7 @@ class Clan extends Model
     use HasFactory;
 
     protected $connection = 'simpleclans';
-    protected $table = 'sc_clans';
+
     public $timestamps = false;
 
     public function members(): HasMany
@@ -100,5 +100,10 @@ class Clan extends Model
 
                 return $clan;
             });
+    }
+
+    function getTable(): string
+    {
+        return config('scstats.db_prefix', 'sc_') . 'clans';
     }
 }

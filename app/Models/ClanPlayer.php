@@ -49,8 +49,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ClanPlayer extends Model
 {
     protected $connection = 'simpleclans';
-    protected $table = 'sc_players';
     public $timestamps = 'false';
+
+    public function getTable(): string
+    {
+        return config('scstats.db_prefix', 'sc_') . 'players';
+    }
 
     public function clan(): BelongsTo
     {
@@ -75,5 +79,4 @@ class ClanPlayer extends Model
 
         return $kills / $deaths;
     }
-
 }

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'db_prefix' => env('SC_DATABASE_PREFIX', 'sc_'),
     'killWeight' => [
         'rival' => env('SC_KILL_WEIGHT_RIVAL', 2.0),
         'neutral' => env('SC_KILL_WEIGHT_NEUTRAL', 1.0),
