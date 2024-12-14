@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -48,8 +49,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ClanPlayer extends Model
 {
+    use HasFactory;
+
     protected $connection = 'simpleclans';
-    public $timestamps = 'false';
+
+    public $timestamps = false;
 
     public function getTable(): string
     {
@@ -75,7 +79,7 @@ class ClanPlayer extends Model
             $kills += $ally;
         }
 
-        $deaths = $this->deaths == 0 ? 1 : $this->deaths;
+        $deaths = $this->deaths ?: 1;
 
         return $kills / $deaths;
     }
