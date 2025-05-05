@@ -10,6 +10,9 @@ Watch demo of the application [here](https://scstats.roinujnosde.me/).
 * Laravel [documentation](https://laravel.com/docs)
 * SimpleClans [plugin](https://github.com/RoinujNosde/SimpleClans)
 ---
+## ⚠️ No longer actively maintained
+The maintainer can't continue actively maintaining this project for one year.
+Try come back later.
 ## Features
 
 * **Powerful Leaderboard**: \
