@@ -1,0 +1,10 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"dashboard": {
+		"title": "Панель управления",
+		"footer": {
+			"copyright": "© 2023 - 2026. Все права защищены",
+			"author": "Сделано с <3 от Minat0_"
+		}
+	}
+}

@@ -1,0 +1,10 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"dashboard": {
+		"title": "Dashboard",
+		"footer": {
+			"copyright": "© 2023 - 2026. All Rights Reserved",
+			"author": "Made with <3 by Minat0_"
+		}
+	}
+}

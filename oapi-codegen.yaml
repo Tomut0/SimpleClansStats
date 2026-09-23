@@ -1,0 +1,5 @@
+package: presentation
+output: internal/presentation/http.gen.go
+generate:
+  chi-server: true
+  models: true
