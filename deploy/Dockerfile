@@ -39,7 +39,7 @@ COPY sql/migrations /app/migrations
 # SQLite database
 VOLUME ["/data"]
 
-ENV DATABASE_PATH=/data/simpleclansstats.db
+ENV DATABASE_PATH=/data/simpleclansstats.sqlite
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

@@ -4,20 +4,16 @@
 	import { page } from '$app/state';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import './layout.css';
-	import config from '$lib/config';
 	import { ModeWatcher } from 'mode-watcher';
+	import { APP_NAME } from '$app/env/public';
 
 	let { children } = $props();
 </script>
 
 <svelte:head>
 	<title>
-		{page.data.title ? `${page.data.title} - ${config.appName}` : config.appName}
+		{page.data.title ? `${page.data.title} - ${APP_NAME}` : APP_NAME}
 	</title>
-
-	<link rel="icon" href="legacy-icon.ico" sizes="any" />
-	<link rel="icon" type="image/svg+xml" href="modern-icon.svg" />
-	<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 </svelte:head>
 
 <ModeWatcher />

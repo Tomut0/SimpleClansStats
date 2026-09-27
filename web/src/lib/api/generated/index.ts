@@ -50,6 +50,10 @@ export type {
 	GetPlayerByIdErrors,
 	GetPlayerByIdResponse,
 	GetPlayerByIdResponses,
+	GetServersData,
+	GetServersErrors,
+	GetServersResponse,
+	GetServersResponses,
 	GetStatsOverviewData,
 	GetStatsOverviewResponse,
 	GetStatsOverviewResponses,
@@ -82,6 +86,7 @@ export type {
 	SearchData,
 	SearchResponse,
 	SearchResponses,
+	Server,
 	Settings,
 	TimeSeries,
 	UpdateAdminSettingsData,
@@ -94,5 +99,6 @@ export type {
 	UpdateDashboardLayoutErrors,
 	UpdateDashboardLayoutResponse,
 	UpdateDashboardLayoutResponses,
+	User,
 	WidgetConfig
 } from './types.gen';

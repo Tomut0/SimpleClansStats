@@ -5,7 +5,7 @@ set -e
 echo "Running database migrations..."
 
 goose \
-    -dir /app/migrations \
+    -dir /app/sql/migrations \
     sqlite3 "$DATABASE_PATH" \
     up
 

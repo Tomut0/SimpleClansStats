@@ -5,4 +5,4 @@ sql:
     schema: "sql/migrations"
     gen:
       go:
-        out: "internal/infrastructure/persistence/sqlite/generated"
+        out: "internal/infrastructure/persistence/sqlite/"

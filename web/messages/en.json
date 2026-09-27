@@ -2,9 +2,40 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"dashboard": {
 		"title": "Dashboard",
+		"description": "Statistics and activity of clans and players on the server",
+		"serverSelector": {
+			"placeholder": "Select a server",
+			"label": "Servers"
+		},
+		"searchBar": {
+			"placeholder": "Search..."
+		},
 		"footer": {
 			"copyright": "© 2023 - 2026. All Rights Reserved",
 			"author": "Made with <3 by Minat0_"
+		}
+	},
+	"auth": {
+		"login": "Login",
+		"logout": "Logout",
+		"backToHome": "Back to Home",
+		"loginForm": {
+			"description": "Enter your email below to login to your account",
+			"email": "Email",
+			"emailPlaceholder": "example@example.com",
+			"password": "Password",
+			"forgotPassword": "Forgot your password?",
+			"loginWithGoogle": "Login with Google",
+			"noAccount": "Don't have an account?",
+			"signUp": "Sign up"
+		}
+	},
+	"server": {
+		"online": "Online",
+		"offline": "Offline",
+		"empty": {
+			"title": "No servers",
+			"description": "No servers found. Please add a server to get started."
 		}
 	}
 }

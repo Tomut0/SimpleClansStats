@@ -22,12 +22,15 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
+			experimental: {
+				explicitEnvironmentVariables: true
+			},
 			adapter: adapter({
 				fallback: '200.html'
-      }),
-      version: {
-        name: `${process.env.npm_package_version} (${gitHash})`,
-			},
+			}),
+			version: {
+				name: `${process.env.npm_package_version} (${gitHash})`
+			}
 		}),
 
 		paraglideVitePlugin({

@@ -1,0 +1,1059 @@
+openapi: 3.2.0
+
+info:
+  title: SimpleClansStats - OpenAPI 3.2
+  description: |-
+    API for the SimpleClansStats web application.
+    Three consumers: SvelteKit (browser), the relay plugin (Java), and the admin UI.
+    Authentication: session cookie for users, API key for ingest.
+  contact:
+    email: minat0_@outlook.com
+  license:
+    name: Apache 2.0
+    url: https://github.com/Tomut0/SimpleClansStats/blob/master/LICENSE
+  version: 2.0.0
+
+externalDocs:
+  description: Find out more about SimpleClansStats
+  url: https://swagger.io
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+  - url: https://stats.example.com/api/v1
+    description: Production
+
+tags:
+  - name: auth
+  - name: clans
+  - name: players
+  - name: search
+  - name: stats
+  - name: events
+  - name: ingest
+  - name: admin
+  - name: meta
+
+paths:
+  # ===========================================================================
+  # Auth
+  # ===========================================================================
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Log in with email/password
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string, format: password }
+            example:
+              username: player1
+              password: hunter2
+      responses:
+        "200":
+          description: Login successful; sets the session cookie
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Player" }
+              example:
+                id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                uuid: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                name: Player1
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Log out
+      operationId: logout
+      responses:
+        "204":
+          description: Session destroyed
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Current user
+      operationId: getCurrentUser
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: ["object", "null"]
+                    properties:
+                      id: { type: string }
+                      email: { type: string }
+                      role: { type: string, enum: [admin, user, guest] }
+              example:
+                user:
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  email: player1@example.com
+                  role: user
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  # ===========================================================================
+  # Clans
+  # ===========================================================================
+  /clans:
+    get:
+      tags: [clans]
+      summary: List clans
+      operationId: getClans
+      security: []
+      parameters:
+        - {
+            name: sort,
+            in: query,
+            schema:
+              { type: string, enum: [name, kdr, members, balance, createdAt] },
+          }
+        - {
+            name: order,
+            in: query,
+            schema: { type: string, enum: [asc, desc], default: desc },
+          }
+        - { name: verified, in: query, schema: { type: boolean } }
+        - { name: permanent, in: query, schema: { type: boolean } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ClanSummary" }
+              example:
+                - id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  tag: KoL
+                  name: Knights of Liberty
+                  verified: true
+                  permanent: true
+                  memberCount: 12
+                  kdr: 1.42
+                  colorHex: "#ff4444"
+                - id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+                  tag: RED
+                  name: Redstone Lords
+                  verified: false
+                  permanent: false
+                  memberCount: 5
+                  kdr: 0.87
+                  colorHex: null
+
+  /clans/{tag}:
+    get:
+      tags: [clans]
+      summary: Get a clan by tag
+      operationId: getClanByTag
+      parameters:
+        - name: tag
+          description: The tag of the clan
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Clan" }
+              example:
+                id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                tag: KoL
+                name: Knights of Liberty
+                verified: true
+                permanent: true
+                memberCount: 2
+                kdr: 1.42
+                colorHex: "#ff4444"
+                description: A friendly clan of knights.
+                balance: 1000
+                createdAt: "2024-01-01T00:00:00Z"
+                counts:
+                  leaders: 1
+                  members: 2
+                  allies: 1
+                  enemies: 1
+                members:
+                  - playerId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    name: Player1
+                    role: leader
+                    verified: true
+                    joinedAt: "2024-01-01T00:00:00Z"
+                    kills: 42
+                    deaths: 10
+                    kdr: 4.2
+                  - playerId: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+                    name: Player2
+                    role: member
+                    verified: false
+                    joinedAt: "2024-02-15T00:00:00Z"
+                    kills: 20
+                    deaths: 15
+                    kdr: 1.33
+                allies:
+                  - id: 9b2e6679-7425-40de-944b-e07fc1f90ae8
+                    tag: ALY
+                    name: Allied Guard
+                    verified: true
+                    permanent: false
+                    memberCount: 8
+                    kdr: 1.1
+                    colorHex: "#44ff88"
+                enemies:
+                  - id: 5f2e6679-7425-40de-944b-e07fc1f90ae9
+                    tag: ENM
+                    name: Enemy Horde
+                    verified: false
+                    permanent: false
+                    memberCount: 6
+                    kdr: 0.95
+                    colorHex: "#ff8844"
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /clans/{tag}/history:
+    get:
+      tags: [clans]
+      summary: Clan metric history (for charts)
+      operationId: getClanHistory
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema: { type: string }
+        - name: metric
+          in: query
+          required: true
+          schema: { type: string, enum: [kills, deaths, kdr, balance, members] }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+        - name: bucket
+          in: query
+          schema: { type: string, enum: [hour, day, week], default: day }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TimeSeries" }
+              example:
+                metric: kdr
+                points:
+                  - ts: "2024-06-01T00:00:00Z"
+                    value: 1.1
+                  - ts: "2024-06-02T00:00:00Z"
+                    value: 1.25
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===========================================================================
+  # Players
+  # ===========================================================================
+  /players/{playerId}:
+    get:
+      tags: [players]
+      summary: Get a player by ID (for the modal)
+      operationId: getPlayerById
+      parameters:
+        - {
+            name: playerId,
+            in: path,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Player" }
+              example:
+                id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                uuid: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                name: Player1
+                verified: true
+                firstSeen: "2023-05-01T00:00:00Z"
+                lastSeen: "2024-06-10T12:00:00Z"
+                kills: 42
+                deaths: 10
+                kdr: 4.2
+                currentClan:
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  tag: KoL
+                  name: Knights of Liberty
+                  verified: true
+                  permanent: true
+                  memberCount: 12
+                  kdr: 1.42
+                  colorHex: "#ff4444"
+                currentRole: leader
+                joinedCurrentClanAt: "2024-01-01T00:00:00Z"
+                pastClans:
+                  - clan:
+                      id: 9b2e6679-7425-40de-944b-e07fc1f90ae8
+                      tag: OLD
+                      name: Old Guard
+                      verified: false
+                      permanent: false
+                      memberCount: 3
+                      kdr: 0.9
+                      colorHex: null
+                    role: member
+                    joinedAt: "2023-05-01T00:00:00Z"
+                    leftAt: "2023-12-31T00:00:00Z"
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===========================================================================
+  # Search
+  # ===========================================================================
+  /search:
+    get:
+      tags: [search]
+      summary: Search clans and players
+      operationId: search
+      parameters:
+        - {
+            name: q,
+            in: query,
+            required: true,
+            schema: { type: string, minLength: 1 },
+          }
+        - {
+            name: type,
+            in: query,
+            schema: { type: string, enum: [all, clan, player], default: all },
+          }
+        - {
+            name: limit,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 50, default: 10 },
+          }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clans:
+                    type: array
+                    items: { $ref: "#/components/schemas/ClanSummary" }
+                  players:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        name: { type: string }
+                        clan: { $ref: "#/components/schemas/ClanSummary" }
+              example:
+                clans:
+                  - id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    tag: KoL
+                    name: Knights of Liberty
+                    verified: true
+                    permanent: true
+                    memberCount: 12
+                    kdr: 1.42
+                    colorHex: "#ff4444"
+                players:
+                  - id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+                    name: Player2
+                    clan:
+                      id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                      tag: KoL
+                      name: Knights of Liberty
+                      verified: true
+                      permanent: true
+                      memberCount: 12
+                      kdr: 1.42
+                      colorHex: "#ff4444"
+
+  # ===========================================================================
+  # Stats / Dashboard
+  # ===========================================================================
+  /stats/overview:
+    get:
+      tags: [stats]
+      summary: Summary figures for the dashboard
+      operationId: getStatsOverview
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clans: { type: integer }
+                  players: { type: integer }
+                  lastIngestAt:
+                    { type: [string, "null"], format: date-time }
+                  ingestStale: { type: boolean }
+              example:
+                clans: 24
+                players: 318
+                lastIngestAt: "2024-06-10T12:00:00Z"
+                ingestStale: false
+
+  /stats/top-clans:
+    get:
+      tags: [stats]
+      summary: Top clans by metric
+      operationId: getTopClans
+      parameters:
+        - name: metric
+          in: query
+          schema:
+            { type: string, enum: [kdr, members, balance, kills], default: kdr }
+        - {
+            name: limit,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 50, default: 10 },
+          }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ClanSummary" }
+              example:
+                - id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  tag: KoL
+                  name: Knights of Liberty
+                  verified: true
+                  permanent: true
+                  memberCount: 12
+                  kdr: 1.42
+                  colorHex: "#ff4444"
+
+  /stats/top-players:
+    get:
+      tags: [stats]
+      summary: Top players
+      operationId: getTopPlayers
+      parameters:
+        - name: metric
+          in: query
+          schema: { type: string, enum: [kills, kdr], default: kills }
+        - {
+            name: limit,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 50, default: 10 },
+          }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string, format: uuid }
+                    name: { type: string }
+                    kills: { type: integer }
+                    deaths: { type: integer }
+                    kdr: { type: number, format: float }
+                    clan: { $ref: "#/components/schemas/ClanSummary" }
+              example:
+                - id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  name: Player1
+                  kills: 42
+                  deaths: 10
+                  kdr: 4.2
+                  clan:
+                    id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    tag: KoL
+                    name: Knights of Liberty
+                    verified: true
+                    permanent: true
+                    memberCount: 12
+                    kdr: 1.42
+                    colorHex: "#ff4444"
+
+  # ===========================================================================
+  # Events (SSE)
+  # ===========================================================================
+  /events:
+    get:
+      tags: [events]
+      summary: Server-Sent Events stream
+      operationId: getEvents
+      description: |-
+        The client subscribes via EventSource. The server sends events of type
+        `clan.updated`, `player.updated`, `metrics.snapshot`, etc. Optionally
+        filter by type via the query string.
+      parameters:
+        - name: types
+          in: query
+          description: Comma-separated list of event types
+          schema: { type: string, example: "clan.updated,player.updated" }
+      responses:
+        "200":
+          description: Event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |-
+                  SSE format:
+                  event: clan.updated
+                  data: {"type":"clan.updated","ts":"...","payload":{...}}
+                example: |-
+                  event: clan.updated
+                  data: {"type":"clan.updated","ts":"2024-06-10T12:00:00Z","payload":{"clanId":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}}
+
+  # ===========================================================================
+  # Servers
+  # ===========================================================================
+  /servers:
+    get:
+      tags: [servers]
+      summary: List all servers
+      operationId: getServers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Server"
+              examples:
+                empty:
+                  summary: No servers
+                  value: []
+                with_servers:
+                  summary: With servers
+                  value:
+                    - id: "6ecad9ed-b8b1-49f2-8443-3b73203ba033"
+                      displayName: "My Server"
+                      disabled: false
+                      online: true
+        "500":
+          description: Internal Server Error
+  
+  # ===========================================================================
+  # Ingest (from the relay plugin)
+  # ===========================================================================
+  /ingest:
+    post:
+      tags: [ingest]
+      summary: Ingest a snapshot from the relay plugin
+      operationId: ingest
+      description: Ingests a snapshot of clan/player state from the game into the system
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IngestSnapshot" }
+            example:
+              takenAt: "2024-06-10T12:00:00Z"
+              serverId: survival-1
+              clans:
+                - externalId: "101"
+                  tag: KoL
+                  name: Knights of Liberty
+                  description: A friendly clan of knights.
+                  balance: 1000
+                  verified: true
+                  permanent: true
+                  memberExternalIds: ["201", "202"]
+              players:
+                - uuid: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  name: Player1
+                  clanExternalId: "101"
+                  role: leader
+                  kills: 42
+                  deaths: 10
+                  verified: true
+                  joinedClanAt: "2024-01-01T00:00:00Z"
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IngestResult" }
+              example:
+                accepted: true
+                processedAt: "2024-06-10T12:00:01Z"
+                warnings: []
+        "400":
+          description: Invalid snapshot
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: invalid_snapshot
+                message: "clans[0].tag is required"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /ingest/status:
+    get:
+      tags: [ingest]
+      summary: Status of the last ingest
+      operationId: getIngestStatus
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lastIngestAt:
+                    { type: [string, "null"], format: date-time }
+                  stale: { type: boolean }
+                  serverId: { type: [string, "null"] }
+                  intervalSeconds: { type: integer }
+              example:
+                lastIngestAt: "2024-06-10T12:00:00Z"
+                stale: false
+                serverId: survival-1
+                intervalSeconds: 30
+
+  # ===========================================================================
+  # Admin
+  # ===========================================================================
+  /admin/settings:
+    get:
+      tags: [admin]
+      summary: Get settings
+      operationId: getAdminSettings
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Settings" }
+              example:
+                defaultLocale: en
+                enabledLocales: [en, ru]
+                searchProvider: builtin
+                realtimeEnabled: true
+                ingest:
+                  intervalSeconds: 30
+                  staleAfterSeconds: 120
+        "403": { $ref: "#/components/responses/Forbidden" }
+    put:
+      tags: [admin]
+      summary: Update settings
+      operationId: updateAdminSettings
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Settings" }
+            example:
+              defaultLocale: en
+              enabledLocales: [en, ru]
+              searchProvider: builtin
+              realtimeEnabled: true
+              ingest:
+                intervalSeconds: 30
+                staleAfterSeconds: 120
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Settings" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/dashboard/layout:
+    get:
+      tags: [admin]
+      summary: Get current dashboard layout
+      operationId: getDashboardLayout
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardLayout" }
+              example:
+                widgets:
+                  - id: w1
+                    type: top-clans
+                    title: Top Clans
+                    position: { x: 0, y: 0, w: 4, h: 3 }
+                    options: {}
+                  - id: w2
+                    type: kdr-chart
+                    title: Global KDR
+                    position: { x: 4, y: 0, w: 4, h: 3 }
+                    options: { metric: kdr }
+    put:
+      tags: [admin]
+      summary: Save dashboard layout
+      operationId: updateDashboardLayout
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DashboardLayout" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardLayout" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ===========================================================================
+  # Meta (i18n, health)
+  # ===========================================================================
+  /meta/health:
+    get:
+      tags: [meta]
+      summary: Health check
+      operationId: getHealth
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [ok, degraded] }
+                  version: { type: string }
+              example:
+                status: ok
+                version: 2.0.0
+
+  /meta/i18n/{locale}:
+    get:
+      tags: [meta]
+      summary: Locale messages
+      operationId: getI18nMessages
+      security: []
+      parameters:
+        - {
+            name: locale,
+            in: path,
+            required: true,
+            schema: { type: string, example: en },
+          }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              example:
+                clan.tag: Tag
+                clan.name: Name
+                player.kills: Kills
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: scs_session
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, example: not_found }
+        message: { type: string, example: Clan not found }
+        details:
+          type: object
+          additionalProperties: true
+
+    ClanSummary:
+      type: object
+      required: [id, tag, name]
+      properties:
+        id: { type: string, format: uuid }
+        tag: { type: string, maxLength: 8, example: KoL }
+        name: { type: string, example: Knights of Liberty }
+        verified: { type: boolean }
+        permanent: { type: boolean }
+        memberCount: { type: integer }
+        kdr: { type: number, format: float, example: 1.42 }
+        colorHex: { type: [string, "null"], example: "#ff4444" }
+
+    Server:
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        displayName: { type: string, example: "My Server" }
+        online: { type: boolean, example: true }
+        disabled: { type: boolean, example: false }
+        
+    Clan:
+      allOf:
+        - $ref: "#/components/schemas/ClanSummary"
+        - type: object
+          required: [createdAt, counts]
+          properties:
+            description: { type: [string, "null"] }
+            balance: { type: number, format: double }
+            createdAt: { type: string, format: date-time }
+            counts:
+              type: object
+              required: [leaders, members, allies, enemies]
+              properties:
+                leaders: { type: integer }
+                members: { type: integer }
+                allies: { type: integer }
+                enemies: { type: integer }
+            members:
+              type: array
+              items: { $ref: "#/components/schemas/ClanMember" }
+            allies:
+              type: array
+              items: { $ref: "#/components/schemas/ClanSummary" }
+            enemies:
+              type: array
+              items: { $ref: "#/components/schemas/ClanSummary" }
+
+    ClanMember:
+      type: object
+      required: [playerId, name, role, joinedAt]
+      properties:
+        playerId: { type: string, format: uuid }
+        name: { type: string }
+        role:
+          type: string
+          enum: [leader, member, recruit, ally] # TODO: confirm full SimpleClans role set
+        verified: { type: boolean }
+        joinedAt: { type: string, format: date-time }
+        kills: { type: integer }
+        deaths: { type: integer }
+        kdr: { type: number, format: float }
+
+    Player:
+      type: object
+      required: [id, name, uuid]
+      properties:
+        id: { type: string, format: uuid }
+        uuid: { type: string, format: uuid, description: Minecraft UUID }
+        name: { type: string }
+        verified: { type: boolean }
+        firstSeen: { type: string, format: date-time }
+        lastSeen: { type: string, format: date-time }
+        kills: { type: integer }
+        deaths: { type: integer }
+        kdr: { type: number, format: float }
+        currentClan: { $ref: "#/components/schemas/ClanSummary" }
+        currentRole:
+          type: [string, "null"]
+          enum: [leader, member, recruit, null]
+        joinedCurrentClanAt: { type: [string, "null"], format: date-time }
+        pastClans:
+          type: array
+          items:
+            type: object
+            required: [clan, joinedAt, leftAt]
+            properties:
+              clan: { $ref: "#/components/schemas/ClanSummary" }
+              role: { type: string }
+              joinedAt: { type: string, format: date-time }
+              leftAt: { type: string, format: date-time }
+
+    MetricPoint:
+      type: object
+      required: [ts, value]
+      properties:
+        ts: { type: string, format: date-time }
+        value: { type: number, format: double }
+
+    TimeSeries:
+      type: object
+      required: [metric, points]
+      properties:
+        metric:
+          type: string
+          enum: [kills, deaths, kdr, balance, members]
+        points:
+          type: array
+          items: { $ref: "#/components/schemas/MetricPoint" }
+
+    WidgetConfig:
+      type: object
+      required: [id, type, position]
+      properties:
+        id: { type: string }
+        type:
+          type: string
+          enum: [top-clans, top-players, kdr-chart, activity-feed, custom]
+        title: { type: [string, "null"] }
+        position:
+          type: object
+          required: [x, y, w, h]
+          properties:
+            x: { type: integer }
+            y: { type: integer }
+            w: { type: integer }
+            h: { type: integer }
+        options:
+          type: object
+          additionalProperties: true
+
+    DashboardLayout:
+      type: object
+      required: [widgets]
+      properties:
+        widgets:
+          type: array
+          items: { $ref: "#/components/schemas/WidgetConfig" }
+
+    Settings:
+      type: object
+      properties:
+        defaultLocale: { type: string, example: en }
+        enabledLocales: { type: array, items: { type: string } }
+        searchProvider: { type: string, enum: [builtin, meilisearch, algolia] }
+        realtimeEnabled: { type: boolean }
+        ingest:
+          type: object
+          properties:
+            intervalSeconds: { type: integer, minimum: 5 }
+            staleAfterSeconds: { type: integer, minimum: 30 }
+
+    RealtimeEvent:
+      type: object
+      required: [type, ts, payload]
+      properties:
+        type:
+          type: string
+          enum:
+            - clan.updated
+            - clan.created
+            - clan.deleted
+            - player.updated
+            - metrics.snapshot
+            - ingest.status
+        ts: { type: string, format: date-time }
+        payload: { type: object, additionalProperties: true }
+
+    IngestSnapshot:
+      type: object
+      required: [takenAt, clans, players]
+      properties:
+        takenAt: { type: string, format: date-time }
+        serverId: { type: string, description: Minecraft server identifier }
+        clans:
+          type: array
+          items: { $ref: "#/components/schemas/IngestClan" }
+        players:
+          type: array
+          items: { $ref: "#/components/schemas/IngestPlayer" }
+
+    IngestClan:
+      type: object
+      required: [externalId, tag, name]
+      properties:
+        externalId: { type: string, description: Clan ID in SimpleClans }
+        tag: { type: string }
+        name: { type: string }
+        description: { type: [string, "null"] }
+        balance: { type: number }
+        verified: { type: boolean }
+        permanent: { type: boolean }
+        memberExternalIds:
+          type: array
+          items: { type: string }
+
+    IngestPlayer:
+      type: object
+      required: [uuid, name]
+      properties:
+        uuid: { type: string, format: uuid }
+        name: { type: string }
+        clanExternalId: { type: [string, "null"] }
+        role: { type: [string, "null"] }
+        kills: { type: integer }
+        deaths: { type: integer }
+        verified: { type: boolean }
+        joinedClanAt: { type: [string, "null"], format: date-time }
+
+    IngestResult:
+      type: object
+      required: [accepted, processedAt]
+      properties:
+        accepted: { type: boolean }
+        processedAt: { type: string, format: date-time }
+        warnings:
+          type: array
+          items: { type: string }
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        role: { type: string, enum: [admin, user, guest] }
+        
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Not authenticated
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }

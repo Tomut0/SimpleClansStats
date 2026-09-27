@@ -2,9 +2,39 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"dashboard": {
 		"title": "Панель управления",
+		"description": "Статистика и активность кланов и игроков на сервере",
+		"serverSelector": {
+			"placeholder": "Выберите сервер"
+		},
+		"searchBar": {
+			"placeholder": "Поиск..."
+		},
 		"footer": {
 			"copyright": "© 2023 - 2026. Все права защищены",
 			"author": "Сделано с <3 от Minat0_"
+		}
+	},
+	"auth": {
+		"login": "Вход",
+		"logout": "Выход",
+		"backToHome": "Вернуться на главную страницу",
+		"loginForm": {
+			"description": "Введите свой email ниже для входа в свой аккаунт",
+			"email": "Email",
+			"emailPlaceholder": "example@example.com",
+			"password": "Пароль",
+			"forgotPassword": "Забыли свой пароль?",
+			"loginWithGoogle": "Войти с Google",
+			"noAccount": "Нет аккаунта?",
+			"signUp": "Зарегистрироваться"
+		}
+	},
+	"server": {
+		"online": "Онлайн",
+		"offline": "Оффлайн",
+		"empty": {
+			"title": "Нет серверов",
+			"description": "Нет серверов найден. Пожалуйста, добавьте сервер для начала."
 		}
 	}
 }

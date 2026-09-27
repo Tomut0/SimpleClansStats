@@ -23,6 +23,13 @@ export type ClanSummary = {
 	colorHex?: string | null;
 };
 
+export type Server = {
+	id: string;
+	displayName: string;
+	online?: boolean;
+	disabled?: boolean;
+};
+
 export type Clan = ClanSummary & {
 	description?: string | null;
 	balance?: number;
@@ -168,6 +175,12 @@ export type IngestResult = {
 	warnings?: Array<string>;
 };
 
+export type User = {
+	id?: string;
+	email?: string;
+	role?: 'admin' | 'user' | 'guest';
+};
+
 export type LoginData = {
 	body: {
 		email: string;
@@ -237,7 +250,6 @@ export type GetCurrentUserResponses = {
 	 * OK
 	 */
 	200: {
-		authenticated?: boolean;
 		user?: {
 			id?: string;
 			email?: string;
@@ -473,6 +485,29 @@ export type GetEventsResponses = {
 };
 
 export type GetEventsResponse = GetEventsResponses[keyof GetEventsResponses];
+
+export type GetServersData = {
+	body?: never;
+	path?: never;
+	query?: never;
+	url: '/servers';
+};
+
+export type GetServersErrors = {
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
+export type GetServersResponses = {
+	/**
+	 * OK
+	 */
+	200: Array<Server>;
+};
+
+export type GetServersResponse = GetServersResponses[keyof GetServersResponses];
 
 export type IngestData = {
 	body: IngestSnapshot;
