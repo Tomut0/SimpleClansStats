@@ -20,6 +20,32 @@ tags:
   - name: auth
 
 paths:
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Current user
+      operationId: getCurrentUser
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: ["object", "null"]
+                    properties:
+                      username: { type: string }
+                      role: { type: string, enum: [admin, member, guest] }
+              example:
+                user:
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  email: player1@example.com
+                  role: user
+        "401": { $ref: "#/components/responses/Unauthorized" }
   /auth/login:
     post:
       tags: [auth]
@@ -54,6 +80,36 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
+  # ===========================================================================
+  # Servers
+  # ===========================================================================
+  /servers:
+    get:
+      tags: [servers]
+      summary: List all servers
+      operationId: getServers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Server"
+              examples:
+                empty:
+                  summary: No servers
+                  value: []
+                with_servers:
+                  summary: With servers
+                  value:
+                    - id: "6ecad9ed-b8b1-49f2-8443-3b73203ba033"
+                      displayName: "My Server"
+                      disabled: false
+                      online: true
+        "500":
+          description: Internal Server Error
 
 components:
   schemas:
@@ -72,22 +128,26 @@ components:
     User:
       type: object
       required:
-        - id
-        - email
+        - username
         - role
       properties:
-        id:
+        username:
           type: string
-          format: uuid
-        email:
-          type: string
-          format: email
         role:
           type: string
           enum:
             - admin
-            - user
+            - member
             - guest
+
+    Server:
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        displayName: { type: string, example: "My Server" }
+        online: { type: boolean, example: true }
+        disabled: { type: boolean, example: false }
 
     Error:
       type: object

@@ -15,8 +15,11 @@ function mockHeaders(scenario: MockScenario): HeadersInit {
 
 export const load: PageLoad = async ({ fetch }) => {
 	const [userResponse, serversResponse] = await Promise.all([
-		fetch(`${API_URL}/auth/me`),
-		fetch(`${API_URL}/servers`, { headers: mockHeaders('empty') })
+		fetch(`${API_URL}/auth/me`, { credentials: 'include' }),
+		fetch(`${API_URL}/servers`, {
+			credentials: 'include',
+			headers: mockHeaders('empty')
+		})
 	]);
 
 	if (!serversResponse.ok) {

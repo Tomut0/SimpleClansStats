@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"github.com/joho/godotenv"
-	"os"
-	"log"
 	"github.com/Tomut0/SimpleClansStats/internal/application"
+	"github.com/joho/godotenv"
+	"log"
+	"os"
 )
 
 func UpdateEnvVar(key, value string) error {
@@ -34,7 +34,7 @@ func CreateAdminIfNotExists(authService *application.AuthService) error {
 		}
 
 		credentials := map[string]string{"ADMIN_USERNAME": "admin", "ADMIN_PASSWORD_HASH": hash}
-		
+
 		if err := UpdateEnvVars(credentials); err != nil {
 			return err
 		}

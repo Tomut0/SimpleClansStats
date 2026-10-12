@@ -10,9 +10,11 @@ tool (
 
 require (
 	github.com/go-chi/chi/v5 v5.3.2
+	github.com/go-chi/cors v1.2.2
 	github.com/go-playground/validator/v10 v10.30.5
 	github.com/joho/godotenv v1.5.1
 	github.com/oapi-codegen/runtime v1.7.0
+	golang.org/x/crypto v0.57.0
 )
 
 require (
@@ -108,7 +110,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/exp v0.0.0-20260824195058-e88cd73687aa // indirect
 	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/net v0.58.0 // indirect

@@ -1,36 +1,36 @@
 package security
 
 import (
-	"golang.org/x/crypto/argon2"
-	"strings"
+	"crypto/rand"
+	"crypto/subtle"
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"encoding/base64"
-	"crypto/subtle"
-	"crypto/rand"
+	"golang.org/x/crypto/argon2"
+	"strings"
 )
 
 type ArgonHasher struct {
-	timeCost     uint32
-	memoryCost   uint32
-	parallelism  uint8
+	timeCost    uint32
+	memoryCost  uint32
+	parallelism uint8
 }
 
 func NewArgonHasher(timeCost, memoryCost uint32, parallelism uint8) *ArgonHasher {
 	return &ArgonHasher{
-		timeCost:     timeCost,
-		memoryCost:   memoryCost,
-		parallelism:  parallelism,
+		timeCost:    timeCost,
+		memoryCost:  memoryCost,
+		parallelism: parallelism,
 	}
 }
 
-func generateSalt(n int) ([]byte) {
+func generateSalt(n int) []byte {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 	if err != nil {
 		panic(err)
 	}
-	
+
 	return b
 }
 

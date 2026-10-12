@@ -13,9 +13,9 @@ import (
 
 // Defines values for UserRole.
 const (
-	UserRoleAdmin UserRole = "admin"
-	UserRoleGuest UserRole = "guest"
-	UserRoleUser  UserRole = "user"
+	UserRoleAdmin  UserRole = "admin"
+	UserRoleGuest  UserRole = "guest"
+	UserRoleMember UserRole = "member"
 )
 
 // Valid indicates whether the value is a known member of the UserRole enum.
@@ -25,7 +25,28 @@ func (e UserRole) Valid() bool {
 		return true
 	case UserRoleGuest:
 		return true
-	case UserRoleUser:
+	case UserRoleMember:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for GetCurrentUser200JSONResponseBodyUserRole.
+const (
+	GetCurrentUser200JSONResponseBodyUserRoleAdmin  GetCurrentUser200JSONResponseBodyUserRole = "admin"
+	GetCurrentUser200JSONResponseBodyUserRoleGuest  GetCurrentUser200JSONResponseBodyUserRole = "guest"
+	GetCurrentUser200JSONResponseBodyUserRoleMember GetCurrentUser200JSONResponseBodyUserRole = "member"
+)
+
+// Valid indicates whether the value is a known member of the GetCurrentUser200JSONResponseBodyUserRole enum.
+func (e GetCurrentUser200JSONResponseBodyUserRole) Valid() bool {
+	switch e {
+	case GetCurrentUser200JSONResponseBodyUserRoleAdmin:
+		return true
+	case GetCurrentUser200JSONResponseBodyUserRoleGuest:
+		return true
+	case GetCurrentUser200JSONResponseBodyUserRoleMember:
 		return true
 	default:
 		return false
@@ -45,11 +66,18 @@ type LoginRequest struct {
 	Username string `json:"username"`
 }
 
+// Server defines model for Server.
+type Server struct {
+	Disabled    *bool              `json:"disabled,omitempty"`
+	DisplayName string             `json:"displayName"`
+	Id          openapi_types.UUID `json:"id"`
+	Online      *bool              `json:"online,omitempty"`
+}
+
 // User defines model for User.
 type User struct {
-	Email openapi_types.Email `json:"email"`
-	Id    openapi_types.UUID  `json:"id"`
-	Role  UserRole            `json:"role"`
+	Role     UserRole `json:"role"`
+	Username string   `json:"username"`
 }
 
 // UserRole defines model for User.Role.
@@ -61,6 +89,9 @@ type TooManyRequests = Error
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = Error
 
+// GetCurrentUser200JSONResponseBodyUserRole defines parameters for GetCurrentUser.
+type GetCurrentUser200JSONResponseBodyUserRole string
+
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = LoginRequest
 
@@ -69,6 +100,12 @@ type ServerInterface interface {
 	// Login Log in with email/password
 	// (POST /auth/login)
 	Login(w http.ResponseWriter, r *http.Request)
+	// GetCurrentUser Current user
+	// (GET /auth/me)
+	GetCurrentUser(w http.ResponseWriter, r *http.Request)
+	// GetServers List all servers
+	// (GET /servers)
+	GetServers(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -78,6 +115,18 @@ type Unimplemented struct{}
 // Login Log in with email/password
 // (POST /auth/login)
 func (_ Unimplemented) Login(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetCurrentUser Current user
+// (GET /auth/me)
+func (_ Unimplemented) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetServers List all servers
+// (GET /servers)
+func (_ Unimplemented) GetServers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -95,6 +144,34 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Login(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetCurrentUser operation middleware
+func (siw *ServerInterfaceWrapper) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCurrentUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetServers operation middleware
+func (siw *ServerInterfaceWrapper) GetServers(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetServers(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -218,7 +295,13 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/auth/me", wrapper.GetCurrentUser)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/login", wrapper.Login)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/servers", wrapper.GetServers)
 	})
 
 	return r

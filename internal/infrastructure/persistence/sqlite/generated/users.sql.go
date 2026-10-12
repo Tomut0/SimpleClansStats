@@ -3,18 +3,39 @@
 //   sqlc v1.31.1
 // source: users.sql
 
-package sqlite
+package generated
 
 import (
 	"context"
 )
 
-const getUserById = `-- name: GetUserById :one
-SELECT id, email, username, password_hash, role, email_verified_at, created_at, updated_at FROM users WHERE id = ?
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (email, username, password_hash, role) VALUES (?, ?, ?, ?)
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
+type CreateUserParams struct {
+	Email        string
+	Username     string
+	PasswordHash string
+	Role         string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.ExecContext(ctx, createUser,
+		arg.Email,
+		arg.Username,
+		arg.PasswordHash,
+		arg.Role,
+	)
+	return err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, email, username, password_hash, role, email_verified_at, created_at, updated_at FROM users WHERE email = ?
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,

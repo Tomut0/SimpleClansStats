@@ -1,0 +1,10 @@
+package ports
+
+import "github.com/Tomut0/SimpleClansStats/internal/domain"
+
+type UserRepository interface {
+	All() ([]domain.User, error)
+	Create(email, username, password string, role domain.Role) error
+	GetUserByEmail(email string) (domain.User, error)
+	GetUserCredentialsByEmail(email string) (domain.UserCredentials, error)
+}
