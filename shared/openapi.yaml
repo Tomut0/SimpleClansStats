@@ -33,17 +33,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user:
-                    type: ["object", "null"]
-                    properties:
-                      username: { type: string }
-                      role: { type: string, enum: [admin, member, guest] }
+                $ref: '#/components/schemas/User'
               example:
                 user:
-                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                   email: player1@example.com
+                  username: player1
                   role: user
         "401": { $ref: "#/components/responses/Unauthorized" }
   /auth/login:
@@ -59,7 +53,7 @@ paths:
             schema:
               $ref: "#/components/schemas/LoginRequest"
             example:
-              username: player1
+              email: player1@example.com
               password: hunter2
       responses:
         "200":
@@ -78,11 +72,76 @@ paths:
                 role: user
         "401":
           $ref: "#/components/responses/Unauthorized"
-        "429":
-          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          description: Internal Server Error
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Log out
+      operationId: logout
+      responses:
+        "204":
+          description: Session destroyed
+        "500":
+          description: Internal Server Error
+          
   # ===========================================================================
   # Servers
   # ===========================================================================
+  /settings:
+    get:
+      summary: Get application settings
+      operationId: getAppSettings
+      responses:
+        "200":
+          description: Application settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AppSettings" }
+        "500": { description: Internal Server Error }
+    post:
+      summary: Save application settings as an administrator
+      operationId: updateAppSettings
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/AppSettingsFields"
+                - type: object
+                  properties:
+                    logo: { type: string, format: binary, description: Optional PNG or JPEG up to 1 MiB }
+      responses:
+        "200":
+          description: Saved application settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AppSettings" }
+        "400": { description: Invalid settings or logo }
+        "401": { description: Login required }
+        "403": { description: Administrator required }
+        "413": { description: Request too large }
+        "500": { description: Internal Server Error }
+
+  /settings/logo:
+    get:
+      summary: Get the application logo
+      operationId: getAppLogo
+      responses:
+        "200":
+          description: Application logo
+          content:
+            image/png:
+              schema: { type: string, format: binary }
+            image/jpeg:
+              schema: { type: string, format: binary }
+        "404": { description: No custom logo }
+        "500": { description: Internal Server Error }
+
+
   /servers:
     get:
       tags: [servers]
@@ -112,15 +171,41 @@ paths:
           description: Internal Server Error
 
 components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
   schemas:
+    AppSettingsFields:
+      type: object
+      required: [appName, removeAuthor, timeZone, dateFormat, timeFormat]
+      properties:
+        appName: { type: string, maxLength: 100 }
+        removeAuthor: { type: boolean }
+        timeZone: { type: string, example: Europe/Moscow }
+        dateFormat: { type: string, enum: [DD.MM.YYYY, YYYY-MM-DD, MM/DD/YYYY] }
+        timeFormat: { type: string, enum: [24h, 12h] }
+
+    AppSettings:
+      allOf:
+        - $ref: "#/components/schemas/AppSettingsFields"
+        - type: object
+          required: [logoVersion]
+          properties:
+            logoVersion: { type: integer, format: int64, minimum: 0 }
+
+
+
     LoginRequest:
       type: object
       required:
-        - username
+        - email
         - password
       properties:
-        username:
+        email:
           type: string
+          format: email
         password:
           type: string
           format: password
@@ -128,9 +213,12 @@ components:
     User:
       type: object
       required:
+        - email
         - username
         - role
       properties:
+        email:
+          type: string
         username:
           type: string
         role:
@@ -142,13 +230,13 @@ components:
 
     Server:
       type: object
-      required: [id, displayName]
+      required: [id, displayName, disabled, online]
       properties:
         id: { type: string, format: uuid }
         displayName: { type: string, example: "My Server" }
         online: { type: boolean, example: true }
         disabled: { type: boolean, example: false }
-
+  
     Error:
       type: object
       required:

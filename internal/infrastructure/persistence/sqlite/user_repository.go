@@ -55,6 +55,15 @@ func (r *sqliteUserRepository) Create(email, username, password string, role dom
 	return r.queries.CreateUser(context.Background(), params)
 }
 
+func (r *sqliteUserRepository) GetUserById(id int64) (domain.User, error) {
+	user, err := r.queries.GetUserById(context.Background(), id)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return toDomainUser(user)
+}
+
 func (r *sqliteUserRepository) GetUserByEmail(email string) (domain.User, error) {
 	user, err := r.getUserByEmail(email)
 	if err != nil {
@@ -116,12 +125,12 @@ func toDomainUser(u generated.User) (domain.User, error) {
 		emailVerifiedAt = &t
 	}
 
-	return domain.User{
-		ID:              u.ID,
-		Username:        u.Username,
-		Role:            domain.Role(u.Role),
-		EmailVerifiedAt: emailVerifiedAt,
-		CreatedAt:       createdAt,
-		UpdatedAt:       updatedAt,
-	}, nil
+	return *domain.NewUser(
+    	u.Email,
+    	u.Username,
+    	domain.Role(u.Role),
+    	emailVerifiedAt,
+    	createdAt,
+    	updatedAt,
+	), nil
 }

@@ -4,54 +4,186 @@
 package presentation
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for AppSettingsDateFormat.
+const (
+	AppSettingsDateFormatDDMMYYYY AppSettingsDateFormat = "DD.MM.YYYY"
+	AppSettingsDateFormatMMDDYYYY AppSettingsDateFormat = "MM/DD/YYYY"
+	AppSettingsDateFormatYYYYMMDD AppSettingsDateFormat = "YYYY-MM-DD"
+)
+
+// Valid indicates whether the value is a known member of the AppSettingsDateFormat enum.
+func (e AppSettingsDateFormat) Valid() bool {
+	switch e {
+	case AppSettingsDateFormatDDMMYYYY:
+		return true
+	case AppSettingsDateFormatMMDDYYYY:
+		return true
+	case AppSettingsDateFormatYYYYMMDD:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AppSettingsTimeFormat.
+const (
+	AppSettingsTimeFormatN12h AppSettingsTimeFormat = "12h"
+	AppSettingsTimeFormatN24h AppSettingsTimeFormat = "24h"
+)
+
+// Valid indicates whether the value is a known member of the AppSettingsTimeFormat enum.
+func (e AppSettingsTimeFormat) Valid() bool {
+	switch e {
+	case AppSettingsTimeFormatN12h:
+		return true
+	case AppSettingsTimeFormatN24h:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AppSettingsFieldsDateFormat.
+const (
+	AppSettingsFieldsDateFormatDDMMYYYY AppSettingsFieldsDateFormat = "DD.MM.YYYY"
+	AppSettingsFieldsDateFormatMMDDYYYY AppSettingsFieldsDateFormat = "MM/DD/YYYY"
+	AppSettingsFieldsDateFormatYYYYMMDD AppSettingsFieldsDateFormat = "YYYY-MM-DD"
+)
+
+// Valid indicates whether the value is a known member of the AppSettingsFieldsDateFormat enum.
+func (e AppSettingsFieldsDateFormat) Valid() bool {
+	switch e {
+	case AppSettingsFieldsDateFormatDDMMYYYY:
+		return true
+	case AppSettingsFieldsDateFormatMMDDYYYY:
+		return true
+	case AppSettingsFieldsDateFormatYYYYMMDD:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AppSettingsFieldsTimeFormat.
+const (
+	AppSettingsFieldsTimeFormatN12h AppSettingsFieldsTimeFormat = "12h"
+	AppSettingsFieldsTimeFormatN24h AppSettingsFieldsTimeFormat = "24h"
+)
+
+// Valid indicates whether the value is a known member of the AppSettingsFieldsTimeFormat enum.
+func (e AppSettingsFieldsTimeFormat) Valid() bool {
+	switch e {
+	case AppSettingsFieldsTimeFormatN12h:
+		return true
+	case AppSettingsFieldsTimeFormatN24h:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for UserRole.
 const (
-	UserRoleAdmin  UserRole = "admin"
-	UserRoleGuest  UserRole = "guest"
-	UserRoleMember UserRole = "member"
+	Admin  UserRole = "admin"
+	Guest  UserRole = "guest"
+	Member UserRole = "member"
 )
 
 // Valid indicates whether the value is a known member of the UserRole enum.
 func (e UserRole) Valid() bool {
 	switch e {
-	case UserRoleAdmin:
+	case Admin:
 		return true
-	case UserRoleGuest:
+	case Guest:
 		return true
-	case UserRoleMember:
+	case Member:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for GetCurrentUser200JSONResponseBodyUserRole.
+// Defines values for UpdateAppSettingsMultipartBodyDateFormat.
 const (
-	GetCurrentUser200JSONResponseBodyUserRoleAdmin  GetCurrentUser200JSONResponseBodyUserRole = "admin"
-	GetCurrentUser200JSONResponseBodyUserRoleGuest  GetCurrentUser200JSONResponseBodyUserRole = "guest"
-	GetCurrentUser200JSONResponseBodyUserRoleMember GetCurrentUser200JSONResponseBodyUserRole = "member"
+	UpdateAppSettingsMultipartBodyDateFormatDDMMYYYY UpdateAppSettingsMultipartBodyDateFormat = "DD.MM.YYYY"
+	UpdateAppSettingsMultipartBodyDateFormatMMDDYYYY UpdateAppSettingsMultipartBodyDateFormat = "MM/DD/YYYY"
+	UpdateAppSettingsMultipartBodyDateFormatYYYYMMDD UpdateAppSettingsMultipartBodyDateFormat = "YYYY-MM-DD"
 )
 
-// Valid indicates whether the value is a known member of the GetCurrentUser200JSONResponseBodyUserRole enum.
-func (e GetCurrentUser200JSONResponseBodyUserRole) Valid() bool {
+// Valid indicates whether the value is a known member of the UpdateAppSettingsMultipartBodyDateFormat enum.
+func (e UpdateAppSettingsMultipartBodyDateFormat) Valid() bool {
 	switch e {
-	case GetCurrentUser200JSONResponseBodyUserRoleAdmin:
+	case UpdateAppSettingsMultipartBodyDateFormatDDMMYYYY:
 		return true
-	case GetCurrentUser200JSONResponseBodyUserRoleGuest:
+	case UpdateAppSettingsMultipartBodyDateFormatMMDDYYYY:
 		return true
-	case GetCurrentUser200JSONResponseBodyUserRoleMember:
+	case UpdateAppSettingsMultipartBodyDateFormatYYYYMMDD:
 		return true
 	default:
 		return false
 	}
 }
+
+// Defines values for UpdateAppSettingsMultipartBodyTimeFormat.
+const (
+	UpdateAppSettingsMultipartBodyTimeFormatN12h UpdateAppSettingsMultipartBodyTimeFormat = "12h"
+	UpdateAppSettingsMultipartBodyTimeFormatN24h UpdateAppSettingsMultipartBodyTimeFormat = "24h"
+)
+
+// Valid indicates whether the value is a known member of the UpdateAppSettingsMultipartBodyTimeFormat enum.
+func (e UpdateAppSettingsMultipartBodyTimeFormat) Valid() bool {
+	switch e {
+	case UpdateAppSettingsMultipartBodyTimeFormatN12h:
+		return true
+	case UpdateAppSettingsMultipartBodyTimeFormatN24h:
+		return true
+	default:
+		return false
+	}
+}
+
+// AppSettings defines model for AppSettings.
+type AppSettings struct {
+	AppName      string                `json:"appName"`
+	DateFormat   AppSettingsDateFormat `json:"dateFormat"`
+	LogoVersion  int64                 `json:"logoVersion"`
+	RemoveAuthor bool                  `json:"removeAuthor"`
+	TimeFormat   AppSettingsTimeFormat `json:"timeFormat"`
+	TimeZone     string                `json:"timeZone"`
+}
+
+// AppSettingsDateFormat defines model for AppSettings.DateFormat.
+type AppSettingsDateFormat string
+
+// AppSettingsTimeFormat defines model for AppSettings.TimeFormat.
+type AppSettingsTimeFormat string
+
+// AppSettingsFields defines model for AppSettingsFields.
+type AppSettingsFields struct {
+	AppName      string                      `json:"appName"`
+	DateFormat   AppSettingsFieldsDateFormat `json:"dateFormat"`
+	RemoveAuthor bool                        `json:"removeAuthor"`
+	TimeFormat   AppSettingsFieldsTimeFormat `json:"timeFormat"`
+	TimeZone     string                      `json:"timeZone"`
+}
+
+// AppSettingsFieldsDateFormat defines model for AppSettingsFields.DateFormat.
+type AppSettingsFieldsDateFormat string
+
+// AppSettingsFieldsTimeFormat defines model for AppSettingsFields.TimeFormat.
+type AppSettingsFieldsTimeFormat string
 
 // Error defines model for Error.
 type Error struct {
@@ -62,20 +194,21 @@ type Error struct {
 
 // LoginRequest defines model for LoginRequest.
 type LoginRequest struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
 }
 
 // Server defines model for Server.
 type Server struct {
-	Disabled    *bool              `json:"disabled,omitempty"`
+	Disabled    bool               `json:"disabled"`
 	DisplayName string             `json:"displayName"`
 	Id          openapi_types.UUID `json:"id"`
-	Online      *bool              `json:"online,omitempty"`
+	Online      bool               `json:"online"`
 }
 
 // User defines model for User.
 type User struct {
+	Email    string   `json:"email"`
 	Role     UserRole `json:"role"`
 	Username string   `json:"username"`
 }
@@ -83,29 +216,56 @@ type User struct {
 // UserRole defines model for User.Role.
 type UserRole string
 
-// TooManyRequests defines model for TooManyRequests.
-type TooManyRequests = Error
-
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = Error
 
-// GetCurrentUser200JSONResponseBodyUserRole defines parameters for GetCurrentUser.
-type GetCurrentUser200JSONResponseBodyUserRole string
+// UpdateAppSettingsMultipartBody defines parameters for UpdateAppSettings.
+type UpdateAppSettingsMultipartBody struct {
+	AppName    string                                   `json:"appName"`
+	DateFormat UpdateAppSettingsMultipartBodyDateFormat `json:"dateFormat"`
+
+	// Logo Optional PNG or JPEG up to 1 MiB
+	Logo         *openapi_types.File                      `json:"logo,omitempty"`
+	RemoveAuthor bool                                     `json:"removeAuthor"`
+	TimeFormat   UpdateAppSettingsMultipartBodyTimeFormat `json:"timeFormat"`
+	TimeZone     string                                   `json:"timeZone"`
+}
+
+// UpdateAppSettingsMultipartBodyDateFormat defines parameters for UpdateAppSettings.
+type UpdateAppSettingsMultipartBodyDateFormat string
+
+// UpdateAppSettingsMultipartBodyTimeFormat defines parameters for UpdateAppSettings.
+type UpdateAppSettingsMultipartBodyTimeFormat string
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = LoginRequest
+
+// UpdateAppSettingsMultipartRequestBody defines body for UpdateAppSettings for multipart/form-data ContentType.
+type UpdateAppSettingsMultipartRequestBody UpdateAppSettingsMultipartBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Login Log in with email/password
 	// (POST /auth/login)
 	Login(w http.ResponseWriter, r *http.Request)
+	// Logout Log out
+	// (POST /auth/logout)
+	Logout(w http.ResponseWriter, r *http.Request)
 	// GetCurrentUser Current user
 	// (GET /auth/me)
 	GetCurrentUser(w http.ResponseWriter, r *http.Request)
 	// GetServers List all servers
 	// (GET /servers)
 	GetServers(w http.ResponseWriter, r *http.Request)
+	// GetAppSettings Get application settings
+	// (GET /settings)
+	GetAppSettings(w http.ResponseWriter, r *http.Request)
+	// UpdateAppSettings Save application settings as an administrator
+	// (POST /settings)
+	UpdateAppSettings(w http.ResponseWriter, r *http.Request)
+	// GetAppLogo Get the application logo
+	// (GET /settings/logo)
+	GetAppLogo(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -118,6 +278,12 @@ func (_ Unimplemented) Login(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Logout Log out
+// (POST /auth/logout)
+func (_ Unimplemented) Logout(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // GetCurrentUser Current user
 // (GET /auth/me)
 func (_ Unimplemented) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +293,24 @@ func (_ Unimplemented) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 // GetServers List all servers
 // (GET /servers)
 func (_ Unimplemented) GetServers(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetAppSettings Get application settings
+// (GET /settings)
+func (_ Unimplemented) GetAppSettings(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateAppSettings Save application settings as an administrator
+// (POST /settings)
+func (_ Unimplemented) UpdateAppSettings(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetAppLogo Get the application logo
+// (GET /settings/logo)
+func (_ Unimplemented) GetAppLogo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -144,6 +328,20 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Login(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// Logout operation middleware
+func (siw *ServerInterfaceWrapper) Logout(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.Logout(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -172,6 +370,48 @@ func (siw *ServerInterfaceWrapper) GetServers(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetServers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetAppSettings operation middleware
+func (siw *ServerInterfaceWrapper) GetAppSettings(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAppSettings(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateAppSettings operation middleware
+func (siw *ServerInterfaceWrapper) UpdateAppSettings(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateAppSettings(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetAppLogo operation middleware
+func (siw *ServerInterfaceWrapper) GetAppLogo(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAppLogo(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -301,8 +541,563 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/auth/login", wrapper.Login)
 	})
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/logout", wrapper.Logout)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/settings", wrapper.GetAppSettings)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/settings", wrapper.UpdateAppSettings)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/settings/logo", wrapper.GetAppLogo)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/servers", wrapper.GetServers)
 	})
 
 	return r
+}
+
+type UnauthorizedJSONResponse Error
+
+type LoginRequestObject struct {
+	Body *LoginJSONRequestBody
+}
+
+type LoginResponseObject interface {
+	VisitLoginResponse(w http.ResponseWriter) error
+}
+
+type Login200ResponseHeaders struct {
+	SetCookie *string
+}
+
+type Login200JSONResponse struct {
+	Body    User
+	Headers Login200ResponseHeaders
+}
+
+func (response Login200JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.SetCookie != nil {
+		w.Header().Set("Set-Cookie", fmt.Sprint(*response.Headers.SetCookie))
+	}
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type Login401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response Login401JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type Login500Response struct {
+}
+
+func (response Login500Response) VisitLoginResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type LogoutRequestObject struct {
+}
+
+type LogoutResponseObject interface {
+	VisitLogoutResponse(w http.ResponseWriter) error
+}
+
+type Logout204Response struct {
+}
+
+func (response Logout204Response) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type Logout500Response struct {
+}
+
+func (response Logout500Response) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type GetCurrentUserRequestObject struct {
+}
+
+type GetCurrentUserResponseObject interface {
+	VisitGetCurrentUserResponse(w http.ResponseWriter) error
+}
+
+type GetCurrentUser200JSONResponse User
+
+func (response GetCurrentUser200JSONResponse) VisitGetCurrentUserResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetCurrentUser401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response GetCurrentUser401JSONResponse) VisitGetCurrentUserResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetServersRequestObject struct {
+}
+
+type GetServersResponseObject interface {
+	VisitGetServersResponse(w http.ResponseWriter) error
+}
+
+type GetServers200JSONResponse []Server
+
+func (response GetServers200JSONResponse) VisitGetServersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetServers500Response struct {
+}
+
+func (response GetServers500Response) VisitGetServersResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type GetAppSettingsRequestObject struct {
+}
+
+type GetAppSettingsResponseObject interface {
+	VisitGetAppSettingsResponse(w http.ResponseWriter) error
+}
+
+type GetAppSettings200JSONResponse AppSettings
+
+func (response GetAppSettings200JSONResponse) VisitGetAppSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetAppSettings500Response struct {
+}
+
+func (response GetAppSettings500Response) VisitGetAppSettingsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type UpdateAppSettingsRequestObject struct {
+	Body *multipart.Reader
+}
+
+type UpdateAppSettingsResponseObject interface {
+	VisitUpdateAppSettingsResponse(w http.ResponseWriter) error
+}
+
+type UpdateAppSettings200JSONResponse AppSettings
+
+func (response UpdateAppSettings200JSONResponse) VisitUpdateAppSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateAppSettings400Response struct {
+}
+
+func (response UpdateAppSettings400Response) VisitUpdateAppSettingsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(400)
+	return nil
+}
+
+type UpdateAppSettings401Response struct {
+}
+
+func (response UpdateAppSettings401Response) VisitUpdateAppSettingsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type UpdateAppSettings403Response struct {
+}
+
+func (response UpdateAppSettings403Response) VisitUpdateAppSettingsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
+type UpdateAppSettings413Response struct {
+}
+
+func (response UpdateAppSettings413Response) VisitUpdateAppSettingsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(413)
+	return nil
+}
+
+type UpdateAppSettings500Response struct {
+}
+
+func (response UpdateAppSettings500Response) VisitUpdateAppSettingsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type GetAppLogoRequestObject struct {
+}
+
+type GetAppLogoResponseObject interface {
+	VisitGetAppLogoResponse(w http.ResponseWriter) error
+}
+
+type GetAppLogo200ImagejpegResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response GetAppLogo200ImagejpegResponse) VisitGetAppLogoResponse(w http.ResponseWriter) error {
+
+	w.Header().Set("Content-Type", "image/jpeg")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type GetAppLogo200ImagepngResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response GetAppLogo200ImagepngResponse) VisitGetAppLogoResponse(w http.ResponseWriter) error {
+
+	w.Header().Set("Content-Type", "image/png")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type GetAppLogo404Response struct {
+}
+
+func (response GetAppLogo404Response) VisitGetAppLogoResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type GetAppLogo500Response struct {
+}
+
+func (response GetAppLogo500Response) VisitGetAppLogoResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+// StrictServerInterface represents all server handlers.
+type StrictServerInterface interface {
+	// Login Log in with email/password
+	// (POST /auth/login)
+	Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error)
+	// Logout Log out
+	// (POST /auth/logout)
+	Logout(ctx context.Context, request LogoutRequestObject) (LogoutResponseObject, error)
+	// GetCurrentUser Current user
+	// (GET /auth/me)
+	GetCurrentUser(ctx context.Context, request GetCurrentUserRequestObject) (GetCurrentUserResponseObject, error)
+	// GetServers List all servers
+	// (GET /servers)
+	GetServers(ctx context.Context, request GetServersRequestObject) (GetServersResponseObject, error)
+	// GetAppSettings Get application settings
+	// (GET /settings)
+	GetAppSettings(ctx context.Context, request GetAppSettingsRequestObject) (GetAppSettingsResponseObject, error)
+	// UpdateAppSettings Save application settings as an administrator
+	// (POST /settings)
+	UpdateAppSettings(ctx context.Context, request UpdateAppSettingsRequestObject) (UpdateAppSettingsResponseObject, error)
+	// GetAppLogo Get the application logo
+	// (GET /settings/logo)
+	GetAppLogo(ctx context.Context, request GetAppLogoRequestObject) (GetAppLogoResponseObject, error)
+}
+
+type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
+type StrictMiddlewareFunc func(f StrictHandlerFunc, operationID string) StrictHandlerFunc
+
+type StrictHTTPServerOptions struct {
+	RequestErrorHandlerFunc  func(w http.ResponseWriter, r *http.Request, err error)
+	ResponseErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error)
+}
+
+func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc) ServerInterface {
+	return &strictHandler{ssi: ssi, middlewares: middlewares, options: StrictHTTPServerOptions{
+		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		},
+		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		},
+	}}
+}
+
+func NewStrictHandlerWithOptions(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc, options StrictHTTPServerOptions) ServerInterface {
+	if options.RequestErrorHandlerFunc == nil {
+		options.RequestErrorHandlerFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	}
+	if options.ResponseErrorHandlerFunc == nil {
+		options.ResponseErrorHandlerFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+	return &strictHandler{ssi: ssi, middlewares: middlewares, options: options}
+}
+
+type strictHandler struct {
+	ssi         StrictServerInterface
+	middlewares []StrictMiddlewareFunc
+	options     StrictHTTPServerOptions
+}
+
+// Login operation middleware
+func (sh *strictHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var request LoginRequestObject
+
+	var body LoginJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Login(ctx, request.(LoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "Login")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LoginResponseObject); ok {
+		if err := validResponse.VisitLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// Logout operation middleware
+func (sh *strictHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	var request LogoutRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Logout(ctx, request.(LogoutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "Logout")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LogoutResponseObject); ok {
+		if err := validResponse.VisitLogoutResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetCurrentUser operation middleware
+func (sh *strictHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	var request GetCurrentUserRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCurrentUser(ctx, request.(GetCurrentUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCurrentUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetCurrentUserResponseObject); ok {
+		if err := validResponse.VisitGetCurrentUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetServers operation middleware
+func (sh *strictHandler) GetServers(w http.ResponseWriter, r *http.Request) {
+	var request GetServersRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetServers(ctx, request.(GetServersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetServers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetServersResponseObject); ok {
+		if err := validResponse.VisitGetServersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAppSettings operation middleware
+func (sh *strictHandler) GetAppSettings(w http.ResponseWriter, r *http.Request) {
+	var request GetAppSettingsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAppSettings(ctx, request.(GetAppSettingsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAppSettings")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetAppSettingsResponseObject); ok {
+		if err := validResponse.VisitGetAppSettingsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateAppSettings operation middleware
+func (sh *strictHandler) UpdateAppSettings(w http.ResponseWriter, r *http.Request) {
+	var request UpdateAppSettingsRequestObject
+
+	if reader, err := r.MultipartReader(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode multipart body: %w", err))
+		return
+	} else {
+		request.Body = reader
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateAppSettings(ctx, request.(UpdateAppSettingsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateAppSettings")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateAppSettingsResponseObject); ok {
+		if err := validResponse.VisitUpdateAppSettingsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAppLogo operation middleware
+func (sh *strictHandler) GetAppLogo(w http.ResponseWriter, r *http.Request) {
+	var request GetAppLogoRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAppLogo(ctx, request.(GetAppLogoRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAppLogo")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetAppLogoResponseObject); ok {
+		if err := validResponse.VisitGetAppLogoResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }

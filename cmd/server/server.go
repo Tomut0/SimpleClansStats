@@ -5,16 +5,41 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Tomut0/SimpleClansStats/internal/presentation"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
 )
 
-func RunHttpServer(serverHandler *presentation.ServerHandler) {
+func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager) {
 	r := chi.NewRouter()
 
+	r.Use(func(h http.Handler) http.Handler {
+		settingsUpload := http.MaxBytesHandler(h, presentation.MaxSettingsRequestBytes)
+		defaultLimit := http.MaxBytesHandler(h, 4096)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost && r.URL.Path == "/api/v1/settings" {
+				settingsUpload.ServeHTTP(w, r)
+				return
+			}
+			defaultLimit.ServeHTTP(w, r)
+		})
+	})
+
+	// Rate limiting requests by 100 per minute
+	r.Use(middleware.ClientIPFromRemoteAddr)
+	r.Use(httprate.LimitBy(100, time.Minute, func(r *http.Request) (string, error) {
+		return httprate.CanonicalizeIP(middleware.GetClientIP(r.Context())), nil
+	}))
+
+	// Timeout any requests after 60s
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	// CORS+CSRF protection
 	crossOriginProtection := http.NewCrossOriginProtection()
 	allowedOrigins := corsAllowedOrigins()
 	for _, origin := range allowedOrigins {
@@ -31,14 +56,27 @@ func RunHttpServer(serverHandler *presentation.ServerHandler) {
 		AllowCredentials: true,
 	}))
 
+	// Log any request and recover from panic
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	swaggerHandler := presentation.Handler(serverHandler)
-	r.Mount("/api/v1", swaggerHandler)
+	// Store sessions between requests
+	r.Use(sessions.LoadAndSave)
+
+	swaggerHandler := presentation.NewStrictHandler(serverHandler, nil)
+	r.Mount("/api/v1", presentation.Handler(swaggerHandler))
+
+	srv := &http.Server{
+		Addr:           ":4000",
+		Handler:        r,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		IdleTimeout:    120 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MB
+	}
 
 	log.Println("API сервер запущен на :4000...")
-	if err := http.ListenAndServe(":4000", r); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 }

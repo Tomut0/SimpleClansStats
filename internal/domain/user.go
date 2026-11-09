@@ -11,14 +11,33 @@ const (
 )
 
 type User struct {
-	ID        int64
-	Email     string
-	Username  string
-	Role      Role
-	EmailVerifiedAt *time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	email     string
+	username  string
+	role      Role
+	emailVerifiedAt *time.Time
+	createdAt time.Time
+	updatedAt time.Time
 }
+
+func NewUser(
+    email, username string,
+    role Role,
+    emailVerifiedAt *time.Time,
+    createdAt, updatedAt time.Time,
+) *User {
+    return &User{
+        email:           email,
+        username:        username,
+        role:            role,
+        emailVerifiedAt: emailVerifiedAt,
+        createdAt:       createdAt,
+        updatedAt:       updatedAt,
+    }
+}
+
+func (u *User) Email() string    { return u.email }
+func (u *User) Username() string { return u.username }
+func (u *User) Role() Role       { return u.role }
 
 type UserCredentials struct {
 	UserID       int64

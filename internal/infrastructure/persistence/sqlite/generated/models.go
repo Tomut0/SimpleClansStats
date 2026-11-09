@@ -8,16 +8,21 @@ import (
 	"database/sql"
 )
 
+type AppSetting struct {
+	ID           int64
+	AppName      string
+	RemoveAuthor bool
+	TimeZone     string
+	DateFormat   string
+	TimeFormat   string
+	Logo         []byte
+	LogoVersion  int64
+}
+
 type Session struct {
-	ID             string
-	UserID         int64
-	TokenHash      []byte
-	CsrfToken      string
-	UserAgent      sql.NullString
-	Ip             sql.NullString
-	CreatedAt      string
-	LastActivityAt string
-	ExpiresAt      string
+	Token  string
+	Data   []byte
+	Expiry float64
 }
 
 type User struct {
