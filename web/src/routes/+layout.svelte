@@ -8,11 +8,12 @@
 	import { APP_NAME } from '$app/env/public';
 
 	let { children } = $props();
+	const appName = $derived(page.data.settings?.appName || APP_NAME);
 </script>
 
 <svelte:head>
 	<title>
-		{page.data.title ? `${page.data.title} - ${APP_NAME}` : APP_NAME}
+		{page.data.title ? `${page.data.title} - ${appName}` : appName}
 	</title>
 </svelte:head>
 

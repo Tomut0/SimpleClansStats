@@ -1,33 +1,77 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"dashboard": {
-		"title": "Dashboard",
-		"description": "Statistics and activity of clans and players on the server",
-		"serverSelector": {
-			"placeholder": "Select a server",
-			"label": "Servers"
+	"pages": {
+		"dashboard": {
+			"title": "Dashboard",
+			"description": "Statistics and activity of clans and players on the server"
 		},
-		"searchBar": {
-			"placeholder": "Search..."
+		"login": {
+			"backToHome": "Back to Home",
+			"form": {
+				"description": "Enter your email below to login to your account",
+				"email": "Email",
+				"emailPlaceholder": "example@example.com",
+				"password": "Password",
+				"forgotPassword": "Forgot your password?",
+				"loginWithGoogle": "Login with Google",
+				"noAccount": "Don't have an account?",
+				"signUp": "Sign up"
+			}
 		},
-		"footer": {
-			"copyright": "© 2023 - 2026. All Rights Reserved",
-			"author": "Made with <3 by Minat0_"
-		}
-	},
-	"auth": {
-		"login": "Login",
-		"logout": "Logout",
-		"backToHome": "Back to Home",
-		"loginForm": {
-			"description": "Enter your email below to login to your account",
-			"email": "Email",
-			"emailPlaceholder": "example@example.com",
-			"password": "Password",
-			"forgotPassword": "Forgot your password?",
-			"loginWithGoogle": "Login with Google",
-			"noAccount": "Don't have an account?",
-			"signUp": "Sign up"
+		"settings": {
+			"title": "Settings",
+			"description": "Configure your application",
+			"backToDashboard": "Back to Dashboard",
+			"save": "Save",
+			"saved": "Settings saved",
+			"save_failed": "Could not save settings. Try again.",
+			"load_failed": "Could not load application settings.",
+			"invalid_settings": "Check the settings and use a PNG or JPEG logo up to 1 MiB and 2048 × 2048 pixels.",
+			"categories": {
+				"general": {
+					"title": "General",
+					"logo_title": "Application Logotype",
+					"logo_desc": "PNG or JPEG, up to 1 MiB and 2048 × 2048 pixels",
+					"name_title": "Application Name",
+					"name_desc": "Set up the name for the application",
+					"remove_author_title": "Remove Author",
+					"remove_author_description": "Remove the author's mention in footer"
+				},
+				"servers": {
+					"title": "Servers",
+					"add_server": "Add Server",
+					"remove": "Remove",
+					"empty": {
+						"title": "No Servers Yet",
+						"description": "You haven't added any server yet. Get started by adding your first server."
+					},
+					"dialog": {
+						"title": "Add your server",
+						"description": "Use the following configuration in the plugin",
+						"endpoint_title": "Endpoint",
+						"api_key_title": "API Key",
+						"command": "or execute this command in-game:",
+						"command_title": "Command",
+						"copy": "Copy {label}",
+						"copied": "Copied to clipboard",
+						"copy_failed": "Could not copy to clipboard",
+						"submit": "Add server"
+					}
+				},
+				"timezone": {
+					"title": "Date and Time",
+					"timezone_title": "Timezone",
+					"timezone_desc": "Specify the timezone",
+					"date_format_title": "Date format",
+					"date_format_desc": "Choose the date format",
+					"date_format_placeholder": "DD.MM.YYYY",
+					"time_format_title": "Time format",
+					"time_format_desc": "Choose the time format",
+					"time_format_placeholder": "24h",
+					"search": "Search timezone...",
+					"no_results": "No timezone found."
+				}
+			}
 		}
 	},
 	"server": {
@@ -37,5 +81,24 @@
 			"title": "No servers",
 			"description": "No servers found. Please add a server to get started."
 		}
+	},
+	"errors": {
+		"http_error": "Could not reach the server. Please try again.",
+		"servers_empty": "You have no servers, please add at least one"
+	},
+	"footer": {
+		"copyright": "© 2023 - 2026. All Rights Reserved",
+		"author": "Made with <3 by Minat0_"
+	},
+	"auth": {
+		"login": "Login",
+		"logout": "Logout"
+	},
+	"searchBar": {
+		"placeholder": "Search..."
+	},
+	"serverSelector": {
+		"placeholder": "Select a server",
+		"label": "Servers"
 	}
 }

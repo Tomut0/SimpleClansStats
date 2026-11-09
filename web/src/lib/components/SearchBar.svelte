@@ -5,7 +5,7 @@
 </script>
 
 <InputGroup.Root class="w-64">
-	<InputGroup.Input placeholder={m['dashboard.searchBar.placeholder']()} />
+	<InputGroup.Input placeholder={m['searchBar.placeholder']()} />
 	<InputGroup.Addon>
 		<SearchIcon />
 	</InputGroup.Addon>

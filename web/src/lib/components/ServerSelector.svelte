@@ -21,7 +21,7 @@
 	<Select.Root type="single" name="favoriteFruit" {items} bind:value>
 		<Select.Trigger class="min-w-50">
 			<ServerIcon class="h-4 w-4 text-muted-foreground" />
-			<Select.Value placeholder={m['dashboard.serverSelector.placeholder']()} />
+			<Select.Value placeholder={m['serverSelector.placeholder']()} />
 		</Select.Trigger>
 		<Select.Content>
 			<Select.Group>

@@ -1,32 +1,77 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"dashboard": {
-		"title": "Панель управления",
-		"description": "Статистика и активность кланов и игроков на сервере",
-		"serverSelector": {
-			"placeholder": "Выберите сервер"
+	"pages": {
+		"dashboard": {
+			"title": "Панель управления",
+			"description": "Статистика и активность кланов и игроков на сервере"
 		},
-		"searchBar": {
-			"placeholder": "Поиск..."
+		"login": {
+			"backToHome": "Вернуться на главную страницу",
+			"form": {
+				"description": "Введите свой email ниже для входа в свой аккаунт",
+				"email": "Email",
+				"emailPlaceholder": "example@example.com",
+				"password": "Пароль",
+				"forgotPassword": "Забыли свой пароль?",
+				"loginWithGoogle": "Войти с Google",
+				"noAccount": "Нет аккаунта?",
+				"signUp": "Зарегистрироваться"
+			}
 		},
-		"footer": {
-			"copyright": "© 2023 - 2026. Все права защищены",
-			"author": "Сделано с <3 от Minat0_"
-		}
-	},
-	"auth": {
-		"login": "Вход",
-		"logout": "Выход",
-		"backToHome": "Вернуться на главную страницу",
-		"loginForm": {
-			"description": "Введите свой email ниже для входа в свой аккаунт",
-			"email": "Email",
-			"emailPlaceholder": "example@example.com",
-			"password": "Пароль",
-			"forgotPassword": "Забыли свой пароль?",
-			"loginWithGoogle": "Войти с Google",
-			"noAccount": "Нет аккаунта?",
-			"signUp": "Зарегистрироваться"
+		"settings": {
+			"title": "Настройки",
+			"description": "Отредактируйте ваше приложение",
+			"backToDashboard": "Назад на главную",
+			"save": "Сохранить",
+			"saved": "Настройки сохранены",
+			"save_failed": "Не удалось сохранить настройки. Попробуйте ещё раз.",
+			"load_failed": "Не удалось загрузить настройки приложения.",
+			"invalid_settings": "Проверьте поля. Для логотипа используйте PNG или JPEG до 1 МиБ и 2048 × 2048 пикселей.",
+			"categories": {
+				"general": {
+					"title": "Основное",
+					"logo_title": "Логотип приложения",
+					"logo_desc": "PNG или JPEG до 1 МиБ и 2048 × 2048 пикселей",
+					"name_title": "Название приложения",
+					"name_desc": "Установите название для приложения",
+					"remove_author_title": "Убрать автора",
+					"remove_author_description": "Убрать упоминание об авторе из футера"
+				},
+				"servers": {
+					"title": "Сервера",
+					"add_server": "Добавить сервер",
+					"remove": "Удалить",
+					"empty": {
+						"title": "Нет серверов",
+						"description": "Вы не добавили ни одного сервера. Чтобы начать - создайте свой первый сервер."
+					},
+					"dialog": {
+						"title": "Добавьте свой сервер",
+						"description": "Укажите эти настройки в плагине",
+						"endpoint_title": "Адрес API",
+						"api_key_title": "Ключ API",
+						"command": "или выполните эту команду в игре:",
+						"command_title": "Команда",
+						"copy": "Копировать: {label}",
+						"copied": "Скопировано в буфер обмена",
+						"copy_failed": "Не удалось скопировать в буфер обмена",
+						"submit": "Добавить сервер"
+					}
+				},
+				"timezone": {
+					"title": "Дата и время",
+					"timezone_title": "Часовой пояс",
+					"timezone_desc": "Укажите часовой пояс",
+					"date_format_title": "Формат даты",
+					"date_format_desc": "Выберите формат даты",
+					"date_format_placeholder": "ДД.ММ.ГГГГ",
+					"time_format_title": "Формат времени",
+					"time_format_desc": "Выберите формат времени",
+					"time_format_placeholder": "24 ч",
+					"search": "Поиск часового пояса...",
+					"no_results": "Часовой пояс не найден."
+				}
+			}
 		}
 	},
 	"server": {
@@ -36,5 +81,24 @@
 			"title": "Нет серверов",
 			"description": "Нет серверов найден. Пожалуйста, добавьте сервер для начала."
 		}
+	},
+	"errors": {
+		"http_error": "Не могу получить ответ от сервера. Попробуйте позже.",
+		"servers_empty": "You have no servers, please add at least one"
+	},
+	"footer": {
+		"copyright": "© 2023 - 2026. Все права защищены",
+		"author": "Сделано с <3 от Minat0_"
+	},
+	"auth": {
+		"login": "Вход",
+		"logout": "Выход"
+	},
+	"serverSelector": {
+		"placeholder": "Выберите сервер",
+		"label": "Сервера"
+	},
+	"searchBar": {
+		"placeholder": "Поиск..."
 	}
 }
