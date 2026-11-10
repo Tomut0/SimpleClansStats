@@ -3,7 +3,9 @@
 	"pages": {
 		"dashboard": {
 			"title": "Dashboard",
-			"description": "Statistics and activity of clans and players on the server"
+			"description": "Statistics and activity of clans and players on the server",
+			"waiting_title": "Retrieving server data",
+			"waiting_description": "We’re waiting for the server to send its first snapshot. This may take a while."
 		},
 		"login": {
 			"backToHome": "Back to Home",
@@ -45,7 +47,22 @@
 						"title": "No Servers Yet",
 						"description": "You haven't added any server yet. Get started by adding your first server."
 					},
+					"online": "Online",
+					"offline": "Offline",
+					"online_timeout": "Online timeout (minutes)",
+					"online_timeout_desc": "How long a server stays online after its last successful upload.",
+					"retention": "Ingest history retention (days)",
+					"retention_desc": "Snapshots and events older than this are deleted. Use 0 to disable cleanup.",
+					"delete": "Delete",
+					"delete_confirm": "Delete {name} and its snapshot history? The collector key will stop working.",
+					"delete_failed": "Could not delete the server or refresh the list",
 					"dialog": {
+						"register_description": "Enter the name to show on the dashboard.",
+						"server_name": "Server name",
+						"create_failed": "Could not add the server",
+						"refresh_failed": "The server was added, but the list could not be refreshed",
+						"key_once": "Save this API key now. It is shown only once.",
+						"done": "Done",
 						"title": "Add your server",
 						"description": "Use the following configuration in the plugin",
 						"endpoint_title": "Endpoint",
@@ -77,6 +94,8 @@
 	"server": {
 		"online": "Online",
 		"offline": "Offline",
+		"updated": "Updated:",
+		"never_updated": "Never",
 		"empty": {
 			"title": "No servers",
 			"description": "No servers found. Please add a server to get started."

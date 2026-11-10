@@ -4,6 +4,11 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:8080/api/v1' | 'https://stats.example.com/api/v1' | (string & {});
 };
 
+export type ServerRegistration = {
+    server: Server;
+    apiKey: string;
+};
+
 export type AppSettingsFields = {
     appName: string;
     removeAuthor: boolean;
@@ -14,6 +19,8 @@ export type AppSettingsFields = {
 
 export type AppSettings = AppSettingsFields & {
     logoVersion: number;
+    serverOnlineTimeoutMinutes: number;
+    ingestRetentionDays: number;
 };
 
 export type LoginRequest = {
@@ -32,6 +39,10 @@ export type Server = {
     displayName: string;
     online: boolean;
     disabled: boolean;
+    /**
+     * When the last successful ingest was received
+     */
+    lastIngestAt: string | null;
 };
 
 export type Error = {
@@ -148,6 +159,8 @@ export type UpdateAppSettingsData = {
          * Optional PNG or JPEG up to 1 MiB
          */
         logo?: Blob | File;
+        serverOnlineTimeoutMinutes?: number;
+        ingestRetentionDays?: number;
     };
     path?: never;
     query?: never;
@@ -235,3 +248,152 @@ export type GetServersResponses = {
 };
 
 export type GetServersResponse = GetServersResponses[keyof GetServersResponses];
+
+export type CreateServerData = {
+    body: {
+        displayName: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/servers';
+};
+
+export type CreateServerErrors = {
+    /**
+     * Invalid server name
+     */
+    400: unknown;
+    /**
+     * Login required
+     */
+    401: unknown;
+    /**
+     * Administrator required
+     */
+    403: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type CreateServerResponses = {
+    /**
+     * Registered server. The API key is returned only by this operation.
+     */
+    201: ServerRegistration;
+};
+
+export type CreateServerResponse = CreateServerResponses[keyof CreateServerResponses];
+
+export type DeleteServerData = {
+    body?: never;
+    path: {
+        serverId: string;
+    };
+    query?: never;
+    url: '/servers/{serverId}';
+};
+
+export type DeleteServerErrors = {
+    /**
+     * Invalid server ID
+     */
+    400: unknown;
+    /**
+     * Login required
+     */
+    401: unknown;
+    /**
+     * Administrator required
+     */
+    403: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type DeleteServerResponses = {
+    /**
+     * Server deleted or already absent
+     */
+    204: void;
+};
+
+export type DeleteServerResponse = DeleteServerResponses[keyof DeleteServerResponses];
+
+export type IngestData = {
+    body: {
+        /**
+         * When SCCollector captured the state
+         */
+        takenAt: string;
+        /**
+         * Optional assertion of the server bound to the API key
+         */
+        serverId?: string;
+        clans: Array<{
+            externalId: string;
+            tag: string;
+            name: string;
+        }>;
+        players: Array<{
+            uuid: string;
+            name: string;
+        }>;
+        extensions?: {
+            /**
+             * SCCollector v1 data for online players, wars, invites, claims and events
+             */
+            scCollectorV1?: {
+                [key: string]: unknown;
+            };
+            [key: string]: unknown;
+        };
+    };
+    path?: never;
+    query?: never;
+    url: '/ingest';
+};
+
+export type IngestErrors = {
+    /**
+     * Invalid snapshot
+     */
+    400: unknown;
+    /**
+     * Invalid credentials
+     */
+    401: Error;
+    /**
+     * Snapshot exceeds 8 MiB
+     */
+    413: unknown;
+    /**
+     * Expected application/json
+     */
+    415: unknown;
+    /**
+     * Rate limit exceeded
+     */
+    429: Error;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type IngestError = IngestErrors[keyof IngestErrors];
+
+export type IngestResponses = {
+    /**
+     * Ingest accepted. A snapshot is stored only when the state changes.
+     */
+    202: {
+        accepted: boolean;
+        processedAt: string;
+    };
+};
+
+export type IngestResponse = IngestResponses[keyof IngestResponses];
