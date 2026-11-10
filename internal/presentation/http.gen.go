@@ -11,8 +11,10 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
@@ -156,12 +158,14 @@ func (e UpdateAppSettingsMultipartBodyTimeFormat) Valid() bool {
 
 // AppSettings defines model for AppSettings.
 type AppSettings struct {
-	AppName      string                `json:"appName"`
-	DateFormat   AppSettingsDateFormat `json:"dateFormat"`
-	LogoVersion  int64                 `json:"logoVersion"`
-	RemoveAuthor bool                  `json:"removeAuthor"`
-	TimeFormat   AppSettingsTimeFormat `json:"timeFormat"`
-	TimeZone     string                `json:"timeZone"`
+	AppName                    string                `json:"appName"`
+	DateFormat                 AppSettingsDateFormat `json:"dateFormat"`
+	IngestRetentionDays        int64                 `json:"ingestRetentionDays"`
+	LogoVersion                int64                 `json:"logoVersion"`
+	RemoveAuthor               bool                  `json:"removeAuthor"`
+	ServerOnlineTimeoutMinutes int64                 `json:"serverOnlineTimeoutMinutes"`
+	TimeFormat                 AppSettingsTimeFormat `json:"timeFormat"`
+	TimeZone                   string                `json:"timeZone"`
 }
 
 // AppSettingsDateFormat defines model for AppSettings.DateFormat.
@@ -203,7 +207,16 @@ type Server struct {
 	Disabled    bool               `json:"disabled"`
 	DisplayName string             `json:"displayName"`
 	Id          openapi_types.UUID `json:"id"`
-	Online      bool               `json:"online"`
+
+	// LastIngestAt When the last successful ingest was received
+	LastIngestAt *time.Time `json:"lastIngestAt"`
+	Online       bool       `json:"online"`
+}
+
+// ServerRegistration defines model for ServerRegistration.
+type ServerRegistration struct {
+	ApiKey string `json:"apiKey"`
+	Server Server `json:"server"`
 }
 
 // User defines model for User.
@@ -219,16 +232,23 @@ type UserRole string
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = Error
 
+// CreateServerJSONBody defines parameters for CreateServer.
+type CreateServerJSONBody struct {
+	DisplayName string `json:"displayName"`
+}
+
 // UpdateAppSettingsMultipartBody defines parameters for UpdateAppSettings.
 type UpdateAppSettingsMultipartBody struct {
-	AppName    string                                   `json:"appName"`
-	DateFormat UpdateAppSettingsMultipartBodyDateFormat `json:"dateFormat"`
+	AppName             string                                   `json:"appName"`
+	DateFormat          UpdateAppSettingsMultipartBodyDateFormat `json:"dateFormat"`
+	IngestRetentionDays *int64                                   `json:"ingestRetentionDays,omitempty"`
 
 	// Logo Optional PNG or JPEG up to 1 MiB
-	Logo         *openapi_types.File                      `json:"logo,omitempty"`
-	RemoveAuthor bool                                     `json:"removeAuthor"`
-	TimeFormat   UpdateAppSettingsMultipartBodyTimeFormat `json:"timeFormat"`
-	TimeZone     string                                   `json:"timeZone"`
+	Logo                       *openapi_types.File                      `json:"logo,omitempty"`
+	RemoveAuthor               bool                                     `json:"removeAuthor"`
+	ServerOnlineTimeoutMinutes *int64                                   `json:"serverOnlineTimeoutMinutes,omitempty"`
+	TimeFormat                 UpdateAppSettingsMultipartBodyTimeFormat `json:"timeFormat"`
+	TimeZone                   string                                   `json:"timeZone"`
 }
 
 // UpdateAppSettingsMultipartBodyDateFormat defines parameters for UpdateAppSettings.
@@ -239,6 +259,9 @@ type UpdateAppSettingsMultipartBodyTimeFormat string
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = LoginRequest
+
+// CreateServerJSONRequestBody defines body for CreateServer for application/json ContentType.
+type CreateServerJSONRequestBody CreateServerJSONBody
 
 // UpdateAppSettingsMultipartRequestBody defines body for UpdateAppSettings for multipart/form-data ContentType.
 type UpdateAppSettingsMultipartRequestBody UpdateAppSettingsMultipartBody
@@ -257,6 +280,12 @@ type ServerInterface interface {
 	// GetServers List all servers
 	// (GET /servers)
 	GetServers(w http.ResponseWriter, r *http.Request)
+	// CreateServer Register a Minecraft server and issue its collector key
+	// (POST /servers)
+	CreateServer(w http.ResponseWriter, r *http.Request)
+	// DeleteServer Delete a server and its snapshot history
+	// (DELETE /servers/{serverId})
+	DeleteServer(w http.ResponseWriter, r *http.Request, serverId openapi_types.UUID)
 	// GetAppSettings Get application settings
 	// (GET /settings)
 	GetAppSettings(w http.ResponseWriter, r *http.Request)
@@ -293,6 +322,18 @@ func (_ Unimplemented) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 // GetServers List all servers
 // (GET /servers)
 func (_ Unimplemented) GetServers(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateServer Register a Minecraft server and issue its collector key
+// (POST /servers)
+func (_ Unimplemented) CreateServer(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DeleteServer Delete a server and its snapshot history
+// (DELETE /servers/{serverId})
+func (_ Unimplemented) DeleteServer(w http.ResponseWriter, r *http.Request, serverId openapi_types.UUID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -370,6 +411,46 @@ func (siw *ServerInterfaceWrapper) GetServers(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetServers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateServer operation middleware
+func (siw *ServerInterfaceWrapper) CreateServer(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateServer(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteServer operation middleware
+func (siw *ServerInterfaceWrapper) DeleteServer(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "serverId" -------------
+	var serverId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "serverId", chi.URLParam(r, "serverId"), &serverId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "serverId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteServer(w, r, serverId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -555,6 +636,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/servers", wrapper.GetServers)
 	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/servers", wrapper.CreateServer)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/servers/{serverId}", wrapper.DeleteServer)
+	})
 
 	return r
 }
@@ -698,6 +785,118 @@ type GetServers500Response struct {
 }
 
 func (response GetServers500Response) VisitGetServersResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type CreateServerRequestObject struct {
+	Body *CreateServerJSONRequestBody
+}
+
+type CreateServerResponseObject interface {
+	VisitCreateServerResponse(w http.ResponseWriter) error
+}
+
+type CreateServer201ResponseHeaders struct {
+	CacheControl *string
+}
+
+type CreateServer201JSONResponse struct {
+	Body    ServerRegistration
+	Headers CreateServer201ResponseHeaders
+}
+
+func (response CreateServer201JSONResponse) VisitCreateServerResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.CacheControl != nil {
+		w.Header().Set("Cache-Control", fmt.Sprint(*response.Headers.CacheControl))
+	}
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateServer400Response struct {
+}
+
+func (response CreateServer400Response) VisitCreateServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(400)
+	return nil
+}
+
+type CreateServer401Response struct {
+}
+
+func (response CreateServer401Response) VisitCreateServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type CreateServer403Response struct {
+}
+
+func (response CreateServer403Response) VisitCreateServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
+type CreateServer500Response struct {
+}
+
+func (response CreateServer500Response) VisitCreateServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type DeleteServerRequestObject struct {
+	ServerId openapi_types.UUID `json:"serverId"`
+}
+
+type DeleteServerResponseObject interface {
+	VisitDeleteServerResponse(w http.ResponseWriter) error
+}
+
+type DeleteServer204Response struct {
+}
+
+func (response DeleteServer204Response) VisitDeleteServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteServer400Response struct {
+}
+
+func (response DeleteServer400Response) VisitDeleteServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(400)
+	return nil
+}
+
+type DeleteServer401Response struct {
+}
+
+func (response DeleteServer401Response) VisitDeleteServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type DeleteServer403Response struct {
+}
+
+func (response DeleteServer403Response) VisitDeleteServerResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
+type DeleteServer500Response struct {
+}
+
+func (response DeleteServer500Response) VisitDeleteServerResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
@@ -870,6 +1069,12 @@ type StrictServerInterface interface {
 	// GetServers List all servers
 	// (GET /servers)
 	GetServers(ctx context.Context, request GetServersRequestObject) (GetServersResponseObject, error)
+	// CreateServer Register a Minecraft server and issue its collector key
+	// (POST /servers)
+	CreateServer(ctx context.Context, request CreateServerRequestObject) (CreateServerResponseObject, error)
+	// DeleteServer Delete a server and its snapshot history
+	// (DELETE /servers/{serverId})
+	DeleteServer(ctx context.Context, request DeleteServerRequestObject) (DeleteServerResponseObject, error)
 	// GetAppSettings Get application settings
 	// (GET /settings)
 	GetAppSettings(ctx context.Context, request GetAppSettingsRequestObject) (GetAppSettingsResponseObject, error)
@@ -1016,6 +1221,63 @@ func (sh *strictHandler) GetServers(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetServersResponseObject); ok {
 		if err := validResponse.VisitGetServersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateServer operation middleware
+func (sh *strictHandler) CreateServer(w http.ResponseWriter, r *http.Request) {
+	var request CreateServerRequestObject
+
+	var body CreateServerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateServer(ctx, request.(CreateServerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateServer")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateServerResponseObject); ok {
+		if err := validResponse.VisitCreateServerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteServer operation middleware
+func (sh *strictHandler) DeleteServer(w http.ResponseWriter, r *http.Request, serverId openapi_types.UUID) {
+	var request DeleteServerRequestObject
+
+	request.ServerId = serverId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteServer(ctx, request.(DeleteServerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteServer")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteServerResponseObject); ok {
+		if err := validResponse.VisitDeleteServerResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

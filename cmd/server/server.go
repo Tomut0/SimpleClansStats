@@ -16,12 +16,32 @@ import (
 )
 
 func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager) {
+	srv := &http.Server{
+		Addr:           ":4000",
+		Handler:        newRouter(serverHandler, sessions),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		IdleTimeout:    120 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MB
+	}
+
+	log.Println("API сервер запущен на :4000...")
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatalf("Ошибка запуска сервера: %v", err)
+	}
+}
+
+func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(func(h http.Handler) http.Handler {
 		settingsUpload := http.MaxBytesHandler(h, presentation.MaxSettingsRequestBytes)
 		defaultLimit := http.MaxBytesHandler(h, 4096)
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost && r.URL.Path == "/api/v1/ingest" {
+				h.ServeHTTP(w, r)
+				return
+			}
 			if r.Method == http.MethodPost && r.URL.Path == "/api/v1/settings" {
 				settingsUpload.ServeHTTP(w, r)
 				return
@@ -51,7 +71,7 @@ func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.Sess
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   allowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Prefer", "Authorization"},
 		AllowCredentials: true,
 	}))
@@ -63,22 +83,10 @@ func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.Sess
 	// Store sessions between requests
 	r.Use(sessions.LoadAndSave)
 
-	swaggerHandler := presentation.NewStrictHandler(serverHandler, nil)
-	r.Mount("/api/v1", presentation.Handler(swaggerHandler))
-
-	srv := &http.Server{
-		Addr:           ":4000",
-		Handler:        r,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		IdleTimeout:    120 * time.Second,
-		MaxHeaderBytes: 1 << 20, // 1 MB
-	}
-
-	log.Println("API сервер запущен на :4000...")
-	if err := srv.ListenAndServe(); err != nil {
-		log.Fatalf("Ошибка запуска сервера: %v", err)
-	}
+	api := chi.NewRouter()
+	api.Post("/ingest", serverHandler.Ingest)
+	r.Mount("/api/v1", presentation.HandlerFromMux(presentation.NewStrictHandler(serverHandler, nil), api))
+	return r
 }
 
 func corsAllowedOrigins() []string {

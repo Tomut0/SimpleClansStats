@@ -19,6 +19,37 @@ type AppSetting struct {
 	LogoVersion  int64
 }
 
+type IngestEvent struct {
+	ServerID   string
+	EventID    string
+	ReceivedAt string
+	Payload    string
+}
+
+type IngestSetting struct {
+	ID                         int64
+	ServerOnlineTimeoutMinutes int64
+	IngestRetentionDays        int64
+}
+
+type IngestSnapshot struct {
+	ServerID   string
+	TakenAt    string
+	ReceivedAt string
+	Payload    string
+}
+
+type Server struct {
+	ID             string
+	DisplayName    string
+	ApiKeyHash     []byte
+	Disabled       bool
+	LastReceivedAt string
+	LastTakenAt    string
+	StateHash      string
+	StatePayload   string
+}
+
 type Session struct {
 	Token  string
 	Data   []byte

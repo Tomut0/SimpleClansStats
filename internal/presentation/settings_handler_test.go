@@ -36,17 +36,22 @@ func (settingsTestUsers) GetUserById(id int64) (domain.User, error) {
 func TestAppSettings(t *testing.T) {
 	db := sqlite.New(filepath.Join(t.TempDir(), "settings.sqlite"))
 	defer db.Close()
-	migration, err := os.ReadFile("../../sql/migrations/20261109190000_create_app_settings.sql")
-	if err != nil {
-		t.Fatal(err)
-	}
-	up, _, _ := strings.Cut(string(migration), "-- +goose Down")
-	if _, err := db.Db.Exec(up); err != nil {
-		t.Fatal(err)
+	for _, name := range []string{
+		"20261109190000_create_app_settings.sql",
+		"20261110120000_create_servers_and_ingest_snapshots.sql",
+	} {
+		migration, err := os.ReadFile("../../sql/migrations/" + name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		up, _, _ := strings.Cut(string(migration), "-- +goose Down")
+		if _, err := db.Db.Exec(up); err != nil {
+			t.Fatal(err)
+		}
 	}
 	sessions := scs.New()
-	handler := Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{}, nil), sessions, db.Queries), nil))
-	request := func(method, path, name string, logo []byte, userID int64, wantStatus int) *httptest.ResponseRecorder {
+	handler := Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{}, nil), sessions, db.Db), nil))
+	request := func(method, path, name string, logo []byte, userID int64, wantStatus int, extra ...map[string]string) *httptest.ResponseRecorder {
 		t.Helper()
 		var body bytes.Buffer
 		var contentType string
@@ -58,6 +63,13 @@ func TestAppSettings(t *testing.T) {
 			} {
 				if err := form.WriteField(key, value); err != nil {
 					t.Fatal(err)
+				}
+			}
+			for _, fields := range extra {
+				for key, value := range fields {
+					if err := form.WriteField(key, value); err != nil {
+						t.Fatal(err)
+					}
 				}
 			}
 			if logo != nil {
@@ -97,6 +109,9 @@ func TestAppSettings(t *testing.T) {
 	if defaults.AppName != "SCStats" {
 		t.Fatalf("initial app name: got %q, want SCStats", defaults.AppName)
 	}
+	if defaults.ServerOnlineTimeoutMinutes != 10 || defaults.IngestRetentionDays != 30 {
+		t.Fatalf("unexpected default ingest settings: %+v", defaults)
+	}
 
 	var logo bytes.Buffer
 	if err := png.Encode(&logo, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
@@ -105,7 +120,9 @@ func TestAppSettings(t *testing.T) {
 	request("GET", "/settings/logo", "", nil, 0, 404)
 	request("POST", "/settings", "Clan Stats", logo.Bytes(), 0, 401)
 	request("POST", "/settings", "Clan Stats", logo.Bytes(), 2, 403)
-	request("POST", "/settings", "Clan Stats", logo.Bytes(), 1, 200)
+	request("POST", "/settings", "Clan Stats", logo.Bytes(), 1, 200,
+		map[string]string{"serverOnlineTimeoutMinutes": "15", "ingestRetentionDays": "0"})
+	request("POST", "/settings", "Rejected", nil, 1, 400, map[string]string{"ingestRetentionDays": "-1"})
 	request("POST", "/settings", "Rejected", []byte("not an image"), 1, 400)
 
 	readSettings := func(wantName string) {
@@ -115,7 +132,8 @@ func TestAppSettings(t *testing.T) {
 		if err := json.Unmarshal(res.Body.Bytes(), &got); err != nil {
 			t.Fatal(err)
 		}
-		want := AppSettings{AppName: wantName, RemoveAuthor: true, TimeZone: "America/New_York", DateFormat: "YYYY-MM-DD", TimeFormat: "12h", LogoVersion: 1}
+		want := AppSettings{AppName: wantName, RemoveAuthor: true, TimeZone: "America/New_York", DateFormat: "YYYY-MM-DD",
+			TimeFormat: "12h", LogoVersion: 1, ServerOnlineTimeoutMinutes: 15, IngestRetentionDays: 0}
 		if got != want {
 			t.Fatalf("stored settings: got %+v, want %+v", got, want)
 		}

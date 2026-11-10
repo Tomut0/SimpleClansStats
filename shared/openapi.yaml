@@ -18,6 +18,8 @@ servers:
 
 tags:
   - name: auth
+  - name: servers
+  - name: ingest
 
 paths:
   /auth/me:
@@ -114,6 +116,8 @@ paths:
                 - type: object
                   properties:
                     logo: { type: string, format: binary, description: Optional PNG or JPEG up to 1 MiB }
+                    serverOnlineTimeoutMinutes: { type: integer, format: int64, minimum: 1, maximum: 1440 }
+                    ingestRetentionDays: { type: integer, format: int64, minimum: 0, maximum: 36500 }
       responses:
         "200":
           description: Saved application settings
@@ -167,8 +171,116 @@ paths:
                       displayName: "My Server"
                       disabled: false
                       online: true
+                      lastIngestAt: "2026-11-10T12:00:00Z"
         "500":
           description: Internal Server Error
+    post:
+      tags: [servers]
+      summary: Register a Minecraft server and issue its collector key
+      operationId: createServer
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [displayName]
+              properties:
+                displayName: { type: string, minLength: 1, maxLength: 100 }
+      responses:
+        "201":
+          description: Registered server. The API key is returned only by this operation.
+          headers:
+            Cache-Control:
+              schema: { type: string, example: no-store }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServerRegistration" }
+        "400": { description: Invalid server name }
+        "401": { description: Login required }
+        "403": { description: Administrator required }
+        "500": { description: Internal Server Error }
+
+  /servers/{serverId}:
+    delete:
+      tags: [servers]
+      summary: Delete a server and its snapshot history
+      operationId: deleteServer
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Server deleted or already absent }
+        "400": { description: Invalid server ID }
+        "401": { description: Login required }
+        "403": { description: Administrator required }
+        "500": { description: Internal Server Error }
+
+  /ingest:
+    post:
+      tags: [ingest]
+      summary: Record receipt, events and any state change from SCCollector
+      operationId: ingest
+      security:
+        - ingestApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [takenAt, clans, players]
+              properties:
+                takenAt: { type: string, format: date-time, description: When SCCollector captured the state }
+                serverId: { type: string, format: uuid, description: Optional assertion of the server bound to the API key }
+                clans:
+                  type: array
+                  items:
+                    type: object
+                    required: [externalId, tag, name]
+                    properties:
+                      externalId: { type: string }
+                      tag: { type: string }
+                      name: { type: string }
+                players:
+                  type: array
+                  items:
+                    type: object
+                    required: [uuid, name]
+                    properties:
+                      uuid: { type: string, format: uuid }
+                      name: { type: string }
+                extensions:
+                  type: object
+                  properties:
+                    scCollectorV1:
+                      type: object
+                      description: SCCollector v1 data for online players, wars, invites, claims and events
+                      additionalProperties: true
+                  additionalProperties: true
+      responses:
+        "202":
+          description: Ingest accepted. A snapshot is stored only when the state changes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted, processedAt]
+                properties:
+                  accepted: { type: boolean }
+                  processedAt: { type: string, format: date-time }
+        "400": { description: Invalid snapshot }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413": { description: Snapshot exceeds 8 MiB }
+        "415": { description: Expected application/json }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+        "500": { description: Internal Server Error }
 
 components:
   securitySchemes:
@@ -176,7 +288,18 @@ components:
       type: apiKey
       in: cookie
       name: session
+    ingestApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
   schemas:
+    ServerRegistration:
+      type: object
+      required: [server, apiKey]
+      properties:
+        server: { $ref: "#/components/schemas/Server" }
+        apiKey: { type: string }
+
     AppSettingsFields:
       type: object
       required: [appName, removeAuthor, timeZone, dateFormat, timeFormat]
@@ -191,9 +314,11 @@ components:
       allOf:
         - $ref: "#/components/schemas/AppSettingsFields"
         - type: object
-          required: [logoVersion]
+          required: [logoVersion, serverOnlineTimeoutMinutes, ingestRetentionDays]
           properties:
             logoVersion: { type: integer, format: int64, minimum: 0 }
+            serverOnlineTimeoutMinutes: { type: integer, format: int64, minimum: 1, maximum: 1440 }
+            ingestRetentionDays: { type: integer, format: int64, minimum: 0, maximum: 36500 }
 
 
 
@@ -230,12 +355,13 @@ components:
 
     Server:
       type: object
-      required: [id, displayName, disabled, online]
+      required: [id, displayName, disabled, online, lastIngestAt]
       properties:
         id: { type: string, format: uuid }
         displayName: { type: string, example: "My Server" }
         online: { type: boolean, example: true }
         disabled: { type: boolean, example: false }
+        lastIngestAt: { type: [string, "null"], format: date-time, description: When the last successful ingest was received }
   
     Error:
       type: object

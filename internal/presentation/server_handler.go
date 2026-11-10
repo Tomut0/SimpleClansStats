@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/Tomut0/SimpleClansStats/internal/application"
 	"github.com/Tomut0/SimpleClansStats/internal/infrastructure/persistence/sqlite/generated"
@@ -14,11 +15,12 @@ type ServerHandler struct {
 	authService *application.AuthService
 	sessions    *scs.SessionManager
 	settings    *generated.Queries
+	db          *sql.DB
 }
 
-func NewServerHandler(authService *application.AuthService, sessions *scs.SessionManager, settings *generated.Queries) *ServerHandler {
+func NewServerHandler(authService *application.AuthService, sessions *scs.SessionManager, db *sql.DB) *ServerHandler {
 	validate := validator.New()
-	return &ServerHandler{validator: validate, authService: authService, sessions: sessions, settings: settings}
+	return &ServerHandler{validator: validate, authService: authService, sessions: sessions, settings: generated.New(db), db: db}
 }
 
 // Login Log in with username/password
@@ -60,14 +62,6 @@ func (s *ServerHandler) GetCurrentUser(ctx context.Context, request GetCurrentUs
 	}
 
 	return GetCurrentUser200JSONResponse(apiUser), nil
-}
-
-// GetServers Get servers
-// (GET /servers)
-func (s *ServerHandler) GetServers(ctx context.Context, request GetServersRequestObject) (GetServersResponseObject, error) {
-	// servers := []Server{
-    // {DisplayName: "Test", Id: uuid.New(), Disabled: false, Online: true}}
-	return GetServers200JSONResponse([]Server{}), nil
 }
 
 // Logout Log out

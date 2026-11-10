@@ -19,6 +19,7 @@ import (
 func main() {
 	db := sqlite.New(os.Getenv("GOOSE_DBSTRING"))
 	defer db.Close()
+	startIngestCleanup(db.Queries)
 
 	argonHasher := security.NewArgonHasher(3, 64*1024, 4)
 	userRepository := sqlite.NewSQLiteUserRepository(db.Queries, argonHasher)
@@ -36,6 +37,6 @@ func main() {
 	// 2. Задача UserRepository:  (создание, обновление, удаление) хранить пользователей. AuthService(UserRepository)
 	// 3. Нужно иметь сессии для хранения состояния аутентификации (alexedwards/scs)
 
-	serverHandler := presentation.NewServerHandler(authService, sessionManager, db.Queries)
+	serverHandler := presentation.NewServerHandler(authService, sessionManager, db.Db)
 	server.RunHttpServer(serverHandler, sessionManager)
 }

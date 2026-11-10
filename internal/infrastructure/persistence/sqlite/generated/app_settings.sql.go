@@ -7,6 +7,7 @@ package generated
 
 import (
 	"context"
+	"database/sql"
 )
 
 const getAppLogo = `-- name: GetAppLogo :one
@@ -21,17 +22,20 @@ func (q *Queries) GetAppLogo(ctx context.Context) ([]byte, error) {
 }
 
 const getAppSettings = `-- name: GetAppSettings :one
-SELECT app_name, remove_author, time_zone, date_format, time_format, logo_version
-FROM app_settings WHERE id = 1
+SELECT app_name, remove_author, time_zone, date_format, time_format, logo_version,
+       server_online_timeout_minutes, ingest_retention_days
+FROM app_settings CROSS JOIN ingest_settings WHERE app_settings.id = 1 AND ingest_settings.id = 1
 `
 
 type GetAppSettingsRow struct {
-	AppName      string
-	RemoveAuthor bool
-	TimeZone     string
-	DateFormat   string
-	TimeFormat   string
-	LogoVersion  int64
+	AppName                    string
+	RemoveAuthor               bool
+	TimeZone                   string
+	DateFormat                 string
+	TimeFormat                 string
+	LogoVersion                int64
+	ServerOnlineTimeoutMinutes int64
+	IngestRetentionDays        int64
 }
 
 func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error) {
@@ -44,11 +48,24 @@ func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error)
 		&i.DateFormat,
 		&i.TimeFormat,
 		&i.LogoVersion,
+		&i.ServerOnlineTimeoutMinutes,
+		&i.IngestRetentionDays,
 	)
 	return i, err
 }
 
-const updateAppSettings = `-- name: UpdateAppSettings :one
+const getIngestRetentionDays = `-- name: GetIngestRetentionDays :one
+SELECT ingest_retention_days FROM ingest_settings WHERE id = 1
+`
+
+func (q *Queries) GetIngestRetentionDays(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getIngestRetentionDays)
+	var ingest_retention_days int64
+	err := row.Scan(&ingest_retention_days)
+	return ingest_retention_days, err
+}
+
+const updateAppSettings = `-- name: UpdateAppSettings :exec
 UPDATE app_settings
 SET app_name = ?1,
     remove_author = ?2,
@@ -58,7 +75,6 @@ SET app_name = ?1,
     logo = COALESCE(?6, logo),
     logo_version = logo_version + (?6 IS NOT NULL)
 WHERE id = 1
-RETURNING app_name, remove_author, time_zone, date_format, time_format, logo_version
 `
 
 type UpdateAppSettingsParams struct {
@@ -70,17 +86,8 @@ type UpdateAppSettingsParams struct {
 	Logo         []byte
 }
 
-type UpdateAppSettingsRow struct {
-	AppName      string
-	RemoveAuthor bool
-	TimeZone     string
-	DateFormat   string
-	TimeFormat   string
-	LogoVersion  int64
-}
-
-func (q *Queries) UpdateAppSettings(ctx context.Context, arg UpdateAppSettingsParams) (UpdateAppSettingsRow, error) {
-	row := q.db.QueryRowContext(ctx, updateAppSettings,
+func (q *Queries) UpdateAppSettings(ctx context.Context, arg UpdateAppSettingsParams) error {
+	_, err := q.db.ExecContext(ctx, updateAppSettings,
 		arg.AppName,
 		arg.RemoveAuthor,
 		arg.TimeZone,
@@ -88,14 +95,22 @@ func (q *Queries) UpdateAppSettings(ctx context.Context, arg UpdateAppSettingsPa
 		arg.TimeFormat,
 		arg.Logo,
 	)
-	var i UpdateAppSettingsRow
-	err := row.Scan(
-		&i.AppName,
-		&i.RemoveAuthor,
-		&i.TimeZone,
-		&i.DateFormat,
-		&i.TimeFormat,
-		&i.LogoVersion,
-	)
-	return i, err
+	return err
+}
+
+const updateIngestSettings = `-- name: UpdateIngestSettings :exec
+UPDATE ingest_settings
+SET server_online_timeout_minutes = COALESCE(?1, server_online_timeout_minutes),
+    ingest_retention_days = COALESCE(?2, ingest_retention_days)
+WHERE id = 1
+`
+
+type UpdateIngestSettingsParams struct {
+	ServerOnlineTimeoutMinutes sql.NullInt64
+	IngestRetentionDays        sql.NullInt64
+}
+
+func (q *Queries) UpdateIngestSettings(ctx context.Context, arg UpdateIngestSettingsParams) error {
+	_, err := q.db.ExecContext(ctx, updateIngestSettings, arg.ServerOnlineTimeoutMinutes, arg.IngestRetentionDays)
+	return err
 }
