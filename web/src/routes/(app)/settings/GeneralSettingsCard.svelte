@@ -62,6 +62,14 @@
 
 				<Field.Field orientation="horizontal">
 					<Field.Content>
+						<Field.Label for="player-avatar-url">{m['pages.settings.categories.general.player_avatar_url_title']()}</Field.Label>
+						<Field.Description>{m['pages.settings.categories.general.player_avatar_url_desc']()}</Field.Description>
+					</Field.Content>
+					<Input id="player-avatar-url" name="playerAvatarUrl" value={settings?.playerAvatarUrl ?? 'https://mc-heads.net/avatar/{username}/32'} required maxlength={500} class="max-w-lg" />
+				</Field.Field>
+
+				<Field.Field orientation="horizontal">
+					<Field.Content>
 						<Field.Label for="remove-author">
 							{m['pages.settings.categories.general.remove_author_title']()}
 						</Field.Label>

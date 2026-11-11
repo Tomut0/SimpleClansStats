@@ -2,21 +2,29 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { getLocale } from '$lib/paraglide/runtime.js';
 	import { APP_NAME, PAGE_SEPARATOR } from '$app/env/public';
-	import { invalidate } from '$app/navigation';
+	import { API_URL } from '$app/env/public';
 	import type { PageProps } from './$types';
 	import { serverState } from '$lib/states/serverState.svelte';
 	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import * as Empty from '$lib/components/ui/empty';
 	import { Spinner } from '$lib/components/ui/spinner';
+	import DashboardGrid from '$lib/components/Widgets/DashboardGrid.svelte';
 
 	const { data }: PageProps = $props();
 	const selectedServer = $derived(
 		data.servers.find((server) => server.id === serverState.selectedId)
 	);
+
+	$effect.pre(() => {
+		if (selectedServer && !selectedServer.disabled) return;
+		serverState.selectedId = data.servers.find((server) => !server.disabled)?.id ?? '';
+	});
+
 	const waitingForSnapshot = $derived(
 		selectedServer?.lastIngestAt === null && !selectedServer.disabled
 	);
+
 	const updatedAt = $derived.by(() => {
 		if (!selectedServer?.lastIngestAt) return null;
 
@@ -43,15 +51,6 @@
 			hourCycle: data.settings?.timeFormat === '12h' ? 'h12' : 'h23'
 		}).format(receivedAt);
 		return `${date}, ${time}`;
-	});
-
-	$effect(() => {
-		if (!selectedServer || selectedServer.disabled) return;
-
-		const timer = setInterval(() => {
-			void invalidate('app:servers').catch(() => {});
-		}, 10_000);
-		return () => clearInterval(timer);
 	});
 </script>
 
@@ -104,5 +103,8 @@
 				<Empty.Description>{m['pages.dashboard.waiting_description']()}</Empty.Description>
 			</Empty.Header>
 		</Empty.Root>
+	{/if}
+	{#if selectedServer && !selectedServer.disabled}
+		{#key selectedServer.id}<DashboardGrid serverId={selectedServer.id} apiUrl={API_URL} avatarUrlTemplate={data.settings?.playerAvatarUrl ?? 'https://mc-heads.net/avatar/{username}/32'} />{/key}
 	{/if}
 </main>

@@ -6,6 +6,7 @@
 	import './layout.css';
 	import { ModeWatcher } from 'mode-watcher';
 	import { APP_NAME } from '$app/env/public';
+	import { Tooltip } from 'bits-ui';
 
 	let { children } = $props();
 	const appName = $derived(page.data.settings?.appName || APP_NAME);
@@ -19,7 +20,9 @@
 
 <ModeWatcher />
 
-{@render children()}
+<Tooltip.Provider>
+	{@render children()}
+</Tooltip.Provider>
 
 <div style="display:none">
 	{#each locales as locale (locale)}

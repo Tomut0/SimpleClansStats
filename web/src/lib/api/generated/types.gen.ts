@@ -4,6 +4,45 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:8080/api/v1' | 'https://stats.example.com/api/v1' | (string & {});
 };
 
+export type DashboardLayout = {
+    version: 1;
+    widgets: Array<DashboardWidget>;
+};
+
+export type DashboardWidget = {
+    id: string;
+    type?: 'counter' | 'table' | 'leaderboard' | 'activityFeed' | 'onlineSnapshot' | 'distribution' | 'timeSeries' | 'clanCard' | 'playerCard' | 'warCenter' | 'clanRoster' | 'network' | 'compare' | 'heatmap' | 'gainersLosers' | 'economy' | 'killFeed' | 'peakOnline' | 'pendingInvites' | 'claims';
+    field?: 'clans' | 'players' | 'wars' | 'balance' | 'onlinePlayers' | 'kills' | 'clanBalance' | 'recentActions' | 'killTypes' | 'clanStatus' | 'clan' | 'player' | 'clanPlayers' | 'clanRelations' | 'clanMetrics' | 'playerActivity' | 'clanBalanceChange' | 'recentKills' | 'pendingInvites' | 'claims';
+    format?: 'number' | 'compact' | 'plain';
+    limit?: number;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+};
+
+export type DashboardData = {
+    state: {
+        [key: string]: unknown;
+    };
+    events: Array<{
+        [key: string]: unknown;
+    }>;
+    history: Array<{
+        at: string;
+        clans: number;
+        players: number;
+        wars: number;
+        balance: number;
+        onlinePlayers: number;
+        kills: number;
+    }>;
+    clanBalanceChanges: Array<{
+        tag: string;
+        balanceChange: number;
+    }>;
+};
+
 export type ServerRegistration = {
     server: Server;
     apiKey: string;
@@ -15,6 +54,7 @@ export type AppSettingsFields = {
     timeZone: string;
     dateFormat: 'DD.MM.YYYY' | 'YYYY-MM-DD' | 'MM/DD/YYYY';
     timeFormat: '24h' | '12h';
+    playerAvatarUrl: string;
 };
 
 export type AppSettings = AppSettingsFields & {
@@ -322,6 +362,103 @@ export type DeleteServerResponses = {
 };
 
 export type DeleteServerResponse = DeleteServerResponses[keyof DeleteServerResponses];
+
+export type GetDashboardLayoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/dashboard/layout';
+};
+
+export type GetDashboardLayoutErrors = {
+    /**
+     * Invalid credentials
+     */
+    401: Error;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GetDashboardLayoutError = GetDashboardLayoutErrors[keyof GetDashboardLayoutErrors];
+
+export type GetDashboardLayoutResponses = {
+    /**
+     * Saved layout, or an empty widget list when the client should render the default arrangement
+     */
+    200: DashboardLayout;
+};
+
+export type GetDashboardLayoutResponse = GetDashboardLayoutResponses[keyof GetDashboardLayoutResponses];
+
+export type SaveDashboardLayoutData = {
+    body: DashboardLayout;
+    path?: never;
+    query?: never;
+    url: '/dashboard/layout';
+};
+
+export type SaveDashboardLayoutErrors = {
+    /**
+     * Unsupported widget or invalid layout
+     */
+    400: unknown;
+    /**
+     * Invalid credentials
+     */
+    401: Error;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type SaveDashboardLayoutError = SaveDashboardLayoutErrors[keyof SaveDashboardLayoutErrors];
+
+export type SaveDashboardLayoutResponses = {
+    /**
+     * Layout saved
+     */
+    204: void;
+};
+
+export type SaveDashboardLayoutResponse = SaveDashboardLayoutResponses[keyof SaveDashboardLayoutResponses];
+
+export type GetDashboardEventsData = {
+    body?: never;
+    path?: never;
+    query: {
+        serverId: string;
+    };
+    url: '/dashboard/events';
+};
+
+export type GetDashboardEventsErrors = {
+    /**
+     * Missing or invalid server ID
+     */
+    400: unknown;
+    /**
+     * Invalid credentials
+     */
+    401: Error;
+    /**
+     * Streaming unavailable
+     */
+    500: unknown;
+};
+
+export type GetDashboardEventsError = GetDashboardEventsErrors[keyof GetDashboardEventsErrors];
+
+export type GetDashboardEventsResponses = {
+    /**
+     * SSE event: event: snapshot followed by JSON DashboardData in data:
+     */
+    200: string;
+};
+
+export type GetDashboardEventsResponse = GetDashboardEventsResponses[keyof GetDashboardEventsResponses];
 
 export type IngestData = {
     body: {

@@ -8,7 +8,6 @@
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { serverState } from '$lib/states/serverState.svelte';
 	import type { PageProps } from './$types';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
@@ -88,13 +87,6 @@
 		}
 	}
 
-	function selectServerForDashboard() {
-		notifyIfServersEmpty();
-		if (!data.servers.some((server) => server.id === serverState.selectedId && !server.disabled)) {
-			serverState.selectedId = data.servers.find((server) => !server.disabled)?.id ?? '';
-		}
-	}
-
 	onMount(() => {
 		notifyIfServersEmpty();
 	});
@@ -115,7 +107,7 @@
 				<Button type="submit" form="app-settings" {disabled}>
 					{m['pages.settings.save']()}
 				</Button>
-				<Button variant="secondary" href={resolve('/')} onclick={selectServerForDashboard}>
+				<Button variant="secondary" href={resolve('/')} onclick={notifyIfServersEmpty}>
 					{m['pages.settings.backToDashboard']()}
 				</Button>
 			</div>

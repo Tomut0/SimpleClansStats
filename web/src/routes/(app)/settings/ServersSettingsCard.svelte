@@ -11,6 +11,7 @@
 	import * as Field from '$lib/components/ui/field/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
+	import ServerIcon from '@lucide/svelte/icons/server';
 	import type { AppSettings, Server } from '$lib/api/generated';
 
 	let {
@@ -126,7 +127,7 @@
 			<ul class="grid gap-2">
 				{#each servers as server (server.id)}
 					<li class="flex items-center justify-between gap-2">
-						<span>{server.displayName}</span>
+						<span class="flex items-center gap-2"><ServerIcon class="w-4 h-4 text-foreground"/> {server.displayName}</span>
 						<div class="flex items-center gap-2">
 							<span class="text-sm text-muted-foreground">
 								{server.online

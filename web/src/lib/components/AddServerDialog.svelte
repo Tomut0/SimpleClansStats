@@ -106,7 +106,7 @@
 		showCloseButton={false}
 		escapeKeydownBehavior={saving || credentials ? 'ignore' : 'close'}
 		interactOutsideBehavior={saving || credentials ? 'ignore' : 'close'}
-		class="max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto rounded-2xl border border-border p-5 sm:max-w-[34rem]"
+		class="max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto rounded-2xl border border-border p-5 sm:max-w-136"
 	>
 		<Dialog.Header>
 			<Dialog.Title class="text-xl">
