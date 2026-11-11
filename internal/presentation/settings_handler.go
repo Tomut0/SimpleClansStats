@@ -3,7 +3,6 @@ package presentation
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"errors"
 	"image"
 	_ "image/jpeg"
@@ -13,25 +12,17 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
-	"strings"
-	"time"
-	_ "time/tzdata"
-	"unicode/utf8"
 
+	"github.com/Tomut0/SimpleClansStats/internal/application"
 	"github.com/Tomut0/SimpleClansStats/internal/domain"
-	"github.com/Tomut0/SimpleClansStats/internal/infrastructure/persistence/sqlite/generated"
 )
 
+// 1 MB
 const maxLogoBytes = 1 << 20
 const MaxSettingsRequestBytes = maxLogoBytes + 4096
 
-type appSettingsUpdate struct {
-	generated.UpdateAppSettingsParams
-	generated.UpdateIngestSettingsParams
-}
-
 func (s *ServerHandler) GetAppSettings(ctx context.Context, _ GetAppSettingsRequestObject) (GetAppSettingsResponseObject, error) {
-	settings, err := s.settings.GetAppSettings(ctx)
+	settings, err := s.settingsService.Get(ctx)
 	if err != nil {
 		log.Printf("read app settings: %v", err)
 		return GetAppSettings500Response{}, nil
@@ -44,11 +35,11 @@ func (s *ServerHandler) UpdateAppSettings(ctx context.Context, request UpdateApp
 	if !ok {
 		return UpdateAppSettings401Response{}, nil
 	}
-	user, err := s.authService.GetByID(userID)
+	admin, err := s.authService.IsAdmin(userID)
 	if err != nil {
 		return UpdateAppSettings401Response{}, nil
 	}
-	if user.Role() != domain.RoleAdmin {
+	if !admin {
 		return UpdateAppSettings403Response{}, nil
 	}
 
@@ -80,36 +71,19 @@ func (s *ServerHandler) UpdateAppSettings(ctx context.Context, request UpdateApp
 		}
 	}
 
-	saved, err := s.saveAppSettings(ctx, params)
+	saved, err := s.settingsService.Update(ctx, params)
 	if err != nil {
+		if errors.Is(err, application.ErrInvalidSettings) {
+			return UpdateAppSettings400Response{}, nil
+		}
 		log.Printf("save app settings: %v", err)
 		return UpdateAppSettings500Response{}, nil
 	}
 	return UpdateAppSettings200JSONResponse(appSettingsResponse(saved)), nil
 }
 
-func (s *ServerHandler) saveAppSettings(ctx context.Context, params appSettingsUpdate) (generated.GetAppSettingsRow, error) {
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return generated.GetAppSettingsRow{}, err
-	}
-	defer tx.Rollback()
-	queries := s.settings.WithTx(tx)
-	if err := queries.UpdateAppSettings(ctx, params.UpdateAppSettingsParams); err != nil {
-		return generated.GetAppSettingsRow{}, err
-	}
-	if err := queries.UpdateIngestSettings(ctx, params.UpdateIngestSettingsParams); err != nil {
-		return generated.GetAppSettingsRow{}, err
-	}
-	saved, err := queries.GetAppSettings(ctx)
-	if err != nil {
-		return saved, err
-	}
-	return saved, tx.Commit()
-}
-
 func (s *ServerHandler) GetAppLogo(ctx context.Context, _ GetAppLogoRequestObject) (GetAppLogoResponseObject, error) {
-	logo, err := s.settings.GetAppLogo(ctx)
+	logo, err := s.settingsService.Logo(ctx)
 	if err != nil {
 		log.Printf("read app logo: %v", err)
 		return GetAppLogo500Response{}, nil
@@ -124,49 +98,48 @@ func (s *ServerHandler) GetAppLogo(ctx context.Context, _ GetAppLogoRequestObjec
 	}
 }
 
-func parseAppSettings(form *multipart.Form) (appSettingsUpdate, bool) {
-	var params appSettingsUpdate
-	for _, name := range []string{"appName", "removeAuthor", "timeZone", "dateFormat", "timeFormat"} {
+func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
+	var params domain.AppSettingsUpdate
+	for _, name := range []string{"appName", "removeAuthor", "timeZone", "dateFormat", "timeFormat", "playerAvatarUrl"} {
 		if len(form.Value[name]) != 1 {
 			return params, false
 		}
 	}
-	params.AppName = strings.TrimSpace(form.Value["appName"][0])
+	params.AppName = form.Value["appName"][0]
 	params.TimeZone = form.Value["timeZone"][0]
 	params.DateFormat = form.Value["dateFormat"][0]
 	params.TimeFormat = form.Value["timeFormat"][0]
+	params.PlayerAvatarURL = form.Value["playerAvatarUrl"][0]
 	removeAuthor := form.Value["removeAuthor"][0]
 	params.RemoveAuthor = removeAuthor == "true"
 	var ok bool
-	params.ServerOnlineTimeoutMinutes, ok = optionalSettingsInt(form.Value["serverOnlineTimeoutMinutes"], 1, 1440)
+	params.ServerOnlineTimeoutMinutes, ok = optionalSettingsInt(form.Value["serverOnlineTimeoutMinutes"])
 	if !ok {
 		return params, false
 	}
-	params.IngestRetentionDays, ok = optionalSettingsInt(form.Value["ingestRetentionDays"], 0, 36500)
+	params.IngestRetentionDays, ok = optionalSettingsInt(form.Value["ingestRetentionDays"])
 	if !ok {
 		return params, false
 	}
 
-	if params.AppName == "" || !utf8.ValidString(params.AppName) || utf8.RuneCountInString(params.AppName) > 100 ||
-		(removeAuthor != "true" && removeAuthor != "false") ||
-		!AppSettingsDateFormat(params.DateFormat).Valid() || !AppSettingsTimeFormat(params.TimeFormat).Valid() ||
-		params.TimeZone == "" || params.TimeZone == "Local" {
+	if removeAuthor != "true" && removeAuthor != "false" {
 		return params, false
 	}
-	_, err := time.LoadLocation(params.TimeZone)
-	return params, err == nil
+	return params, true
 }
 
-func optionalSettingsInt(values []string, min, max int64) (sql.NullInt64, bool) {
+func optionalSettingsInt(values []string) (*int64, bool) {
 	if len(values) == 0 {
-		return sql.NullInt64{}, true
+		return nil, true
 	}
 	if len(values) != 1 {
-		return sql.NullInt64{}, false
+		return nil, false
 	}
 	value, err := strconv.ParseInt(values[0], 10, 64)
-	valid := err == nil && value >= min && value <= max
-	return sql.NullInt64{Int64: value, Valid: valid}, valid
+	if err != nil {
+		return nil, false
+	}
+	return &value, true
 }
 
 func readLogo(header *multipart.FileHeader) ([]byte, error) {
@@ -191,13 +164,14 @@ func readLogo(header *multipart.FileHeader) ([]byte, error) {
 	return logo, nil
 }
 
-func appSettingsResponse(row generated.GetAppSettingsRow) AppSettings {
+func appSettingsResponse(row domain.AppSettings) AppSettings {
 	return AppSettings{
 		AppName:                    row.AppName,
 		RemoveAuthor:               row.RemoveAuthor,
 		TimeZone:                   row.TimeZone,
 		DateFormat:                 AppSettingsDateFormat(row.DateFormat),
 		TimeFormat:                 AppSettingsTimeFormat(row.TimeFormat),
+		PlayerAvatarUrl:            row.PlayerAvatarURL,
 		LogoVersion:                row.LogoVersion,
 		ServerOnlineTimeoutMinutes: row.ServerOnlineTimeoutMinutes,
 		IngestRetentionDays:        row.IngestRetentionDays,

@@ -50,7 +50,11 @@ func TestAppSettings(t *testing.T) {
 		}
 	}
 	sessions := scs.New()
-	handler := Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{}, nil), sessions, db.Db), nil))
+	dashboard := application.NewDashboardService(sqlite.NewSQLiteDashboardRepository(db.Db))
+	ingest := application.NewIngestService(sqlite.NewSQLiteIngestRepository(db.Db))
+	settings := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
+	servers := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
+	handler := Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{}, nil), sessions, dashboard, ingest, settings, servers), nil))
 	request := func(method, path, name string, logo []byte, userID int64, wantStatus int, extra ...map[string]string) *httptest.ResponseRecorder {
 		t.Helper()
 		var body bytes.Buffer
@@ -60,6 +64,7 @@ func TestAppSettings(t *testing.T) {
 			for key, value := range map[string]string{
 				"appName": name, "removeAuthor": "true", "timeZone": "America/New_York",
 				"dateFormat": "YYYY-MM-DD", "timeFormat": "12h",
+				"playerAvatarUrl": "https://mc-heads.net/avatar/{username}/32",
 			} {
 				if err := form.WriteField(key, value); err != nil {
 					t.Fatal(err)
@@ -123,6 +128,7 @@ func TestAppSettings(t *testing.T) {
 	request("POST", "/settings", "Clan Stats", logo.Bytes(), 1, 200,
 		map[string]string{"serverOnlineTimeoutMinutes": "15", "ingestRetentionDays": "0"})
 	request("POST", "/settings", "Rejected", nil, 1, 400, map[string]string{"ingestRetentionDays": "-1"})
+	request("POST", "/settings", "Rejected", nil, 1, 400, map[string]string{"playerAvatarUrl": "javascript:alert(1)"})
 	request("POST", "/settings", "Rejected", []byte("not an image"), 1, 400)
 
 	readSettings := func(wantName string) {
@@ -133,7 +139,7 @@ func TestAppSettings(t *testing.T) {
 			t.Fatal(err)
 		}
 		want := AppSettings{AppName: wantName, RemoveAuthor: true, TimeZone: "America/New_York", DateFormat: "YYYY-MM-DD",
-			TimeFormat: "12h", LogoVersion: 1, ServerOnlineTimeoutMinutes: 15, IngestRetentionDays: 0}
+			TimeFormat: "12h", PlayerAvatarUrl: "https://mc-heads.net/avatar/{username}/32", LogoVersion: 1, ServerOnlineTimeoutMinutes: 15, IngestRetentionDays: 0}
 		if got != want {
 			t.Fatalf("stored settings: got %+v, want %+v", got, want)
 		}

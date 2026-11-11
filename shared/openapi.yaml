@@ -20,6 +20,7 @@ tags:
   - name: auth
   - name: servers
   - name: ingest
+  - name: dashboard
 
 paths:
   /auth/me:
@@ -222,6 +223,63 @@ paths:
         "403": { description: Administrator required }
         "500": { description: Internal Server Error }
 
+  /dashboard/layout:
+    get:
+      tags: [dashboard]
+      summary: Get the authenticated user's dashboard layout
+      operationId: getDashboardLayout
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Saved layout, or an empty widget list when the client should render the default arrangement
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardLayout" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { description: Internal Server Error }
+    put:
+      tags: [dashboard]
+      summary: Save the authenticated user's dashboard layout
+      operationId: saveDashboardLayout
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DashboardLayout" }
+      responses:
+        "204": { description: Layout saved }
+        "400": { description: Unsupported widget or invalid layout }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { description: Internal Server Error }
+
+  /dashboard/events:
+    get:
+      tags: [dashboard]
+      summary: Subscribe to live dashboard data using Server-Sent Events
+      operationId: getDashboardEvents
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: serverId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: A stream emits a snapshot event whenever collector data changes
+          content:
+            text/event-stream:
+              schema: { type: string, description: 'SSE event: event: snapshot followed by JSON DashboardData in data:' }
+              example: |-
+                event: snapshot
+                data: {"state":{"clans":[],"players":[]},"events":[]}
+        "400": { description: Missing or invalid server ID }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { description: Streaming unavailable }
+
   /ingest:
     post:
       tags: [ingest]
@@ -293,6 +351,61 @@ components:
       in: header
       name: X-API-Key
   schemas:
+    DashboardLayout:
+      type: object
+      required: [version, widgets]
+      properties:
+        version: { type: integer, enum: [1] }
+        widgets:
+          type: array
+          minItems: 1
+          maxItems: 24
+          items: { $ref: "#/components/schemas/DashboardWidget" }
+
+    DashboardWidget:
+      type: object
+      required: [id, x, y, w, h]
+      properties:
+        id: { type: string, maxLength: 64, pattern: '^(clans|players|wars|balance|kills|status|actions|top|online|counter-[0-9a-fA-F-]{36}|widget-[0-9a-fA-F-]{36})$' }
+        type: { type: string, enum: [counter, table, leaderboard, activityFeed, onlineSnapshot, distribution, timeSeries, clanCard, playerCard, warCenter, clanRoster, network, compare, heatmap, gainersLosers, economy, killFeed, peakOnline, pendingInvites, claims] }
+        field: { type: string, enum: [clans, players, wars, balance, onlinePlayers, kills, clanBalance, recentActions, killTypes, clanStatus, clan, player, clanPlayers, clanRelations, clanMetrics, playerActivity, clanBalanceChange, recentKills, pendingInvites, claims] }
+        format: { type: string, enum: [number, compact, plain] }
+        limit: { type: integer, enum: [5, 10, 20] }
+        x: { type: integer, minimum: 0, maximum: 11 }
+        y: { type: integer, minimum: 0, maximum: 10000 }
+        w: { type: integer, minimum: 1, maximum: 12 }
+        h: { type: integer, minimum: 1, maximum: 12 }
+
+    DashboardData:
+      type: object
+      required: [state, events, history, clanBalanceChanges]
+      properties:
+        state: { type: object, additionalProperties: true }
+        events:
+          type: array
+          items: { type: object, additionalProperties: true }
+        history:
+          type: array
+          items:
+            type: object
+            required: [at, clans, players, wars, balance, onlinePlayers, kills]
+            properties:
+              at: { type: string, format: date-time }
+              clans: { type: integer }
+              players: { type: integer }
+              wars: { type: integer }
+              balance: { type: number }
+              onlinePlayers: { type: integer }
+              kills: { type: number }
+        clanBalanceChanges:
+          type: array
+          items:
+            type: object
+            required: [tag, balanceChange]
+            properties:
+              tag: { type: string }
+              balanceChange: { type: number }
+
     ServerRegistration:
       type: object
       required: [server, apiKey]
@@ -302,13 +415,14 @@ components:
 
     AppSettingsFields:
       type: object
-      required: [appName, removeAuthor, timeZone, dateFormat, timeFormat]
+      required: [appName, removeAuthor, timeZone, dateFormat, timeFormat, playerAvatarUrl]
       properties:
         appName: { type: string, maxLength: 100 }
         removeAuthor: { type: boolean }
         timeZone: { type: string, example: Europe/Moscow }
         dateFormat: { type: string, enum: [DD.MM.YYYY, YYYY-MM-DD, MM/DD/YYYY] }
         timeFormat: { type: string, enum: [24h, 12h] }
+        playerAvatarUrl: { type: string, maxLength: 500, example: 'https://mc-heads.net/avatar/{username}/32' }
 
     AppSettings:
       allOf:

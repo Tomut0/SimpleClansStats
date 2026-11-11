@@ -37,6 +37,10 @@ func main() {
 	// 2. Задача UserRepository:  (создание, обновление, удаление) хранить пользователей. AuthService(UserRepository)
 	// 3. Нужно иметь сессии для хранения состояния аутентификации (alexedwards/scs)
 
-	serverHandler := presentation.NewServerHandler(authService, sessionManager, db.Db)
+	dashboardService := application.NewDashboardService(sqlite.NewSQLiteDashboardRepository(db.Db))
+	ingestService := application.NewIngestService(sqlite.NewSQLiteIngestRepository(db.Db))
+	settingsService := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
+	serverService := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
+	serverHandler := presentation.NewServerHandler(authService, sessionManager, dashboardService, ingestService, settingsService, serverService)
 	server.RunHttpServer(serverHandler, sessionManager)
 }

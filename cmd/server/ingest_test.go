@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"net/http"
@@ -19,6 +20,25 @@ import (
 	"github.com/alexedwards/scs/v2"
 )
 
+type changingSnapshotWriter struct {
+	*httptest.ResponseRecorder
+	cancel    context.CancelFunc
+	flushes   int
+	update    func() error
+	updateErr error
+}
+
+func (w *changingSnapshotWriter) Flush() {
+	w.ResponseRecorder.Flush()
+	w.flushes++
+	if w.flushes == 1 {
+		w.updateErr = w.update()
+	}
+	if w.flushes == 2 || w.updateErr != nil {
+		w.cancel()
+	}
+}
+
 type ingestTestUsers struct{ ports.UserRepository }
 
 func (ingestTestUsers) GetUserById(id int64) (domain.User, error) {
@@ -33,8 +53,10 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	db := sqlite.New(filepath.Join(t.TempDir(), "ingest.sqlite"))
 	defer db.Close()
 	for _, name := range []string{
+		"20260925204348_create_users_table.sql",
 		"20261109190000_create_app_settings.sql",
 		"20261110120000_create_servers_and_ingest_snapshots.sql",
+		"20261111100000_create_dashboard_layouts.sql",
 	} {
 		migration, err := os.ReadFile("../../sql/migrations/" + name)
 		if err != nil {
@@ -45,9 +67,16 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	if _, err := db.Db.Exec(`INSERT INTO users (id, email, username, password_hash, role) VALUES (2, 'member@example.com', 'member', 'hash', 'member')`); err != nil {
+		t.Fatal(err)
+	}
 
 	sessions := scs.New()
-	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, db.Db), sessions)
+	dashboard := application.NewDashboardService(sqlite.NewSQLiteDashboardRepository(db.Db))
+	ingest := application.NewIngestService(sqlite.NewSQLiteIngestRepository(db.Db))
+	settings := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
+	servers := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
+	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, dashboard, ingest, settings, servers), sessions)
 	request := func(method, path, body, key string, userID int64, wantStatus int) *httptest.ResponseRecorder {
 		t.Helper()
 		req := httptest.NewRequest(method, "/api/v1"+path, strings.NewReader(body))
@@ -96,6 +125,13 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	if string(storedHash) != string(hash[:]) {
 		t.Fatal("collector key was not stored as a hash")
 	}
+	request("GET", "/dashboard/layout", "", "", 0, 401)
+	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"clans","x":0,"y":0,"w":4,"h":2}]}`, "", 2, 204)
+	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"custom-html","x":0,"y":0,"w":4,"h":2}]}`, "", 2, 400)
+	layout := request("GET", "/dashboard/layout", "", "", 2, 200)
+	if !strings.Contains(layout.Body.String(), `"id":"clans"`) {
+		t.Fatalf("layout did not persist: %s", layout.Body.String())
+	}
 	list := func(online, hasSnapshot bool) {
 		t.Helper()
 		res := request("GET", "/servers", "", "", 0, 200)
@@ -124,6 +160,36 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	}
 	request("POST", "/ingest", strings.Replace(payload, "15:00:00.123+03:00", "12:00:00.123Z", 1), registered.ApiKey, 0, 202)
 	list(true, true)
+	streamContext, cancelStream := context.WithCancel(context.Background())
+	streamRequest := httptest.NewRequest("GET", "/api/v1/dashboard/events?serverId="+id, nil)
+	streamContext, err := sessions.Load(streamContext, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sessions.Put(streamContext, "user_id", int64(1))
+	token, _, err := sessions.Commit(streamContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	streamRequest.AddCookie(&http.Cookie{Name: sessions.Cookie.Name, Value: token})
+	streamRequest = streamRequest.WithContext(streamContext)
+	stream := httptest.NewRecorder()
+	streamWriter := &changingSnapshotWriter{
+		ResponseRecorder: stream,
+		cancel:           cancelStream,
+		update: func() error {
+			_, err := db.Db.Exec(`UPDATE servers SET state_payload = ? WHERE id = ?`, `{"clans":[{"tag":"updated"}]}`, id)
+			return err
+		},
+	}
+	router.ServeHTTP(streamWriter, streamRequest)
+	if streamWriter.updateErr != nil {
+		t.Fatal(streamWriter.updateErr)
+	}
+	if streamWriter.flushes != 2 || strings.Count(stream.Body.String(), "event: snapshot") != 2 ||
+		!strings.Contains(stream.Body.String(), `"tag":"updated"`) || !strings.Contains(stream.Body.String(), `"events":[]`) {
+		t.Fatalf("SSE snapshot was not streamed: %s", stream.Body.String())
+	}
 
 	var count int
 	if err := db.Db.QueryRow("SELECT count(*) FROM ingest_snapshots").Scan(&count); err != nil || count != 1 {

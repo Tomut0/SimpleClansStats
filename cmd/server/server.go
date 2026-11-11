@@ -71,7 +71,7 @@ func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionM
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   allowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Prefer", "Authorization"},
 		AllowCredentials: true,
 	}))
@@ -85,6 +85,9 @@ func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionM
 
 	api := chi.NewRouter()
 	api.Post("/ingest", serverHandler.Ingest)
+	api.Get("/dashboard/events", serverHandler.DashboardEvents)
+	api.Get("/dashboard/layout", serverHandler.GetDashboardLayout)
+	api.Put("/dashboard/layout", serverHandler.SaveDashboardLayout)
 	r.Mount("/api/v1", presentation.HandlerFromMux(presentation.NewStrictHandler(serverHandler, nil), api))
 	return r
 }

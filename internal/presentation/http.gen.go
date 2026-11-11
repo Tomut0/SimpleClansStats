@@ -165,6 +165,7 @@ type AppSettings struct {
 	RemoveAuthor               bool                  `json:"removeAuthor"`
 	ServerOnlineTimeoutMinutes int64                 `json:"serverOnlineTimeoutMinutes"`
 	TimeFormat                 AppSettingsTimeFormat `json:"timeFormat"`
+	PlayerAvatarUrl            string                `json:"playerAvatarUrl"`
 	TimeZone                   string                `json:"timeZone"`
 }
 
@@ -176,11 +177,12 @@ type AppSettingsTimeFormat string
 
 // AppSettingsFields defines model for AppSettingsFields.
 type AppSettingsFields struct {
-	AppName      string                      `json:"appName"`
-	DateFormat   AppSettingsFieldsDateFormat `json:"dateFormat"`
-	RemoveAuthor bool                        `json:"removeAuthor"`
-	TimeFormat   AppSettingsFieldsTimeFormat `json:"timeFormat"`
-	TimeZone     string                      `json:"timeZone"`
+	AppName         string                      `json:"appName"`
+	DateFormat      AppSettingsFieldsDateFormat `json:"dateFormat"`
+	RemoveAuthor    bool                        `json:"removeAuthor"`
+	TimeFormat      AppSettingsFieldsTimeFormat `json:"timeFormat"`
+	TimeZone        string                      `json:"timeZone"`
+	PlayerAvatarUrl string                      `json:"playerAvatarUrl"`
 }
 
 // AppSettingsFieldsDateFormat defines model for AppSettingsFields.DateFormat.
@@ -249,6 +251,7 @@ type UpdateAppSettingsMultipartBody struct {
 	ServerOnlineTimeoutMinutes *int64                                   `json:"serverOnlineTimeoutMinutes,omitempty"`
 	TimeFormat                 UpdateAppSettingsMultipartBodyTimeFormat `json:"timeFormat"`
 	TimeZone                   string                                   `json:"timeZone"`
+	PlayerAvatarUrl            string                                   `json:"playerAvatarUrl"`
 }
 
 // UpdateAppSettingsMultipartBodyDateFormat defines parameters for UpdateAppSettings.

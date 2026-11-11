@@ -1,4 +1,4 @@
-package presentation
+package application
 
 import (
 	"bytes"
@@ -14,11 +14,11 @@ func TestCanonicalIngestState(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, events, err := ingestState([]byte(reordered))
+	b, events, err := NormalizeIngestState([]byte(reordered))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(a, b) || len(events) != 1 || events[0].id != "b" {
+	if !bytes.Equal(a, b) || len(events) != 1 || events[0].ID != "b" {
 		t.Fatal("an unordered list or event changed the snapshot state")
 	}
 	changed, _, err := canonicalIngestState(bytes.Replace([]byte(reordered), []byte("[1,2]"), []byte("[2,1]"), 1))

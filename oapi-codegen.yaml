@@ -5,4 +5,5 @@ generate:
   strict-server: true
   models: true
 output-options:
-  exclude-tags: [ingest]
+  # Dashboard SSE and layout handlers use custom streaming/session-aware routes.
+  exclude-tags: [ingest, dashboard]

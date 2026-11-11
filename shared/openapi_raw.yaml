@@ -856,13 +856,14 @@ components:
   schemas:
     AppSettingsFields:
       type: object
-      required: [appName, removeAuthor, timeZone, dateFormat, timeFormat]
+      required: [appName, removeAuthor, timeZone, dateFormat, timeFormat, playerAvatarUrl]
       properties:
         appName: { type: string, maxLength: 100 }
         removeAuthor: { type: boolean }
         timeZone: { type: string, example: Europe/Moscow }
         dateFormat: { type: string, enum: [DD.MM.YYYY, YYYY-MM-DD, MM/DD/YYYY] }
         timeFormat: { type: string, enum: [24h, 12h] }
+        playerAvatarUrl: { type: string, maxLength: 500, example: 'https://mc-heads.net/avatar/{username}/32' }
 
     AppSettings:
       allOf:

@@ -1,4 +1,4 @@
-package presentation
+package application
 
 import (
 	"bytes"
@@ -6,14 +6,11 @@ import (
 	"errors"
 	"sort"
 	"strings"
+
+	"github.com/Tomut0/SimpleClansStats/internal/domain"
 )
 
-type ingestEvent struct {
-	id      string
-	payload string
-}
-
-func ingestState(payload []byte) ([]byte, []ingestEvent, error) {
+func NormalizeIngestState(payload []byte) ([]byte, []domain.IngestEvent, error) {
 	state, rawEvents, err := canonicalIngestState(payload)
 	if err != nil {
 		return nil, nil, err
@@ -25,7 +22,7 @@ func ingestState(payload []byte) ([]byte, []ingestEvent, error) {
 	if !ok {
 		return nil, nil, errors.New("events must be an array")
 	}
-	result := make([]ingestEvent, 0, len(events))
+	result := make([]domain.IngestEvent, 0, len(events))
 	for _, event := range events {
 		object, _ := event.(map[string]any)
 		id, _ := object["id"].(string)
@@ -36,7 +33,7 @@ func ingestState(payload []byte) ([]byte, []ingestEvent, error) {
 		if err != nil {
 			return nil, nil, err
 		}
-		result = append(result, ingestEvent{id: id, payload: string(data)})
+		result = append(result, domain.IngestEvent{ID: id, Payload: string(data)})
 	}
 	return state, result, nil
 }

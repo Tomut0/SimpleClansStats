@@ -6,6 +6,7 @@ CREATE TABLE app_settings (
   time_zone TEXT NOT NULL DEFAULT 'Europe/Moscow',
   date_format TEXT NOT NULL DEFAULT 'DD.MM.YYYY',
   time_format TEXT NOT NULL DEFAULT '24h',
+  player_avatar_url TEXT NOT NULL DEFAULT 'https://mc-heads.net/avatar/{username}/32',
   logo BLOB,
   logo_version INTEGER NOT NULL DEFAULT 0
 );

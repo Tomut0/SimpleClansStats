@@ -126,11 +126,11 @@ func toDomainUser(u generated.User) (domain.User, error) {
 	}
 
 	return *domain.NewUser(
-    	u.Email,
-    	u.Username,
-    	domain.Role(u.Role),
-    	emailVerifiedAt,
-    	createdAt,
-    	updatedAt,
+		u.Email,
+		u.Username,
+		domain.Role(u.Role),
+		emailVerifiedAt,
+		createdAt,
+		updatedAt,
 	), nil
 }

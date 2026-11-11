@@ -2,25 +2,22 @@ package presentation
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/Tomut0/SimpleClansStats/internal/application"
-	"github.com/Tomut0/SimpleClansStats/internal/infrastructure/persistence/sqlite/generated"
 	"github.com/alexedwards/scs/v2"
-	"github.com/go-playground/validator/v10"
 )
 
 type ServerHandler struct {
-	validator   *validator.Validate
-	authService *application.AuthService
-	sessions    *scs.SessionManager
-	settings    *generated.Queries
-	db          *sql.DB
+	authService     *application.AuthService
+	dashboard       *application.DashboardService
+	ingest          *application.IngestService
+	settingsService *application.SettingsService
+	serverService   *application.ServerService
+	sessions        *scs.SessionManager
 }
 
-func NewServerHandler(authService *application.AuthService, sessions *scs.SessionManager, db *sql.DB) *ServerHandler {
-	validate := validator.New()
-	return &ServerHandler{validator: validate, authService: authService, sessions: sessions, settings: generated.New(db), db: db}
+func NewServerHandler(authService *application.AuthService, sessions *scs.SessionManager, dashboard *application.DashboardService, ingest *application.IngestService, settingsService *application.SettingsService, serverService *application.ServerService) *ServerHandler {
+	return &ServerHandler{authService: authService, dashboard: dashboard, ingest: ingest, settingsService: settingsService, serverService: serverService, sessions: sessions}
 }
 
 // Login Log in with username/password

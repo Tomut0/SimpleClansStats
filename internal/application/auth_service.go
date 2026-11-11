@@ -46,3 +46,8 @@ func (s *AuthService) Login(email, password string) (int64, error) {
 func (s *AuthService) GetByID(id int64) (domain.User, error) {
 	return s.repository.GetUserById(id)
 }
+
+func (s *AuthService) IsAdmin(id int64) (bool, error) {
+	user, err := s.repository.GetUserById(id)
+	return err == nil && user.Role() == domain.RoleAdmin, err
+}

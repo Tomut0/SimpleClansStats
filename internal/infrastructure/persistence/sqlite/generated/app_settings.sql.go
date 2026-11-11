@@ -22,7 +22,7 @@ func (q *Queries) GetAppLogo(ctx context.Context) ([]byte, error) {
 }
 
 const getAppSettings = `-- name: GetAppSettings :one
-SELECT app_name, remove_author, time_zone, date_format, time_format, logo_version,
+SELECT app_name, remove_author, time_zone, date_format, time_format, player_avatar_url, logo_version,
        server_online_timeout_minutes, ingest_retention_days
 FROM app_settings CROSS JOIN ingest_settings WHERE app_settings.id = 1 AND ingest_settings.id = 1
 `
@@ -33,6 +33,7 @@ type GetAppSettingsRow struct {
 	TimeZone                   string
 	DateFormat                 string
 	TimeFormat                 string
+	PlayerAvatarUrl            string
 	LogoVersion                int64
 	ServerOnlineTimeoutMinutes int64
 	IngestRetentionDays        int64
@@ -47,6 +48,7 @@ func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error)
 		&i.TimeZone,
 		&i.DateFormat,
 		&i.TimeFormat,
+		&i.PlayerAvatarUrl,
 		&i.LogoVersion,
 		&i.ServerOnlineTimeoutMinutes,
 		&i.IngestRetentionDays,
@@ -72,18 +74,20 @@ SET app_name = ?1,
     time_zone = ?3,
     date_format = ?4,
     time_format = ?5,
-    logo = COALESCE(?6, logo),
-    logo_version = logo_version + (?6 IS NOT NULL)
+    player_avatar_url = ?6,
+    logo = COALESCE(?7, logo),
+    logo_version = logo_version + (?7 IS NOT NULL)
 WHERE id = 1
 `
 
 type UpdateAppSettingsParams struct {
-	AppName      string
-	RemoveAuthor bool
-	TimeZone     string
-	DateFormat   string
-	TimeFormat   string
-	Logo         []byte
+	AppName         string
+	RemoveAuthor    bool
+	TimeZone        string
+	DateFormat      string
+	TimeFormat      string
+	PlayerAvatarUrl string
+	Logo            []byte
 }
 
 func (q *Queries) UpdateAppSettings(ctx context.Context, arg UpdateAppSettingsParams) error {
@@ -93,6 +97,7 @@ func (q *Queries) UpdateAppSettings(ctx context.Context, arg UpdateAppSettingsPa
 		arg.TimeZone,
 		arg.DateFormat,
 		arg.TimeFormat,
+		arg.PlayerAvatarUrl,
 		arg.Logo,
 	)
 	return err
