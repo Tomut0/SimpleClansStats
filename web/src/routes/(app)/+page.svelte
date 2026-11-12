@@ -176,9 +176,11 @@
 					avatarUrlTemplate={data.settings?.playerAvatarUrl ??
 						'https://mc-heads.net/avatar/{username}/32'}
 					bind:editing
-					bind:onAddWidget={addWidget}
-					bind:onRestoreDefaults={restoreDefaults}
-					bind:onSaveDashboard={saveDashboard}
+					onActionsReady={(actions) => {
+						addWidget = actions.addWidget;
+						restoreDefaults = actions.restoreDefaults;
+						saveDashboard = actions.saveDashboard;
+					}}
 					onSnapshot={(received) => (receivedSnapshot = received)}
 				/>
 			</div>

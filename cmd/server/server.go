@@ -77,9 +77,9 @@ func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionM
 		})
 	})
 
-	// Rate limiting requests by 100 per minute
+	// Rate limiting requests by 300 per minute
 	r.Use(middleware.ClientIPFromRemoteAddr)
-	r.Use(httprate.LimitBy(100, time.Minute, func(r *http.Request) (string, error) {
+	r.Use(httprate.LimitBy(300, time.Minute, func(r *http.Request) (string, error) {
 		return httprate.CanonicalizeIP(middleware.GetClientIP(r.Context())), nil
 	}))
 
@@ -115,7 +115,7 @@ func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionM
 	api := chi.NewRouter()
 	api.Post("/ingest", serverHandler.Ingest)
 	api.Get("/dashboard/events", serverHandler.DashboardEvents)
-	api.With(httprate.LimitBy(60, time.Minute, func(r *http.Request) (string, error) {
+	api.With(httprate.LimitBy(120, time.Minute, func(r *http.Request) (string, error) {
 		return httprate.CanonicalizeIP(middleware.GetClientIP(r.Context())), nil
 	})).Get("/search", serverHandler.Search)
 	api.Get("/dashboard/layout", serverHandler.GetDashboardLayout)

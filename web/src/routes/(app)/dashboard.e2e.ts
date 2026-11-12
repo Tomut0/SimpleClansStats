@@ -84,7 +84,7 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 	documentLoads = 0;
 	await page.waitForTimeout(11_000);
 	expect(documentLoads).toBe(0);
-	await page.getByRole('button', { name: 'Customize dashboard' }).click();
+	await page.locator('button[aria-label="Customize dashboard"]').click();
 	await expect(grid).not.toHaveAttribute('gs-static', 'true');
 	const clansWidget = page.locator('[data-widget-id="clans"]');
 	await expect(clansWidget).not.toHaveClass(/ui-draggable-disabled/);
@@ -173,7 +173,7 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 	);
 	await page.mouse.up();
 	await expect.poll(() => clansWidget.getAttribute('gs-w')).not.toBe(String(beforeWidth));
-	await page.getByRole('button', { name: 'Save dashboard' }).click();
+	await page.locator('button[aria-label="Save dashboard"]').click();
 	await expect(grid).toHaveAttribute('gs-static', 'true');
 	await expect(clansWidget).toHaveClass(/ui-resizable-disabled/);
 	await expect.poll(() => savedLayout?.widgets.length).toBe(10);
@@ -187,4 +187,7 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 		'gs-w',
 		String(savedLayout!.widgets.find((widget) => widget.id === 'clans')!.w)
 	);
+	await page.locator('button[aria-label="Customize dashboard"]').click();
+	await page.locator('button[aria-label="Restore default"]').click();
+	await expect(page.locator('.grid-stack-item')).toHaveCount(9);
 });
