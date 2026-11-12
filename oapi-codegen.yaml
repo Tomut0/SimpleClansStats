@@ -2,4 +2,8 @@ package: presentation
 output: internal/presentation/http.gen.go
 generate:
   chi-server: true
+  strict-server: true
   models: true
+output-options:
+  # Ingest enforces a raw 8 MiB limit; dashboard events stream SSE and layouts use custom validation.
+  exclude-tags: [ingest, dashboard]

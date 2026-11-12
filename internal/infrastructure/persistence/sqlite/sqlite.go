@@ -1,8 +1,8 @@
 package sqlite
 
 import (
-	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/Tomut0/SimpleClansStats/internal/infrastructure/persistence/sqlite/generated"
 	_ "modernc.org/sqlite"
@@ -10,7 +10,6 @@ import (
 
 type SQLite struct {
 	Db      *sql.DB
-	Ctx     context.Context
 	Queries *generated.Queries
 }
 
@@ -19,7 +18,12 @@ func New(dbPath string) *SQLite {
 		panic("dbPath is empty")
 	}
 
-	db, err := sql.Open("sqlite", dbPath)
+	path, options, _ := strings.Cut(dbPath, "?")
+	dsn := path + "?_foreign_keys=on&_busy_timeout=4000"
+	if options != "" {
+		dsn += "&" + options
+	}
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +32,6 @@ func New(dbPath string) *SQLite {
 
 	return &SQLite{
 		Db:      db,
-		Ctx:     context.Background(),
 		Queries: queries,
 	}
 }

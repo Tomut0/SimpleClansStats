@@ -25,20 +25,29 @@ func (s *AuthService) CreateAdminUser(email, username string, password string) e
 	return s.repository.Create(email, username, password, domain.RoleAdmin)
 }
 
-func (s *AuthService) Login(email, password string) error {
+func (s *AuthService) Login(email, password string) (int64, error) {
 	credentials, err := s.repository.GetUserCredentialsByEmail(email)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	ok, err := s.hasher.VerifyPassword([]byte(password), []byte(credentials.PasswordHash))
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if !ok {
-		return ErrInvalidCredentials
+		return 0, ErrInvalidCredentials
 	}
 
-	return nil
+	return credentials.UserID, nil
+}
+
+func (s *AuthService) GetByID(id int64) (domain.User, error) {
+	return s.repository.GetUserById(id)
+}
+
+func (s *AuthService) IsAdmin(id int64) (bool, error) {
+	user, err := s.repository.GetUserById(id)
+	return err == nil && user.Role() == domain.RoleAdmin, err
 }

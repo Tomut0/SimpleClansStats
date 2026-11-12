@@ -22,23 +22,6 @@ func NewSQLiteUserRepository(queries *generated.Queries, hasher ports.PasswordHa
 	}
 }
 
-func (r *sqliteUserRepository) All() ([]domain.User, error) {
-	rows, err := r.queries.ListUsers(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	users := make([]domain.User, 0, len(rows))
-	for _, row := range rows {
-		domainUser, err := toDomainUser(row)
-		if err != nil {
-			continue
-		}
-		users = append(users, domainUser)
-	}
-	return users, nil
-}
-
 func (r *sqliteUserRepository) Create(email, username, password string, role domain.Role) error {
 	hash, err := r.hasher.HashPassword(password)
 	if err != nil {
@@ -53,6 +36,15 @@ func (r *sqliteUserRepository) Create(email, username, password string, role dom
 	}
 
 	return r.queries.CreateUser(context.Background(), params)
+}
+
+func (r *sqliteUserRepository) GetUserById(id int64) (domain.User, error) {
+	user, err := r.queries.GetUserById(context.Background(), id)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return toDomainUser(user)
 }
 
 func (r *sqliteUserRepository) GetUserByEmail(email string) (domain.User, error) {
@@ -116,12 +108,12 @@ func toDomainUser(u generated.User) (domain.User, error) {
 		emailVerifiedAt = &t
 	}
 
-	return domain.User{
-		ID:              u.ID,
-		Username:        u.Username,
-		Role:            domain.Role(u.Role),
-		EmailVerifiedAt: emailVerifiedAt,
-		CreatedAt:       createdAt,
-		UpdatedAt:       updatedAt,
-	}, nil
+	return *domain.NewUser(
+		u.Email,
+		u.Username,
+		domain.Role(u.Role),
+		emailVerifiedAt,
+		createdAt,
+		updatedAt,
+	), nil
 }

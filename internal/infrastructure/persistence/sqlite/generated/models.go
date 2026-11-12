@@ -8,16 +8,72 @@ import (
 	"database/sql"
 )
 
-type Session struct {
+type AppSetting struct {
+	ID              int64
+	AppName         string
+	RemoveAuthor    bool
+	RemoveTelemetry bool
+	InstallationID  string
+	TimeZone        string
+	DateFormat      string
+	TimeFormat      string
+	PlayerAvatarUrl string
+	Logo            []byte
+	LogoVersion     int64
+	Theme           string
+	PrimaryLanguage string
+	Multilingual    bool
+}
+
+type DashboardLayout struct {
+	UserID int64
+	Layout string
+}
+
+type IngestEvent struct {
+	ServerID   string
+	EventID    string
+	ReceivedAt string
+	Payload    string
+}
+
+type IngestSetting struct {
+	ID                         int64
+	ServerOnlineTimeoutMinutes int64
+	IngestRetentionDays        int64
+}
+
+type IngestSnapshot struct {
+	ServerID   string
+	TakenAt    string
+	ReceivedAt string
+	Payload    string
+}
+
+type SearchDocument struct {
+	ServerID   string
+	EntityType string
+	EntityID   string
+	Name       string
+	Payload    string
+	SearchText string
+}
+
+type Server struct {
 	ID             string
-	UserID         int64
-	TokenHash      []byte
-	CsrfToken      string
-	UserAgent      sql.NullString
-	Ip             sql.NullString
-	CreatedAt      string
-	LastActivityAt string
-	ExpiresAt      string
+	DisplayName    string
+	ApiKeyHash     []byte
+	Disabled       bool
+	LastReceivedAt string
+	LastTakenAt    string
+	StateHash      string
+	StatePayload   string
+}
+
+type Session struct {
+	Token  string
+	Data   []byte
+	Expiry float64
 }
 
 type User struct {

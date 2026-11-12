@@ -4,6 +4,138 @@ export type ClientOptions = {
 	baseUrl: 'http://localhost:8080/api/v1' | 'https://stats.example.com/api/v1' | (string & {});
 };
 
+export type DashboardLayout = {
+	version: 1;
+	widgets: Array<DashboardWidget>;
+};
+
+export type DashboardWidget = {
+	id: string;
+	type?:
+		| 'counter'
+		| 'table'
+		| 'leaderboard'
+		| 'activityFeed'
+		| 'onlineSnapshot'
+		| 'distribution'
+		| 'timeSeries'
+		| 'clanCard'
+		| 'playerCard'
+		| 'warCenter'
+		| 'clanRoster'
+		| 'network'
+		| 'compare'
+		| 'heatmap'
+		| 'gainersLosers'
+		| 'economy'
+		| 'killFeed'
+		| 'peakOnline'
+		| 'pendingInvites'
+		| 'claims';
+	field?:
+		| 'clans'
+		| 'players'
+		| 'wars'
+		| 'balance'
+		| 'onlinePlayers'
+		| 'kills'
+		| 'clanBalance'
+		| 'recentActions'
+		| 'killTypes'
+		| 'clanStatus'
+		| 'clan'
+		| 'player'
+		| 'clanPlayers'
+		| 'clanRelations'
+		| 'clanMetrics'
+		| 'playerActivity'
+		| 'clanBalanceChange'
+		| 'recentKills'
+		| 'pendingInvites'
+		| 'claims';
+	format?: 'number' | 'compact' | 'plain';
+	limit?: 5 | 10 | 20;
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+};
+
+export type DashboardData = {
+	state: {
+		[key: string]: unknown;
+	};
+	events: Array<{
+		[key: string]: unknown;
+	}>;
+	history: Array<{
+		at: string;
+		clans: number;
+		players: number;
+		wars: number;
+		balance: number;
+		onlinePlayers: number;
+		kills: number;
+	}>;
+	clanBalanceChanges: Array<{
+		tag: string;
+		balanceChange: number;
+	}>;
+};
+
+export type ServerRegistration = {
+	server: Server;
+	apiKey: string;
+};
+
+export type ThemePresetRequest = {
+	preset: string;
+};
+
+export type AppSettingsFields = {
+	appName: string;
+	removeAuthor: boolean;
+	removeTelemetry: boolean;
+	primaryLanguage: string;
+	multilingual: boolean;
+	timeZone: string;
+	dateFormat: 'DD.MM.YYYY' | 'YYYY-MM-DD' | 'MM/DD/YYYY';
+	timeFormat: '24h' | '12h';
+	playerAvatarUrl: string;
+};
+
+export type AppSettings = AppSettingsFields & {
+	logoVersion: number;
+	serverOnlineTimeoutMinutes: number;
+	ingestRetentionDays: number;
+	/**
+	 * Current shadcn-svelte preset code
+	 */
+	theme: string;
+};
+
+export type LoginRequest = {
+	email: string;
+	password: string;
+};
+
+export type User = {
+	email: string;
+	username: string;
+	role: 'admin' | 'member' | 'guest';
+};
+
+export type Server = {
+	id: string;
+	displayName: string;
+	online: boolean;
+	disabled: boolean;
+	/**
+	 * When the last successful ingest was received
+	 */
+	lastIngestAt: string | null;
+};
+
 export type Error = {
 	code: string;
 	message: string;
@@ -12,180 +144,33 @@ export type Error = {
 	};
 };
 
-export type ClanSummary = {
-	id: string;
-	tag: string;
-	name: string;
-	verified?: boolean;
-	permanent?: boolean;
-	memberCount?: number;
-	kdr?: number;
-	colorHex?: string | null;
+export type GetCurrentUserData = {
+	body?: never;
+	path?: never;
+	query?: never;
+	url: '/auth/me';
 };
 
-export type Server = {
-	id: string;
-	displayName: string;
-	online?: boolean;
-	disabled?: boolean;
-};
-
-export type Clan = ClanSummary & {
-	description?: string | null;
-	balance?: number;
-	createdAt: string;
-	counts: {
-		leaders: number;
-		members: number;
-		allies: number;
-		enemies: number;
-	};
-	members?: Array<ClanMember>;
-	allies?: Array<ClanSummary>;
-	enemies?: Array<ClanSummary>;
-};
-
-export type ClanMember = {
-	playerId: string;
-	name: string;
-	role: 'leader' | 'member' | 'recruit' | 'ally';
-	verified?: boolean;
-	joinedAt: string;
-	kills?: number;
-	deaths?: number;
-	kdr?: number;
-};
-
-export type Player = {
-	id: string;
+export type GetCurrentUserErrors = {
 	/**
-	 * Minecraft UUID
+	 * Invalid credentials
 	 */
-	uuid: string;
-	name: string;
-	verified?: boolean;
-	firstSeen?: string;
-	lastSeen?: string;
-	kills?: number;
-	deaths?: number;
-	kdr?: number;
-	currentClan?: ClanSummary;
-	currentRole?: 'leader' | 'member' | 'recruit' | null;
-	joinedCurrentClanAt?: string | null;
-	pastClans?: Array<{
-		clan: ClanSummary;
-		role?: string;
-		joinedAt: string;
-		leftAt: string;
-	}>;
+	401: Error;
 };
 
-export type MetricPoint = {
-	ts: string;
-	value: number;
-};
+export type GetCurrentUserError = GetCurrentUserErrors[keyof GetCurrentUserErrors];
 
-export type TimeSeries = {
-	metric: 'kills' | 'deaths' | 'kdr' | 'balance' | 'members';
-	points: Array<MetricPoint>;
-};
-
-export type WidgetConfig = {
-	id: string;
-	type: 'top-clans' | 'top-players' | 'kdr-chart' | 'activity-feed' | 'custom';
-	title?: string | null;
-	position: {
-		x: number;
-		y: number;
-		w: number;
-		h: number;
-	};
-	options?: {
-		[key: string]: unknown;
-	};
-};
-
-export type DashboardLayout = {
-	widgets: Array<WidgetConfig>;
-};
-
-export type Settings = {
-	defaultLocale?: string;
-	enabledLocales?: Array<string>;
-	searchProvider?: 'builtin' | 'meilisearch' | 'algolia';
-	realtimeEnabled?: boolean;
-	ingest?: {
-		intervalSeconds?: number;
-		staleAfterSeconds?: number;
-	};
-};
-
-export type RealtimeEvent = {
-	type:
-		| 'clan.updated'
-		| 'clan.created'
-		| 'clan.deleted'
-		| 'player.updated'
-		| 'metrics.snapshot'
-		| 'ingest.status';
-	ts: string;
-	payload: {
-		[key: string]: unknown;
-	};
-};
-
-export type IngestSnapshot = {
-	takenAt: string;
+export type GetCurrentUserResponses = {
 	/**
-	 * Minecraft server identifier
+	 * OK
 	 */
-	serverId?: string;
-	clans: Array<IngestClan>;
-	players: Array<IngestPlayer>;
+	200: User;
 };
 
-export type IngestClan = {
-	/**
-	 * Clan ID in SimpleClans
-	 */
-	externalId: string;
-	tag: string;
-	name: string;
-	description?: string | null;
-	balance?: number;
-	verified?: boolean;
-	permanent?: boolean;
-	memberExternalIds?: Array<string>;
-};
-
-export type IngestPlayer = {
-	uuid: string;
-	name: string;
-	clanExternalId?: string | null;
-	role?: string | null;
-	kills?: number;
-	deaths?: number;
-	verified?: boolean;
-	joinedClanAt?: string | null;
-};
-
-export type IngestResult = {
-	accepted: boolean;
-	processedAt: string;
-	warnings?: Array<string>;
-};
-
-export type User = {
-	id?: string;
-	email?: string;
-	role?: 'admin' | 'user' | 'guest';
-};
+export type GetCurrentUserResponse = GetCurrentUserResponses[keyof GetCurrentUserResponses];
 
 export type LoginData = {
-	body: {
-		email: string;
-		password: string;
-	};
+	body: LoginRequest;
 	path?: never;
 	query?: never;
 	url: '/auth/login';
@@ -193,13 +178,13 @@ export type LoginData = {
 
 export type LoginErrors = {
 	/**
-	 * Not authenticated
+	 * Invalid credentials
 	 */
 	401: Error;
 	/**
-	 * Rate limit exceeded
+	 * Internal Server Error
 	 */
-	429: Error;
+	500: unknown;
 };
 
 export type LoginError = LoginErrors[keyof LoginErrors];
@@ -208,7 +193,7 @@ export type LoginResponses = {
 	/**
 	 * Login successful; sets the session cookie
 	 */
-	200: Player;
+	200: User;
 };
 
 export type LoginResponse = LoginResponses[keyof LoginResponses];
@@ -220,6 +205,13 @@ export type LogoutData = {
 	url: '/auth/logout';
 };
 
+export type LogoutErrors = {
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
 export type LogoutResponses = {
 	/**
 	 * Session destroyed
@@ -229,262 +221,162 @@ export type LogoutResponses = {
 
 export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
 
-export type GetCurrentUserData = {
+export type GetAppSettingsData = {
 	body?: never;
 	path?: never;
 	query?: never;
-	url: '/auth/me';
+	url: '/settings';
 };
 
-export type GetCurrentUserErrors = {
+export type GetAppSettingsErrors = {
 	/**
-	 * Not authenticated
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
+export type GetAppSettingsResponses = {
+	/**
+	 * Application settings
+	 */
+	200: AppSettings;
+};
+
+export type GetAppSettingsResponse = GetAppSettingsResponses[keyof GetAppSettingsResponses];
+
+export type UpdateAppSettingsData = {
+	body: AppSettingsFields & {
+		/**
+		 * Optional PNG or JPEG up to 1 MiB
+		 */
+		logo?: Blob | File;
+		serverOnlineTimeoutMinutes?: number;
+		ingestRetentionDays?: number;
+	};
+	path?: never;
+	query?: never;
+	url: '/settings';
+};
+
+export type UpdateAppSettingsErrors = {
+	/**
+	 * Invalid settings or logo
+	 */
+	400: unknown;
+	/**
+	 * Login required
+	 */
+	401: unknown;
+	/**
+	 * Administrator required
+	 */
+	403: unknown;
+	/**
+	 * Request too large
+	 */
+	413: unknown;
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
+export type UpdateAppSettingsResponses = {
+	/**
+	 * Saved application settings
+	 */
+	200: AppSettings;
+};
+
+export type UpdateAppSettingsResponse =
+	UpdateAppSettingsResponses[keyof UpdateAppSettingsResponses];
+
+export type ApplyAppThemeData = {
+	body: ThemePresetRequest;
+	path?: never;
+	query?: never;
+	url: '/settings/theme';
+};
+
+export type ApplyAppThemeErrors = {
+	/**
+	 * Invalid preset code
+	 */
+	400: unknown;
+	/**
+	 * Invalid credentials
 	 */
 	401: Error;
-};
-
-export type GetCurrentUserError = GetCurrentUserErrors[keyof GetCurrentUserErrors];
-
-export type GetCurrentUserResponses = {
 	/**
-	 * OK
+	 * Administrator access required
 	 */
-	200: {
-		user?: {
-			id?: string;
-			email?: string;
-			role?: 'admin' | 'user' | 'guest';
-		} | null;
-	};
-};
-
-export type GetCurrentUserResponse = GetCurrentUserResponses[keyof GetCurrentUserResponses];
-
-export type GetClansData = {
-	body?: never;
-	path?: never;
-	query?: {
-		sort?: 'name' | 'kdr' | 'members' | 'balance' | 'createdAt';
-		order?: 'asc' | 'desc';
-		verified?: boolean;
-		permanent?: boolean;
-	};
-	url: '/clans';
-};
-
-export type GetClansResponses = {
+	403: unknown;
 	/**
-	 * OK
+	 * Theme application failed
 	 */
-	200: Array<ClanSummary>;
+	500: unknown;
 };
 
-export type GetClansResponse = GetClansResponses[keyof GetClansResponses];
+export type ApplyAppThemeError = ApplyAppThemeErrors[keyof ApplyAppThemeErrors];
 
-export type GetClanByTagData = {
-	body?: never;
-	path: {
-		/**
-		 * The tag of the clan
-		 */
-		tag: string;
-	};
-	query?: never;
-	url: '/clans/{tag}';
-};
-
-export type GetClanByTagErrors = {
+export type ApplyAppThemeResponses = {
 	/**
-	 * Resource not found
+	 * Theme applied
 	 */
-	404: Error;
+	204: void;
 };
 
-export type GetClanByTagError = GetClanByTagErrors[keyof GetClanByTagErrors];
+export type ApplyAppThemeResponse = ApplyAppThemeResponses[keyof ApplyAppThemeResponses];
 
-export type GetClanByTagResponses = {
-	/**
-	 * OK
-	 */
-	200: Clan;
-};
-
-export type GetClanByTagResponse = GetClanByTagResponses[keyof GetClanByTagResponses];
-
-export type GetClanHistoryData = {
-	body?: never;
-	path: {
-		tag: string;
-	};
-	query: {
-		metric: 'kills' | 'deaths' | 'kdr' | 'balance' | 'members';
-		from?: string;
-		to?: string;
-		bucket?: 'hour' | 'day' | 'week';
-	};
-	url: '/clans/{tag}/history';
-};
-
-export type GetClanHistoryErrors = {
-	/**
-	 * Resource not found
-	 */
-	404: Error;
-};
-
-export type GetClanHistoryError = GetClanHistoryErrors[keyof GetClanHistoryErrors];
-
-export type GetClanHistoryResponses = {
-	/**
-	 * OK
-	 */
-	200: TimeSeries;
-};
-
-export type GetClanHistoryResponse = GetClanHistoryResponses[keyof GetClanHistoryResponses];
-
-export type GetPlayerByIdData = {
-	body?: never;
-	path: {
-		playerId: string;
-	};
-	query?: never;
-	url: '/players/{playerId}';
-};
-
-export type GetPlayerByIdErrors = {
-	/**
-	 * Resource not found
-	 */
-	404: Error;
-};
-
-export type GetPlayerByIdError = GetPlayerByIdErrors[keyof GetPlayerByIdErrors];
-
-export type GetPlayerByIdResponses = {
-	/**
-	 * OK
-	 */
-	200: Player;
-};
-
-export type GetPlayerByIdResponse = GetPlayerByIdResponses[keyof GetPlayerByIdResponses];
-
-export type SearchData = {
-	body?: never;
-	path?: never;
-	query: {
-		q: string;
-		type?: 'all' | 'clan' | 'player';
-		limit?: number;
-	};
-	url: '/search';
-};
-
-export type SearchResponses = {
-	/**
-	 * OK
-	 */
-	200: {
-		clans?: Array<ClanSummary>;
-		players?: Array<{
-			id?: string;
-			name?: string;
-			clan?: ClanSummary;
-		}>;
-	};
-};
-
-export type SearchResponse = SearchResponses[keyof SearchResponses];
-
-export type GetStatsOverviewData = {
+export type GetAppThemeCssData = {
 	body?: never;
 	path?: never;
 	query?: never;
-	url: '/stats/overview';
+	url: '/settings/theme.css';
 };
 
-export type GetStatsOverviewResponses = {
+export type GetAppThemeCssErrors = {
 	/**
-	 * OK
+	 * Theme stylesheet generation failed
 	 */
-	200: {
-		clans?: number;
-		players?: number;
-		lastIngestAt?: string | null;
-		ingestStale?: boolean;
-	};
+	500: unknown;
 };
 
-export type GetStatsOverviewResponse = GetStatsOverviewResponses[keyof GetStatsOverviewResponses];
+export type GetAppThemeCssResponses = {
+	/**
+	 * CSS variables generated from the active preset
+	 */
+	200: Blob | File;
+};
 
-export type GetTopClansData = {
+export type GetAppThemeCssResponse = GetAppThemeCssResponses[keyof GetAppThemeCssResponses];
+
+export type GetAppLogoData = {
 	body?: never;
 	path?: never;
-	query?: {
-		metric?: 'kdr' | 'members' | 'balance' | 'kills';
-		limit?: number;
-	};
-	url: '/stats/top-clans';
+	query?: never;
+	url: '/settings/logo';
 };
 
-export type GetTopClansResponses = {
+export type GetAppLogoErrors = {
 	/**
-	 * OK
+	 * No custom logo
 	 */
-	200: Array<ClanSummary>;
-};
-
-export type GetTopClansResponse = GetTopClansResponses[keyof GetTopClansResponses];
-
-export type GetTopPlayersData = {
-	body?: never;
-	path?: never;
-	query?: {
-		metric?: 'kills' | 'kdr';
-		limit?: number;
-	};
-	url: '/stats/top-players';
-};
-
-export type GetTopPlayersResponses = {
+	404: unknown;
 	/**
-	 * OK
+	 * Internal Server Error
 	 */
-	200: Array<{
-		id?: string;
-		name?: string;
-		kills?: number;
-		deaths?: number;
-		kdr?: number;
-		clan?: ClanSummary;
-	}>;
+	500: unknown;
 };
 
-export type GetTopPlayersResponse = GetTopPlayersResponses[keyof GetTopPlayersResponses];
-
-export type GetEventsData = {
-	body?: never;
-	path?: never;
-	query?: {
-		/**
-		 * Comma-separated list of event types
-		 */
-		types?: string;
-	};
-	url: '/events';
-};
-
-export type GetEventsResponses = {
+export type GetAppLogoResponses = {
 	/**
-	 * SSE format:
-	 * event: clan.updated
-	 * data: {"type":"clan.updated","ts":"...","payload":{...}}
+	 * Application logo
 	 */
-	200: string;
+	200: Blob | File;
 };
 
-export type GetEventsResponse = GetEventsResponses[keyof GetEventsResponses];
+export type GetAppLogoResponse = GetAppLogoResponses[keyof GetAppLogoResponses];
 
 export type GetServersData = {
 	body?: never;
@@ -509,8 +401,207 @@ export type GetServersResponses = {
 
 export type GetServersResponse = GetServersResponses[keyof GetServersResponses];
 
+export type CreateServerData = {
+	body: {
+		displayName: string;
+	};
+	path?: never;
+	query?: never;
+	url: '/servers';
+};
+
+export type CreateServerErrors = {
+	/**
+	 * Invalid server name
+	 */
+	400: unknown;
+	/**
+	 * Login required
+	 */
+	401: unknown;
+	/**
+	 * Administrator required
+	 */
+	403: unknown;
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
+export type CreateServerResponses = {
+	/**
+	 * Registered server. The API key is returned only by this operation.
+	 */
+	201: ServerRegistration;
+};
+
+export type CreateServerResponse = CreateServerResponses[keyof CreateServerResponses];
+
+export type DeleteServerData = {
+	body?: never;
+	path: {
+		serverId: string;
+	};
+	query?: never;
+	url: '/servers/{serverId}';
+};
+
+export type DeleteServerErrors = {
+	/**
+	 * Invalid server ID
+	 */
+	400: unknown;
+	/**
+	 * Login required
+	 */
+	401: unknown;
+	/**
+	 * Administrator required
+	 */
+	403: unknown;
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
+export type DeleteServerResponses = {
+	/**
+	 * Server deleted or already absent
+	 */
+	204: void;
+};
+
+export type DeleteServerResponse = DeleteServerResponses[keyof DeleteServerResponses];
+
+export type GetDashboardLayoutData = {
+	body?: never;
+	path?: never;
+	query?: never;
+	url: '/dashboard/layout';
+};
+
+export type GetDashboardLayoutErrors = {
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
+export type GetDashboardLayoutResponses = {
+	/**
+	 * Saved layout, or an empty widget list when the client should render the default arrangement
+	 */
+	200: DashboardLayout;
+};
+
+export type GetDashboardLayoutResponse =
+	GetDashboardLayoutResponses[keyof GetDashboardLayoutResponses];
+
+export type SaveDashboardLayoutData = {
+	body: DashboardLayout;
+	path?: never;
+	query?: never;
+	url: '/dashboard/layout';
+};
+
+export type SaveDashboardLayoutErrors = {
+	/**
+	 * Unsupported widget or invalid layout
+	 */
+	400: unknown;
+	/**
+	 * Invalid credentials
+	 */
+	401: Error;
+	/**
+	 * Administrator required
+	 */
+	403: unknown;
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
+};
+
+export type SaveDashboardLayoutError = SaveDashboardLayoutErrors[keyof SaveDashboardLayoutErrors];
+
+export type SaveDashboardLayoutResponses = {
+	/**
+	 * Layout saved
+	 */
+	204: void;
+};
+
+export type SaveDashboardLayoutResponse =
+	SaveDashboardLayoutResponses[keyof SaveDashboardLayoutResponses];
+
+export type GetDashboardEventsData = {
+	body?: never;
+	path?: never;
+	query: {
+		serverId: string;
+	};
+	url: '/dashboard/events';
+};
+
+export type GetDashboardEventsErrors = {
+	/**
+	 * Missing or invalid server ID
+	 */
+	400: unknown;
+	/**
+	 * Invalid credentials
+	 */
+	401: Error;
+	/**
+	 * Streaming unavailable
+	 */
+	500: unknown;
+};
+
+export type GetDashboardEventsError = GetDashboardEventsErrors[keyof GetDashboardEventsErrors];
+
+export type GetDashboardEventsResponses = {
+	/**
+	 * SSE event: event: snapshot followed by JSON DashboardData in data:
+	 */
+	200: string;
+};
+
+export type GetDashboardEventsResponse =
+	GetDashboardEventsResponses[keyof GetDashboardEventsResponses];
+
 export type IngestData = {
-	body: IngestSnapshot;
+	body: {
+		/**
+		 * When SCCollector captured the state
+		 */
+		takenAt: string;
+		/**
+		 * Optional assertion of the server bound to the API key
+		 */
+		serverId?: string;
+		clans: Array<{
+			externalId: string;
+			tag: string;
+			name: string;
+		}>;
+		players: Array<{
+			uuid: string;
+			name: string;
+		}>;
+		extensions?: {
+			/**
+			 * SCCollector v1 data for online players, wars, invites, claims and events
+			 */
+			scCollectorV1?: {
+				[key: string]: unknown;
+			};
+			[key: string]: unknown;
+		};
+	};
 	path?: never;
 	query?: never;
 	url: '/ingest';
@@ -520,179 +611,39 @@ export type IngestErrors = {
 	/**
 	 * Invalid snapshot
 	 */
-	400: Error;
+	400: unknown;
 	/**
-	 * Not authenticated
+	 * Invalid credentials
 	 */
 	401: Error;
+	/**
+	 * Snapshot exceeds 8 MiB
+	 */
+	413: unknown;
+	/**
+	 * Expected application/json
+	 */
+	415: unknown;
 	/**
 	 * Rate limit exceeded
 	 */
 	429: Error;
+	/**
+	 * Internal Server Error
+	 */
+	500: unknown;
 };
 
 export type IngestError = IngestErrors[keyof IngestErrors];
 
 export type IngestResponses = {
 	/**
-	 * Accepted
+	 * Ingest accepted. A snapshot is stored only when the state changes.
 	 */
-	202: IngestResult;
+	202: {
+		accepted: boolean;
+		processedAt: string;
+	};
 };
 
 export type IngestResponse = IngestResponses[keyof IngestResponses];
-
-export type GetIngestStatusData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/ingest/status';
-};
-
-export type GetIngestStatusResponses = {
-	/**
-	 * OK
-	 */
-	200: {
-		lastIngestAt?: string | null;
-		stale?: boolean;
-		serverId?: string | null;
-		intervalSeconds?: number;
-	};
-};
-
-export type GetIngestStatusResponse = GetIngestStatusResponses[keyof GetIngestStatusResponses];
-
-export type GetAdminSettingsData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/admin/settings';
-};
-
-export type GetAdminSettingsErrors = {
-	/**
-	 * Insufficient permissions
-	 */
-	403: Error;
-};
-
-export type GetAdminSettingsError = GetAdminSettingsErrors[keyof GetAdminSettingsErrors];
-
-export type GetAdminSettingsResponses = {
-	/**
-	 * OK
-	 */
-	200: Settings;
-};
-
-export type GetAdminSettingsResponse = GetAdminSettingsResponses[keyof GetAdminSettingsResponses];
-
-export type UpdateAdminSettingsData = {
-	body: Settings;
-	path?: never;
-	query?: never;
-	url: '/admin/settings';
-};
-
-export type UpdateAdminSettingsErrors = {
-	/**
-	 * Insufficient permissions
-	 */
-	403: Error;
-};
-
-export type UpdateAdminSettingsError = UpdateAdminSettingsErrors[keyof UpdateAdminSettingsErrors];
-
-export type UpdateAdminSettingsResponses = {
-	/**
-	 * OK
-	 */
-	200: Settings;
-};
-
-export type UpdateAdminSettingsResponse =
-	UpdateAdminSettingsResponses[keyof UpdateAdminSettingsResponses];
-
-export type GetDashboardLayoutData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/admin/dashboard/layout';
-};
-
-export type GetDashboardLayoutResponses = {
-	/**
-	 * OK
-	 */
-	200: DashboardLayout;
-};
-
-export type GetDashboardLayoutResponse =
-	GetDashboardLayoutResponses[keyof GetDashboardLayoutResponses];
-
-export type UpdateDashboardLayoutData = {
-	body: DashboardLayout;
-	path?: never;
-	query?: never;
-	url: '/admin/dashboard/layout';
-};
-
-export type UpdateDashboardLayoutErrors = {
-	/**
-	 * Insufficient permissions
-	 */
-	403: Error;
-};
-
-export type UpdateDashboardLayoutError =
-	UpdateDashboardLayoutErrors[keyof UpdateDashboardLayoutErrors];
-
-export type UpdateDashboardLayoutResponses = {
-	/**
-	 * OK
-	 */
-	200: DashboardLayout;
-};
-
-export type UpdateDashboardLayoutResponse =
-	UpdateDashboardLayoutResponses[keyof UpdateDashboardLayoutResponses];
-
-export type GetHealthData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/meta/health';
-};
-
-export type GetHealthResponses = {
-	/**
-	 * OK
-	 */
-	200: {
-		status?: 'ok' | 'degraded';
-		version?: string;
-	};
-};
-
-export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
-
-export type GetI18nMessagesData = {
-	body?: never;
-	path: {
-		locale: string;
-	};
-	query?: never;
-	url: '/meta/i18n/{locale}';
-};
-
-export type GetI18nMessagesResponses = {
-	/**
-	 * OK
-	 */
-	200: {
-		[key: string]: unknown;
-	};
-};
-
-export type GetI18nMessagesResponse = GetI18nMessagesResponses[keyof GetI18nMessagesResponses];
