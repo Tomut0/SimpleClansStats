@@ -1,4 +1,4 @@
 export const userState = $state({
-  username: 'Alice',
-  isLoggedIn: false
+	username: 'Alice',
+	isLoggedIn: false
 });

@@ -11,7 +11,12 @@
 	import { CalendarDays, Clock3, Globe2 } from '@lucide/svelte';
 	import type { AppSettings } from '$lib/api/generated';
 
-	let { id, title, settings = null, disabled = true }: {
+	let {
+		id,
+		title,
+		settings = null,
+		disabled = true
+	}: {
 		id: string;
 		title: string;
 		settings?: AppSettings | null;

@@ -10,9 +10,10 @@
 		const input = event.currentTarget as HTMLInputElement;
 		const file = input.files?.[0];
 		if (previewUrl) URL.revokeObjectURL(previewUrl);
-		previewUrl = file && ['image/png', 'image/jpeg'].includes(file.type)
-			? URL.createObjectURL(file)
-			: undefined;
+		previewUrl =
+			file && ['image/png', 'image/jpeg'].includes(file.type)
+				? URL.createObjectURL(file)
+				: undefined;
 	}
 
 	onDestroy(() => {

@@ -127,7 +127,9 @@
 			<ul class="grid gap-2">
 				{#each servers as server (server.id)}
 					<li class="flex items-center justify-between gap-2">
-						<span class="flex items-center gap-2"><ServerIcon class="w-4 h-4 text-foreground"/> {server.displayName}</span>
+						<span class="flex items-center gap-2"
+							><ServerIcon class="h-4 w-4 text-foreground" /> {server.displayName}</span
+						>
 						<div class="flex items-center gap-2">
 							<span class="text-sm text-muted-foreground">
 								{server.online
