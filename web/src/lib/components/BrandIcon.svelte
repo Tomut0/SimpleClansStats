@@ -4,6 +4,6 @@
 </script>
 
 <div class="flex items-center gap-4">
-	<img src={page.data.logoUrl} alt="" class="size-8 object-contain" />
+	<img src={page.data.logoUrl} alt="" class="size-12 object-contain" />
 	<span class="scroll-m-20 text-3xl font-bold tracking-tight">{page.data.settings?.appName || APP_NAME}</span>
 </div>

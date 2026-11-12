@@ -18,7 +18,7 @@
 </script>
 
 <section class="flex items-center justify-between">
-  <div class="flex items-center gap-2 py-8">
+  <div class="flex items-center gap-2 pt-8 pb-4">
     {#if Icon}
       <Icon class="h-10 w-10 text-foreground" />
     {/if}

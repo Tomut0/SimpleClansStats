@@ -10,8 +10,17 @@
 	import * as Empty from '$lib/components/ui/empty';
 	import { Spinner } from '$lib/components/ui/spinner';
 	import DashboardGrid from '$lib/components/Widgets/DashboardGrid.svelte';
+	import Plus from '@lucide/svelte/icons/plus';
+	import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
+	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+	import Save from '@lucide/svelte/icons/save';
+	import { Tooltip } from 'bits-ui';
 
 	const { data }: PageProps = $props();
+	let editing = $state(false);
+	let addWidget = $state(() => {});
+	let restoreDefaults = $state(() => {});
+	let saveDashboard = $state(() => {});
 	const selectedServer = $derived(
 		data.servers.find((server) => server.id === serverState.selectedId)
 	);
@@ -66,29 +75,19 @@
 	>
 		{#snippet actions()}
 			{#if selectedServer}
-				<div
-					class="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm text-muted-foreground"
-				>
-					<span class="inline-flex items-center gap-2">
-						<span
-							class={[
-								'size-1.5 rounded-full',
-								selectedServer.online ? 'bg-emerald-500' : 'bg-muted-foreground'
-							]}
-							aria-hidden="true"
-						></span>
-						{selectedServer.online ? m['server.online']() : m['server.offline']()}
-					</span>
+				<div class="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm text-muted-foreground">
+					<span class="inline-flex items-center gap-2"><span class={['size-1.5 rounded-full', selectedServer.online ? 'bg-emerald-500' : 'bg-muted-foreground']} aria-hidden="true"></span>{selectedServer.online ? m['server.online']() : m['server.offline']()}</span>
 					<span class="h-3 w-px bg-border" aria-hidden="true"></span>
-					<span>
-						{m['server.updated']()}
-						{#if updatedAt && selectedServer.lastIngestAt}
-							<time datetime={selectedServer.lastIngestAt} class="text-foreground">{updatedAt}</time
-							>
+					<span>{m['server.updated']()}{#if updatedAt && selectedServer.lastIngestAt}<time datetime={selectedServer.lastIngestAt} class="text-foreground">{updatedAt}</time>{:else}{m['server.never_updated']()}{/if}</span>
+					{#if selectedServer && !selectedServer.disabled}
+						{#if editing}
+							<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md border text-foreground" aria-label={m['pages.dashboard.add_widget_button']()} onclick={addWidget}><Plus class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">{m['pages.dashboard.add_widget_button']()}</Tooltip.Content></Tooltip.Root>
+							<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md border text-foreground" aria-label={m['pages.dashboard.restore_default']()} onclick={restoreDefaults}><RotateCcw class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">{m['pages.dashboard.restore_default']()}</Tooltip.Content></Tooltip.Root>
+							<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground" aria-label={m['pages.dashboard.save_dashboard']()} onclick={saveDashboard}><Save class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">{m['pages.dashboard.save_dashboard']()}</Tooltip.Content></Tooltip.Root>
 						{:else}
-							{m['server.never_updated']()}
+						<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md border text-foreground" aria-label="Customize dashboard" onclick={() => (editing = true)}><SlidersHorizontal class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">Customize dashboard</Tooltip.Content></Tooltip.Root>
 						{/if}
-					</span>
+					{/if}
 				</div>
 			{/if}
 		{/snippet}
@@ -105,6 +104,8 @@
 		</Empty.Root>
 	{/if}
 	{#if selectedServer && !selectedServer.disabled}
-		{#key selectedServer.id}<DashboardGrid serverId={selectedServer.id} apiUrl={API_URL} avatarUrlTemplate={data.settings?.playerAvatarUrl ?? 'https://mc-heads.net/avatar/{username}/32'} />{/key}
+		{#key selectedServer.id}
+			<DashboardGrid serverId={selectedServer.id} apiUrl={API_URL} avatarUrlTemplate={data.settings?.playerAvatarUrl ?? 'https://mc-heads.net/avatar/{username}/32'} bind:editing bind:onAddWidget={addWidget} bind:onRestoreDefaults={restoreDefaults} bind:onSaveDashboard={saveDashboard} />
+		{/key}
 	{/if}
 </main>

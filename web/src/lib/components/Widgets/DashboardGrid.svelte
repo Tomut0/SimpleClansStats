@@ -37,7 +37,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 
 	type WidgetLayout = GridStackWidget & DashboardWidget;
-	let { serverId, apiUrl, avatarUrlTemplate }: { serverId: string; apiUrl: string; avatarUrlTemplate: string } = $props();
+	let { serverId, apiUrl, avatarUrlTemplate, editing = $bindable(false), onAddWidget = $bindable(() => {}), onRestoreDefaults = $bindable(() => {}), onSaveDashboard = $bindable(() => {}) }: { serverId: string; apiUrl: string; avatarUrlTemplate: string; editing?: boolean; onAddWidget?: () => void; onRestoreDefaults?: () => void; onSaveDashboard?: () => void } = $props();
 	const defaults: WidgetLayout[] = [
 		{
 			id: 'clans',
@@ -163,7 +163,6 @@
 	let widgets = $state<WidgetLayout[]>(defaults);
 	let gridElement: HTMLDivElement;
 	let grid: GridStack | undefined;
-	let editing = $state(false);
 	let data = $state<DashboardData | null>(null);
 	let saveError = $state(false);
 	let addWidgetOpen = $state(false);
@@ -483,6 +482,11 @@
 		editing = value;
 		grid?.setStatic(!value);
 	}
+	onMount(() => {
+		onAddWidget = openWidgetCatalog;
+		onRestoreDefaults = restoreDefaults;
+		onSaveDashboard = () => void saveDashboard();
+	});
 	function moveAddTile(event: PointerEvent) {
 		if (!editing || event.pointerType === 'touch') return;
 		if (event.target instanceof Element && event.target.closest('.add-widget-hover')) return;
@@ -643,28 +647,10 @@
 	}
 </script>
 
-<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+<div class="mb-4">
 	{#if saveError}<div class="text-sm text-muted-foreground" role="status">
 			{m['pages.dashboard.save_failed']()}
 		</div>{/if}
-	<div class="flex flex-wrap gap-2">
-		{#if editing}
-			<button class="rounded-md border px-3 py-2 text-sm" onclick={openWidgetCatalog}
-				>{m['pages.dashboard.add_widget_button']()}</button
-			>
-			<button class="rounded-md border px-3 py-2 text-sm" onclick={restoreDefaults}
-				>{m['pages.dashboard.restore_default']()}</button
-			>
-			<button
-				class="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
-				onclick={saveDashboard}>{m['pages.dashboard.save_dashboard']()}</button
-			>
-		{:else}
-			<button class="rounded-md border px-3 py-2 text-sm" onclick={() => setEditing(true)}
-				>{m['pages.dashboard.customize']()}</button
-			>
-		{/if}
-	</div>
 </div>
 
 <div
