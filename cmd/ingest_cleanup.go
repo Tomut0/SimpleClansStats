@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Tomut0/SimpleClansStats/internal/infrastructure/persistence/sqlite"
 	"github.com/Tomut0/SimpleClansStats/internal/infrastructure/persistence/sqlite/generated"
 )
 
@@ -28,7 +29,7 @@ func cleanupIngest(ctx context.Context, queries *generated.Queries, now time.Tim
 	if err != nil || days == 0 {
 		return err
 	}
-	cutoff := now.UTC().AddDate(0, 0, -int(days)).Format("2006-01-02T15:04:05.000000000Z")
+	cutoff := sqlite.FormatIngestTime(now.UTC().AddDate(0, 0, -int(days)))
 	if err := queries.PurgeIngestSnapshots(ctx, cutoff); err != nil {
 		return err
 	}

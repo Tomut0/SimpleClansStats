@@ -29,7 +29,7 @@ func (s *ServerHandler) GetServers(ctx context.Context, _ GetServersRequestObjec
 }
 
 func (s *ServerHandler) CreateServer(ctx context.Context, request CreateServerRequestObject) (CreateServerResponseObject, error) {
-	switch s.serverAdminStatus(ctx) {
+	switch s.adminStatus(ctx) {
 	case http.StatusUnauthorized:
 		return CreateServer401Response{}, nil
 	case http.StatusForbidden:
@@ -49,7 +49,7 @@ func (s *ServerHandler) CreateServer(ctx context.Context, request CreateServerRe
 }
 
 func (s *ServerHandler) DeleteServer(ctx context.Context, request DeleteServerRequestObject) (DeleteServerResponseObject, error) {
-	switch s.serverAdminStatus(ctx) {
+	switch s.adminStatus(ctx) {
 	case http.StatusUnauthorized:
 		return DeleteServer401Response{}, nil
 	case http.StatusForbidden:
@@ -62,7 +62,7 @@ func (s *ServerHandler) DeleteServer(ctx context.Context, request DeleteServerRe
 	return DeleteServer204Response{}, nil
 }
 
-func (s *ServerHandler) serverAdminStatus(ctx context.Context) int {
+func (s *ServerHandler) adminStatus(ctx context.Context) int {
 	userID, ok := s.sessions.Get(ctx, "user_id").(int64)
 	if !ok {
 		return http.StatusUnauthorized

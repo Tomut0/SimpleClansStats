@@ -22,23 +22,6 @@ func NewSQLiteUserRepository(queries *generated.Queries, hasher ports.PasswordHa
 	}
 }
 
-func (r *sqliteUserRepository) All() ([]domain.User, error) {
-	rows, err := r.queries.ListUsers(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	users := make([]domain.User, 0, len(rows))
-	for _, row := range rows {
-		domainUser, err := toDomainUser(row)
-		if err != nil {
-			continue
-		}
-		users = append(users, domainUser)
-	}
-	return users, nil
-}
-
 func (r *sqliteUserRepository) Create(email, username, password string, role domain.Role) error {
 	hash, err := r.hasher.HashPassword(password)
 	if err != nil {

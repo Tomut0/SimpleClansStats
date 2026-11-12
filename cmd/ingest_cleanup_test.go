@@ -25,6 +25,7 @@ func TestCleanupUsesStoredRetention(t *testing.T) {
 INSERT INTO servers (id, display_name, api_key_hash) VALUES ('s', 'test', zeroblob(32));
 INSERT INTO ingest_events (server_id, event_id, received_at, payload)
 VALUES ('s', 'old', '2026-11-07T12:00:00.000000000Z', '{}'),
+       ('s', 'cutoff', '2026-11-08T12:00:00.000000000Z', '{}'),
        ('s', 'recent', '2026-11-09T12:00:00.000000000Z', '{}');
 UPDATE ingest_settings SET ingest_retention_days = 0;`); err != nil {
 		t.Fatal(err)
@@ -40,9 +41,9 @@ UPDATE ingest_settings SET ingest_retention_days = 0;`); err != nil {
 			t.Fatalf("after cleanup got %d events, want %d (%v)", count, want, err)
 		}
 	}
-	check(2)
+	check(3)
 	if _, err := db.Db.Exec("UPDATE ingest_settings SET ingest_retention_days = 2"); err != nil {
 		t.Fatal(err)
 	}
-	check(1)
+	check(2)
 }

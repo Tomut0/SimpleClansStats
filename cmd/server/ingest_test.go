@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -39,9 +40,15 @@ func (w *changingSnapshotWriter) Flush() {
 	}
 }
 
-type ingestTestUsers struct{ ports.UserRepository }
+type ingestTestUsers struct {
+	ports.UserRepository
+	lookupErr bool
+}
 
-func (ingestTestUsers) GetUserById(id int64) (domain.User, error) {
+func (u ingestTestUsers) GetUserById(id int64) (domain.User, error) {
+	if u.lookupErr {
+		return domain.User{}, errors.New("user lookup failed")
+	}
 	role := domain.RoleMember
 	if id == 1 {
 		role = domain.RoleAdmin
@@ -247,7 +254,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	if _, err := db.Db.Exec("UPDATE ingest_events SET received_at = ?", oldReceipt); err != nil {
 		t.Fatal(err)
 	}
-	cutoff := time.Now().UTC().AddDate(0, 0, -30).Format("2006-01-02T15:04:05.000000000Z")
+	cutoff := sqlite.FormatIngestTime(time.Now().UTC().AddDate(0, 0, -30))
 	if err := db.Queries.PurgeIngestSnapshots(t.Context(), cutoff); err != nil {
 		t.Fatal(err)
 	}
@@ -290,4 +297,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 		t.Fatalf("deleted server left snapshots behind: %d (%v)", count, err)
 	}
 	request("POST", "/ingest", payload, registered.ApiKey, 0, 401)
+	router = newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers), sessions)
+	request("POST", "/servers", name, "", 1, 401)
+	request("DELETE", "/servers/"+id, "", "", 1, 401)
 }

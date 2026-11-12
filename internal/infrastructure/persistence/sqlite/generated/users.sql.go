@@ -69,39 +69,3 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 	)
 	return i, err
 }
-
-const listUsers = `-- name: ListUsers :many
-SELECT id, email, username, password_hash, role, email_verified_at, created_at, updated_at FROM users ORDER BY username
-`
-
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listUsers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Email,
-			&i.Username,
-			&i.PasswordHash,
-			&i.Role,
-			&i.EmailVerifiedAt,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}

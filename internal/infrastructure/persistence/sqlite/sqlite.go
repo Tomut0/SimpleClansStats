@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"context"
 	"database/sql"
 	"strings"
 
@@ -11,7 +10,6 @@ import (
 
 type SQLite struct {
 	Db      *sql.DB
-	Ctx     context.Context
 	Queries *generated.Queries
 }
 
@@ -34,7 +32,6 @@ func New(dbPath string) *SQLite {
 
 	return &SQLite{
 		Db:      db,
-		Ctx:     context.Background(),
 		Queries: queries,
 	}
 }

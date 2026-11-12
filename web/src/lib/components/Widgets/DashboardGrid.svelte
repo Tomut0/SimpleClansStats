@@ -12,18 +12,13 @@
 	import OnlinePlayersWidget from './OnlinePlayersWidget.svelte';
 	import TimeSeriesWidget from './TimeSeriesWidget.svelte';
 	import PeakOnlineWidget from './PeakOnlineWidget.svelte';
-	import WarCenterWidget from './WarCenterWidget.svelte';
-	import ClanRosterWidget from './ClanRosterWidget.svelte';
 	import EconomyWidget from './EconomyWidget.svelte';
 	import KillFeedWidget from './KillFeedWidget.svelte';
-	import PendingInvitesWidget from './PendingInvitesWidget.svelte';
-	import ClaimsWidget from './ClaimsWidget.svelte';
 	import ClanCardWidget from './ClanCardWidget.svelte';
 	import PlayerCardWidget from './PlayerCardWidget.svelte';
 	import NetworkWidget from './NetworkWidget.svelte';
 	import CompareWidget from './CompareWidget.svelte';
 	import HeatmapWidget from './HeatmapWidget.svelte';
-	import GainersLosersWidget from './GainersLosersWidget.svelte';
 	import RowsWidget from './RowsWidget.svelte';
 	import type {
 		ConfigurableWidgetField,
@@ -326,19 +321,8 @@
 		if (widget.type === 'activityFeed') return widgetTitle('actions');
 		if (widget.type === 'onlineSnapshot') return widgetTitle('online');
 		if (widget.type === 'timeSeries') return widgetTitle(widget.field ?? 'clans', widget.field as CounterField);
-		if (widget.type === 'peakOnline') return m['pages.dashboard.peak_online_type']();
-		if (widget.type === 'warCenter') return m['pages.dashboard.war_center_type']();
-		if (widget.type === 'clanRoster') return m['pages.dashboard.clan_roster_type']();
-		if (widget.type === 'economy') return m['pages.dashboard.economy_type']();
-		if (widget.type === 'killFeed') return m['pages.dashboard.kill_feed_type']();
-		if (widget.type === 'pendingInvites') return m['pages.dashboard.pending_invites_type']();
-		if (widget.type === 'claims') return m['pages.dashboard.claims_type']();
-		if (widget.type === 'clanCard') return m['pages.dashboard.clan_card_type']();
-		if (widget.type === 'playerCard') return m['pages.dashboard.player_card_type']();
-		if (widget.type === 'network') return m['pages.dashboard.network_type']();
-		if (widget.type === 'compare') return m['pages.dashboard.compare_type']();
-		if (widget.type === 'heatmap') return m['pages.dashboard.heatmap_type']();
-		if (widget.type === 'gainersLosers') return m['pages.dashboard.gainers_losers_type']();
+		if (['peakOnline', 'warCenter', 'clanRoster', 'economy', 'killFeed', 'pendingInvites', 'claims', 'clanCard', 'playerCard', 'network', 'compare', 'heatmap', 'gainersLosers'].includes(widget.type ?? ''))
+			return configuredTypeTitle(widget.type as ConfigurableWidgetType);
 		return widgetTitle(widget.id);
 	}
 	function configuredTypeTitle(type: ConfigurableWidgetType) {
@@ -367,9 +351,7 @@
 		if (counterFields.includes(field as CounterField))
 			return widgetTitle(field, field as CounterField);
 		if (field === 'recentActions') return widgetTitle('actions');
-		if (field === 'onlinePlayers') return widgetTitle('onlinePlayers', 'onlinePlayers');
 		if (field === 'clanBalance') return widgetTitle('top');
-		if (field === 'wars') return m['pages.dashboard.war_center_type']();
 		if (field === 'clanPlayers') return m['pages.dashboard.clan_roster_type']();
 		if (field === 'recentKills') return m['pages.dashboard.kill_feed_type']();
 		if (field === 'pendingInvites') return m['pages.dashboard.pending_invites_type']();
@@ -387,6 +369,7 @@
 		if (field === 'wars') return { rows: widgetData.wars, fields: ['name', 'status', 'startedAt'] };
 		if (field === 'clanPlayers') return { rows: widgetData.players, fields: ['name', 'clanTag', 'rank'] };
 		if (field === 'pendingInvites') return { rows: widgetData.pendingInvites, fields: ['playerName', 'clanTag', 'createdAt'] };
+		if (field === 'claims') return { rows: widgetData.claims, fields: ['name', 'owner', 'world', 'size'] };
 		return { rows: widgetData.clanBalanceChanges, fields: ['tag', 'balanceChange'] };
 	}
 
@@ -693,18 +676,18 @@
 				{:else if widget.type === 'peakOnline'}<PeakOnlineWidget
 					title={m['pages.dashboard.peak_online_type']()} history={widgetData.history}
 				/>
-				{:else if widget.type === 'warCenter'}<WarCenterWidget wars={widgetData.wars} title={configuredTitle(widget)} />
-				{:else if widget.type === 'clanRoster'}<ClanRosterWidget players={widgetData.players} title={configuredTitle(widget)} />
+				{:else if widget.type === 'warCenter'}{@const table = tableRows('wars')}<RowsWidget title={configuredTitle(widget)} rows={table.rows} fields={table.fields} />
+				{:else if widget.type === 'clanRoster'}{@const table = tableRows('clanPlayers')}<RowsWidget title={configuredTitle(widget)} rows={table.rows} fields={table.fields} />
 				{:else if widget.type === 'economy'}<EconomyWidget clans={widgetData.clans} />
 				{:else if widget.type === 'killFeed'}<KillFeedWidget events={widgetData.events} />
-				{:else if widget.type === 'pendingInvites'}<PendingInvitesWidget invites={widgetData.pendingInvites} title={configuredTitle(widget)} />
-				{:else if widget.type === 'claims'}<ClaimsWidget claims={widgetData.claims} title={configuredTitle(widget)} />
+				{:else if widget.type === 'pendingInvites'}{@const table = tableRows('pendingInvites')}<RowsWidget title={configuredTitle(widget)} rows={table.rows} fields={table.fields} />
+				{:else if widget.type === 'claims'}{@const table = tableRows('claims')}<RowsWidget title={configuredTitle(widget)} rows={table.rows} fields={table.fields} />
 				{:else if widget.type === 'clanCard'}<ClanCardWidget clans={widgetData.clans} />
 				{:else if widget.type === 'playerCard'}<PlayerCardWidget players={widgetData.players} />
 				{:else if widget.type === 'network'}<NetworkWidget clans={widgetData.clans} />
 				{:else if widget.type === 'compare'}<CompareWidget clans={widgetData.clans} />
 				{:else if widget.type === 'heatmap'}<HeatmapWidget activity={widgetData.playerActivity} />
-				{:else if widget.type === 'gainersLosers'}<GainersLosersWidget changes={widgetData.clanBalanceChanges} />
+				{:else if widget.type === 'gainersLosers'}{@const table = tableRows('clanBalanceChange')}<RowsWidget title={configuredTitle(widget)} rows={table.rows} fields={table.fields} />
 				{:else if widget.id === 'kills'}<DonutWidget
 						title={widgetTitle(widget.id)}
 						items={killSlices}

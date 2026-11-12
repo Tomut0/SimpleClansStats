@@ -4,14 +4,68 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/Tomut0/SimpleClansStats/internal/domain"
 )
 
-type dashboardRepositoryTest struct{ saved domain.DashboardLayout }
+type dashboardRepositoryTest struct {
+	saved domain.DashboardLayout
+	data  domain.DashboardData
+}
 
 func (r *dashboardRepositoryTest) GetDashboardData(context.Context, string) (domain.DashboardData, error) {
-	return domain.DashboardData{}, nil
+	return r.data, nil
+}
+
+func TestDashboardDataKeepsHistoryAndOnlyNewestSnapshots(t *testing.T) {
+	repository := &dashboardRepositoryTest{data: domain.DashboardData{Snapshots: []json.RawMessage{
+		[]byte(`{"takenAt":"2026-11-12T00:00:00Z","clans":[{"tag":"A","balance":35}]}`),
+		[]byte(`{"takenAt":"2026-11-11T00:00:00Z","clans":[{"tag":"A","balance":20}]}`),
+		[]byte(`{"takenAt":"2026-11-10T00:00:00Z","clans":[{"tag":"A","balance":10}]}`),
+	}}}
+	data, err := NewDashboardService(repository).Data(context.Background(), "server")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data.History) != 3 || !data.History[0].At.Equal(mustParseTime(t, "2026-11-10T00:00:00Z")) {
+		t.Fatalf("unexpected history ordering: %+v", data.History)
+	}
+	if len(data.ClanBalanceChanges) != 1 || string(data.ClanBalanceChanges[0]) != `{"balanceChange":15,"tag":"A"}` {
+		t.Fatalf("expected newest balance delta, got %s", data.ClanBalanceChanges)
+	}
+	if data.Snapshots != nil {
+		t.Fatal("snapshots should not be returned")
+	}
+}
+
+func TestDashboardDataReturnsPartialHistoryOnDecodeError(t *testing.T) {
+	repository := &dashboardRepositoryTest{data: domain.DashboardData{Snapshots: []json.RawMessage{
+		[]byte(`{"takenAt":"2026-11-10T00:00:00Z"}`),
+		[]byte(`not json`),
+		[]byte(`{"takenAt":"2026-11-12T00:00:00Z"}`),
+	}}}
+	data, err := NewDashboardService(repository).Data(context.Background(), "server")
+	if err == nil || len(data.History) != 1 || !data.History[0].At.Equal(mustParseTime(t, "2026-11-12T00:00:00Z")) {
+		t.Fatalf("expected error and partial newest history, got data=%+v err=%v", data, err)
+	}
+}
+
+func TestDashboardDataWithOneNullSnapshotHasEmptyBalanceChanges(t *testing.T) {
+	repository := &dashboardRepositoryTest{data: domain.DashboardData{Snapshots: []json.RawMessage{[]byte(`null`)}}}
+	data, err := NewDashboardService(repository).Data(context.Background(), "server")
+	if err != nil || len(data.History) != 1 || data.ClanBalanceChanges == nil || len(data.ClanBalanceChanges) != 0 {
+		t.Fatalf("expected one history point and empty changes, got data=%+v err=%v", data, err)
+	}
+}
+
+func mustParseTime(t *testing.T, value string) time.Time {
+	t.Helper()
+	parsed, err := time.Parse(time.RFC3339Nano, value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return parsed
 }
 
 func TestDashboardHistoryPointReadsSnapshotMetrics(t *testing.T) {
@@ -112,5 +166,25 @@ func TestSaveDashboardLayoutRejectsInvalidCounterSettings(t *testing.T) {
 	}}}
 	if err := service.SaveLayout(context.Background(), 1, invalid); err != ErrInvalidDashboardLayout {
 		t.Fatalf("expected invalid counter settings error, got %v", err)
+	}
+}
+
+func TestSaveDashboardLayoutPreservesLegacyAndTableLimits(t *testing.T) {
+	service := NewDashboardService(&dashboardRepositoryTest{})
+	for _, widget := range []domain.DashboardWidget{
+		{ID: "clans", Limit: 99, W: 2, H: 2},
+		{ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "table", Field: "wars", Limit: 0, W: 2, H: 2},
+		{ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "table", Field: "wars", Limit: 20, W: 2, H: 2},
+	} {
+		layout := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{widget}}
+		if err := service.SaveLayout(context.Background(), 1, layout); err != nil {
+			t.Fatalf("expected widget limit %d to be accepted: %v", widget.Limit, err)
+		}
+	}
+	invalid := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{{
+		ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "table", Field: "wars", Limit: 7, W: 2, H: 2,
+	}}}
+	if err := service.SaveLayout(context.Background(), 1, invalid); err != ErrInvalidDashboardLayout {
+		t.Fatalf("expected unsupported table limit to fail, got %v", err)
 	}
 }

@@ -31,15 +31,10 @@ func (s *ServerHandler) GetAppSettings(ctx context.Context, _ GetAppSettingsRequ
 }
 
 func (s *ServerHandler) UpdateAppSettings(ctx context.Context, request UpdateAppSettingsRequestObject) (UpdateAppSettingsResponseObject, error) {
-	userID, ok := s.sessions.Get(ctx, "user_id").(int64)
-	if !ok {
+	switch s.adminStatus(ctx) {
+	case http.StatusUnauthorized:
 		return UpdateAppSettings401Response{}, nil
-	}
-	admin, err := s.authService.IsAdmin(userID)
-	if err != nil {
-		return UpdateAppSettings401Response{}, nil
-	}
-	if !admin {
+	case http.StatusForbidden:
 		return UpdateAppSettings403Response{}, nil
 	}
 

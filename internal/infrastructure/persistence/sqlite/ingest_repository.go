@@ -27,13 +27,15 @@ func (r *ingestRepository) GetServerIDByKeyHash(ctx context.Context, hash []byte
 
 func (r *ingestRepository) SaveIngest(ctx context.Context, serverID string, takenAt, receivedAt time.Time, payload string, state []byte, events []domain.IngestEvent) error {
 	hash := sha256.Sum256(state)
+	taken := FormatIngestTime(takenAt)
+	stateHash := hex.EncodeToString(hash[:])
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 	queries := r.queries.WithTx(tx)
-	received := takenIngestTime(receivedAt)
+	received := FormatIngestTime(receivedAt)
 	updated, err := queries.RecordIngestReceipt(ctx, generated.RecordIngestReceiptParams{ServerID: serverID, ReceivedAt: received})
 	if err != nil {
 		return err
@@ -46,13 +48,13 @@ func (r *ingestRepository) SaveIngest(ctx context.Context, serverID string, take
 			return err
 		}
 	}
-	if err := queries.SaveIngestSnapshot(ctx, generated.SaveIngestSnapshotParams{ServerID: serverID, TakenAt: takenIngestTime(takenAt), ReceivedAt: received, Payload: payload, StateHash: hex.EncodeToString(hash[:])}); err != nil {
+	if err := queries.SaveIngestSnapshot(ctx, generated.SaveIngestSnapshotParams{ServerID: serverID, TakenAt: taken, ReceivedAt: received, Payload: payload, StateHash: stateHash}); err != nil {
 		return err
 	}
-	if err := queries.UpdateIngestState(ctx, generated.UpdateIngestStateParams{ServerID: serverID, TakenAt: takenIngestTime(takenAt), StateHash: hex.EncodeToString(hash[:]), Payload: string(state)}); err != nil {
+	if err := queries.UpdateIngestState(ctx, generated.UpdateIngestStateParams{ServerID: serverID, TakenAt: taken, StateHash: stateHash, Payload: string(state)}); err != nil {
 		return err
 	}
 	return tx.Commit()
 }
 
-func takenIngestTime(t time.Time) string { return t.UTC().Format("2006-01-02T15:04:05.000000000Z") }
+func FormatIngestTime(t time.Time) string { return t.UTC().Format("2006-01-02T15:04:05.000000000Z") }

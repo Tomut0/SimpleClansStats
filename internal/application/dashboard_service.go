@@ -53,17 +53,21 @@ func (s *DashboardService) Data(ctx context.Context, serverID string) (domain.Da
 	if err != nil {
 		return data, err
 	}
-	decoded := make([]map[string]any, 0, len(data.Snapshots))
+	var current, previous map[string]any
 	for i := len(data.Snapshots) - 1; i >= 0; i-- {
 		var snapshot map[string]any
 		if err := json.Unmarshal(data.Snapshots[i], &snapshot); err != nil {
 			return data, err
 		}
-		decoded = append(decoded, snapshot)
+		if i == 0 {
+			current = snapshot
+		} else if i == 1 {
+			previous = snapshot
+		}
 		data.History = append(data.History, dashboardHistoryPoint(snapshot))
 	}
-	if len(decoded) > 1 {
-		data.ClanBalanceChanges = dashboardClanBalanceChanges(decoded[len(decoded)-1], decoded[len(decoded)-2])
+	if len(data.Snapshots) > 1 {
+		data.ClanBalanceChanges = dashboardClanBalanceChanges(current, previous)
 	}
 	if data.ClanBalanceChanges == nil {
 		data.ClanBalanceChanges = []json.RawMessage{}
@@ -169,25 +173,32 @@ func (s *DashboardService) SaveLayout(ctx context.Context, userID int64, layout 
 	}
 	seen := make(map[string]bool, len(layout.Widgets))
 	for _, widget := range layout.Widgets {
-		validID := dashboardWidgetIDs[widget.ID]
-		if widget.Type != "" {
-			fields, supportedType := dashboardWidgetFields[widget.Type]
-			validID = dashboardWidgetInstanceIDs.MatchString(widget.ID)
-			if widget.Type == "counter" {
-				legacyField, legacy := map[string]string{"clans": "clans", "players": "players", "wars": "wars", "balance": "balance"}[widget.ID]
-				validID = (legacy && legacyField == widget.Field) || dashboardCounterIDs.MatchString(widget.ID)
-			}
-			validLimit := widget.Type == "table" && (widget.Limit == 5 || widget.Limit == 10 || widget.Limit == 20)
-			if !supportedType || !fields[widget.Field] || (widget.Format != "" && !dashboardCounterFormats[widget.Format]) || (widget.Type == "counter" && widget.Format == "") || (widget.Type == "table" && widget.Limit != 0 && !validLimit) || (widget.Type != "table" && widget.Limit != 0) {
-				return ErrInvalidDashboardLayout
-			}
-		} else if widget.Type != "" || widget.Field != "" || widget.Format != "" {
-			validID = false
-		}
-		if !validID || seen[widget.ID] || widget.X < 0 || widget.X > 11 || widget.Y < 0 || widget.Y > 10000 || widget.W < 1 || widget.W > 12 || widget.H < 1 || widget.H > 12 || widget.X+widget.W > 12 {
+		if !validDashboardWidget(widget) || seen[widget.ID] || widget.X < 0 || widget.X > 11 || widget.Y < 0 || widget.Y > 10000 || widget.W < 1 || widget.W > 12 || widget.H < 1 || widget.H > 12 || widget.X+widget.W > 12 {
 			return ErrInvalidDashboardLayout
 		}
 		seen[widget.ID] = true
 	}
 	return s.repository.SaveLayout(ctx, userID, layout)
+}
+
+func validDashboardWidget(widget domain.DashboardWidget) bool {
+	if widget.Type == "" {
+		return dashboardWidgetIDs[widget.ID] && widget.Field == "" && widget.Format == ""
+	}
+	fields, supportedType := dashboardWidgetFields[widget.Type]
+	if !supportedType || !fields[widget.Field] {
+		return false
+	}
+	if widget.Type == "counter" {
+		legacyField, legacy := map[string]string{"clans": "clans", "players": "players", "wars": "wars", "balance": "balance"}[widget.ID]
+		if !((legacy && legacyField == widget.Field) || dashboardCounterIDs.MatchString(widget.ID)) || !dashboardCounterFormats[widget.Format] {
+			return false
+		}
+	} else if !dashboardWidgetInstanceIDs.MatchString(widget.ID) || (widget.Format != "" && !dashboardCounterFormats[widget.Format]) {
+		return false
+	}
+	if widget.Type == "table" {
+		return widget.Limit == 0 || widget.Limit == 5 || widget.Limit == 10 || widget.Limit == 20
+	}
+	return widget.Limit == 0
 }

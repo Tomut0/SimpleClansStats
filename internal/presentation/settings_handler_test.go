@@ -3,6 +3,7 @@ package presentation
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"image"
 	"image/png"
 	"mime/multipart"
@@ -23,9 +24,13 @@ import (
 
 type settingsTestUsers struct {
 	ports.UserRepository
+	lookupErr bool
 }
 
-func (settingsTestUsers) GetUserById(id int64) (domain.User, error) {
+func (u settingsTestUsers) GetUserById(id int64) (domain.User, error) {
+	if u.lookupErr {
+		return domain.User{}, errors.New("user lookup failed")
+	}
 	role := domain.RoleMember
 	if id == 1 {
 		role = domain.RoleAdmin
@@ -151,4 +156,6 @@ func TestAppSettings(t *testing.T) {
 	if res.Header().Get("Content-Type") != "image/png" || !bytes.Equal(res.Body.Bytes(), logo.Bytes()) {
 		t.Fatal("stored logo differs from the uploaded PNG")
 	}
+	handler = Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers), nil))
+	request("POST", "/settings", "Rejected", nil, 1, 401)
 }
