@@ -124,7 +124,7 @@ func (s *ServerHandler) GetAppThemeCSS(ctx context.Context, _ GetAppThemeCSSRequ
 
 func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
 	var params domain.AppSettingsUpdate
-	for _, name := range []string{"appName", "removeAuthor", "removeTelemetry", "timeZone", "dateFormat", "timeFormat", "playerAvatarUrl"} {
+	for _, name := range []string{"appName", "removeAuthor", "removeTelemetry", "primaryLanguage", "multilingual", "timeZone", "dateFormat", "timeFormat", "playerAvatarUrl"} {
 		if len(form.Value[name]) != 1 {
 			return params, false
 		}
@@ -134,6 +134,8 @@ func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
 	params.DateFormat = form.Value["dateFormat"][0]
 	params.TimeFormat = form.Value["timeFormat"][0]
 	params.PlayerAvatarURL = form.Value["playerAvatarUrl"][0]
+	params.PrimaryLanguage = form.Value["primaryLanguage"][0]
+	params.Multilingual = form.Value["multilingual"][0] == "true"
 	removeAuthor := form.Value["removeAuthor"][0]
 	params.RemoveAuthor = removeAuthor == "true"
 	removeTelemetry := form.Value["removeTelemetry"][0]
@@ -148,7 +150,8 @@ func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
 		return params, false
 	}
 
-	if (removeAuthor != "true" && removeAuthor != "false") || (removeTelemetry != "true" && removeTelemetry != "false") {
+	multilingual := form.Value["multilingual"][0]
+	if (removeAuthor != "true" && removeAuthor != "false") || (removeTelemetry != "true" && removeTelemetry != "false") || (multilingual != "true" && multilingual != "false") {
 		return params, false
 	}
 	return params, true
@@ -195,6 +198,8 @@ func appSettingsResponse(row domain.AppSettings) AppSettings {
 		AppName:                    row.AppName,
 		RemoveAuthor:               row.RemoveAuthor,
 		RemoveTelemetry:            row.RemoveTelemetry,
+		PrimaryLanguage:            row.PrimaryLanguage,
+		Multilingual:               row.Multilingual,
 		TimeZone:                   row.TimeZone,
 		DateFormat:                 AppSettingsDateFormat(row.DateFormat),
 		TimeFormat:                 AppSettingsTimeFormat(row.TimeFormat),

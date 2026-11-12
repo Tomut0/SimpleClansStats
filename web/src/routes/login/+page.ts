@@ -6,6 +6,6 @@ export const load: PageLoad = async ({ parent }) => {
 	const { user, servers } = await parent();
 
 	if (user) {
-		throw redirect(303, servers?.length ? resolve('/') : resolve('/settings'));
+		throw redirect(303, servers?.length ? resolve('') : resolve('settings'));
 	}
 };

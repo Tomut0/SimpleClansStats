@@ -25,7 +25,7 @@ export const load: LayoutLoad = async ({ fetch, depends }) => {
 
 	const logoUrl = settings?.logoVersion
 		? `${API_URL}/settings/logo?v=${settings.logoVersion}`
-		: asset('/favicon.svg');
+		: asset('favicon.svg');
 
 	return { user, servers, settings, logoUrl };
 };

@@ -114,7 +114,11 @@
 					"remove_author_title": "Remove Author",
 					"remove_author_description": "Remove the author's mention in footer",
 					"remove_telemetry_title": "Remove Telemetry",
-					"remove_telemetry_description": "Stop sending application URL, version, and last activity"
+					"remove_telemetry_description": "Stop sending application URL, version, and last activity",
+					"primary_language": "Primary language",
+					"primary_language_desc": "The language shown by default when someone opens the application.",
+					"multilingual": "Multilingual",
+					"multilingual_desc": "Allow visitors to choose the application language."
 				},
 				"servers": {
 					"title": "Servers",
@@ -171,7 +175,8 @@
 					"description_before": "Create a theme in",
 					"description_after": "and paste its preset code.",
 					"apply": "Apply",
-					"applying": "Applying…",
+					"applying": "Applying theme…",
+					"applying_description": "This may take a few minutes. The page will reload automatically.",
 					"applied": "Theme applied",
 					"apply_failed": "Could not apply theme",
 					"reset": "Reset"
@@ -263,5 +268,8 @@
 	"serverSelector": {
 		"placeholder": "Select a server",
 		"label": "Servers"
+	},
+	"language": {
+		"change": "Change language"
 	}
 }

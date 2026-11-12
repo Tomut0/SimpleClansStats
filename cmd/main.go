@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"time"
@@ -17,6 +18,9 @@ import (
 )
 
 func main() {
+	serveStatic := flag.Bool("static", false, "serve the built frontend alongside the API")
+	flag.Parse()
+
 	db := sqlite.New(os.Getenv("GOOSE_DBSTRING"))
 	defer db.Close()
 	installationID, err := sqlite.EnsureInstallationID(db.Db)
@@ -47,5 +51,5 @@ func main() {
 	settingsService := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
 	serverService := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
 	serverHandler := presentation.NewServerHandler(authService, sessionManager, dashboardService, ingestService, settingsService, serverService, searchService)
-	server.RunHttpServer(serverHandler, sessionManager, installationID)
+	server.RunHttpServer(serverHandler, sessionManager, installationID, *serveStatic)
 }

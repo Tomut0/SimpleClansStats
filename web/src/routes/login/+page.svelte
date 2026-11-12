@@ -8,5 +8,5 @@
 <div class="flex h-screen w-full flex-col items-center justify-center gap-8 px-4">
 	<BrandIcon />
 	<LoginForm />
-	<a href={resolve('/')}>{m['pages.login.backToHome']()}</a>
+	<a href={resolve('')}>{m['pages.login.backToHome']()}</a>
 </div>

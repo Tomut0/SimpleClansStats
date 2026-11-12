@@ -114,7 +114,11 @@
 					"remove_author_title": "Убрать автора",
 					"remove_author_description": "Убрать упоминание об авторе из футера",
 					"remove_telemetry_title": "Отключить телеметрию",
-					"remove_telemetry_description": "Не отправлять URL приложения, версию и последнюю активность"
+					"remove_telemetry_description": "Не отправлять URL приложения, версию и последнюю активность",
+					"primary_language": "Основной язык",
+					"primary_language_desc": "Язык, который будет отображаться по умолчанию при открытии приложения.",
+					"multilingual": "Мультиязычность",
+					"multilingual_desc": "Разрешить посетителям выбирать язык приложения."
 				},
 				"servers": {
 					"title": "Сервера",
@@ -171,7 +175,8 @@
 					"description_before": "Создайте тему в",
 					"description_after": "и вставьте код пресета.",
 					"apply": "Применить",
-					"applying": "Применяем…",
+					"applying": "Применяем тему…",
+					"applying_description": "Это может занять несколько минут. Страница обновится автоматически.",
 					"applied": "Тема применена",
 					"apply_failed": "Не удалось применить тему",
 					"reset": "Сбросить"
@@ -263,5 +268,8 @@
 			"details": "Убийства по типам",
 			"other": "Подробности"
 		}
+	},
+	"language": {
+		"change": "Сменить язык"
 	}
 }

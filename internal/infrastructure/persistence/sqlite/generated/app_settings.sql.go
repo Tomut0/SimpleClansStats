@@ -23,7 +23,7 @@ func (q *Queries) GetAppLogo(ctx context.Context) ([]byte, error) {
 
 const getAppSettings = `-- name: GetAppSettings :one
 SELECT app_name, remove_author, remove_telemetry, time_zone, date_format, time_format, player_avatar_url, logo_version,
-       server_online_timeout_minutes, ingest_retention_days, theme
+       server_online_timeout_minutes, ingest_retention_days, theme, primary_language, multilingual
 FROM app_settings CROSS JOIN ingest_settings WHERE app_settings.id = 1 AND ingest_settings.id = 1
 `
 
@@ -39,6 +39,8 @@ type GetAppSettingsRow struct {
 	ServerOnlineTimeoutMinutes int64
 	IngestRetentionDays        int64
 	Theme                      string
+	PrimaryLanguage            string
+	Multilingual               bool
 }
 
 func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error) {
@@ -56,6 +58,8 @@ func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error)
 		&i.ServerOnlineTimeoutMinutes,
 		&i.IngestRetentionDays,
 		&i.Theme,
+		&i.PrimaryLanguage,
+		&i.Multilingual,
 	)
 	return i, err
 }
@@ -80,8 +84,10 @@ SET app_name = ?1,
     date_format = ?5,
     time_format = ?6,
     player_avatar_url = ?7,
-    logo = COALESCE(?8, logo),
-    logo_version = logo_version + (?8 IS NOT NULL)
+    primary_language = ?8,
+    multilingual = ?9,
+    logo = COALESCE(?10, logo),
+    logo_version = logo_version + (?10 IS NOT NULL)
 WHERE id = 1
 `
 
@@ -93,6 +99,8 @@ type UpdateAppSettingsParams struct {
 	DateFormat      string
 	TimeFormat      string
 	PlayerAvatarUrl string
+	PrimaryLanguage string
+	Multilingual    bool
 	Logo            []byte
 }
 
@@ -105,6 +113,8 @@ func (q *Queries) UpdateAppSettings(ctx context.Context, arg UpdateAppSettingsPa
 		arg.DateFormat,
 		arg.TimeFormat,
 		arg.PlayerAvatarUrl,
+		arg.PrimaryLanguage,
+		arg.Multilingual,
 		arg.Logo,
 	)
 	return err

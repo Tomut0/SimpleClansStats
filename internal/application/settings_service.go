@@ -27,6 +27,8 @@ type SettingsService struct {
 const DefaultThemePreset = "b2pklPa1A"
 
 var themePresetPattern = regexp.MustCompile(`^[A-Za-z0-9]{6,32}$`)
+var themeImportPattern = regexp.MustCompile(`(?m)^@import[^;]+;\r?\n?`)
+var localePattern = regexp.MustCompile(`^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$`)
 var ErrInvalidSettings = errors.New("invalid application settings")
 
 func NewSettingsService(repository ports.SettingsRepository) *SettingsService {
@@ -47,7 +49,7 @@ func (s *SettingsService) ThemeCSS(ctx context.Context) (string, error) {
 	cssPath := themeCSSPath()
 	css, err := os.ReadFile(cssPath)
 	if err == nil {
-		return string(css), nil
+		return cleanThemeCSS(string(css)), nil
 	}
 	if !errors.Is(err, os.ErrNotExist) {
 		return "", err
@@ -132,11 +134,17 @@ func runThemeCLI(ctx context.Context, preset string) (string, func(), error) {
 		return "", func() {}, fmt.Errorf("read theme source: %w", err)
 	}
 	restore := func() { _ = os.WriteFile(cssPath, originalCSS, 0o644) }
-	cmd := exec.CommandContext(ctx, "npx", "--yes", "shadcn-svelte@latest", "apply", preset, "--only", "theme,font", "--yes")
+	cmd := exec.CommandContext(ctx, "npx", "--yes", "shadcn-svelte@latest", "apply", preset, "--yes")
 	cmd.Dir = projectDir
 	if output, err := cmd.CombinedOutput(); err != nil {
 		restore()
 		return "", func() {}, fmt.Errorf("apply shadcn preset: %w: %s", err, strings.TrimSpace(string(output)))
+	}
+	cmd = exec.CommandContext(ctx, "npm", "run", "build")
+	cmd.Dir = projectDir
+	if output, err := cmd.CombinedOutput(); err != nil {
+		restore()
+		return "", func() {}, fmt.Errorf("build frontend after applying theme: %w: %s", err, strings.TrimSpace(string(output)))
 	}
 	css, err := os.ReadFile(cssPath)
 	if err != nil {
@@ -144,13 +152,18 @@ func runThemeCLI(ctx context.Context, preset string) (string, func(), error) {
 		return "", func() {}, fmt.Errorf("read applied theme: %w", err)
 	}
 	// Browsers do not process Tailwind's build-time @theme directive.
-	return strings.ReplaceAll(string(css), "@theme inline {", ":root {"), restore, nil
+	return cleanThemeCSS(string(css)), restore, nil
+}
+
+func cleanThemeCSS(css string) string {
+	css = strings.ReplaceAll(css, "@theme inline {", ":root {")
+	return themeImportPattern.ReplaceAllString(css, "")
 }
 
 func (s *SettingsService) Update(ctx context.Context, update domain.AppSettingsUpdate) (domain.AppSettings, error) {
 	update.AppName = strings.TrimSpace(update.AppName)
 	update.PlayerAvatarURL = strings.TrimSpace(update.PlayerAvatarURL)
-	if update.AppName == "" || !utf8.ValidString(update.AppName) || utf8.RuneCountInString(update.AppName) > 100 ||
+	if update.AppName == "" || !utf8.ValidString(update.AppName) || utf8.RuneCountInString(update.AppName) > 100 || len(update.PrimaryLanguage) > 35 || !localePattern.MatchString(update.PrimaryLanguage) ||
 		(update.DateFormat != "DD.MM.YYYY" && update.DateFormat != "YYYY-MM-DD" && update.DateFormat != "MM/DD/YYYY") ||
 		(update.TimeFormat != "24h" && update.TimeFormat != "12h") || update.TimeZone == "" || update.TimeZone == "Local" ||
 		!validPlayerAvatarURL(update.PlayerAvatarURL) {

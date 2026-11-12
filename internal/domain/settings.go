@@ -4,6 +4,8 @@ type AppSettings struct {
 	AppName                                         string
 	RemoveAuthor                                    bool
 	RemoveTelemetry                                 bool
+	PrimaryLanguage                                 string
+	Multilingual                                    bool
 	TimeZone, DateFormat, TimeFormat                string
 	PlayerAvatarURL                                 string
 	Theme                                           string
@@ -15,6 +17,8 @@ type AppSettingsUpdate struct {
 	AppName                                         string
 	RemoveAuthor                                    bool
 	RemoveTelemetry                                 bool
+	PrimaryLanguage                                 string
+	Multilingual                                    bool
 	TimeZone, DateFormat, TimeFormat                string
 	PlayerAvatarURL                                 string
 	ServerOnlineTimeoutMinutes, IngestRetentionDays *int64

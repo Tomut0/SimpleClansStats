@@ -60,7 +60,7 @@
 				</div>
 			</div>
 			<ul class="space-y-2">
-				{#each items as item}
+				{#each items as item (item.label)}
 					<li class="flex items-center gap-2 text-sm">
 						<span class="size-2.5 rounded-full" style:background={item.color}></span>
 						<span>{item.label}</span>

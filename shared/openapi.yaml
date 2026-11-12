@@ -259,21 +259,18 @@ paths:
   /dashboard/layout:
     get:
       tags: [dashboard]
-      summary: Get the authenticated user's dashboard layout
+      summary: Get the shared dashboard layout
       operationId: getDashboardLayout
-      security:
-        - sessionCookie: []
       responses:
         "200":
           description: Saved layout, or an empty widget list when the client should render the default arrangement
           content:
             application/json:
               schema: { $ref: "#/components/schemas/DashboardLayout" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { description: Internal Server Error }
     put:
       tags: [dashboard]
-      summary: Save the authenticated user's dashboard layout
+      summary: Save the shared dashboard layout (administrators only)
       operationId: saveDashboardLayout
       security:
         - sessionCookie: []
@@ -286,6 +283,7 @@ paths:
         "204": { description: Layout saved }
         "400": { description: Unsupported widget or invalid layout }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Administrator required }
         "500": { description: Internal Server Error }
 
   /dashboard/events:
@@ -454,11 +452,13 @@ components:
 
     AppSettingsFields:
       type: object
-      required: [appName, removeAuthor, removeTelemetry, timeZone, dateFormat, timeFormat, playerAvatarUrl]
+      required: [appName, removeAuthor, removeTelemetry, primaryLanguage, multilingual, timeZone, dateFormat, timeFormat, playerAvatarUrl]
       properties:
         appName: { type: string, maxLength: 100 }
         removeAuthor: { type: boolean }
         removeTelemetry: { type: boolean }
+        primaryLanguage: { type: string, minLength: 2, maxLength: 35 }
+        multilingual: { type: boolean }
         timeZone: { type: string, example: Europe/Moscow }
         dateFormat: { type: string, enum: [DD.MM.YYYY, YYYY-MM-DD, MM/DD/YYYY] }
         timeFormat: { type: string, enum: [24h, 12h] }

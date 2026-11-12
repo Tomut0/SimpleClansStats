@@ -4,7 +4,12 @@
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
 	import { m } from '$lib/paraglide/messages.js';
 	import type { AppSettings } from '$lib/api/generated';
-	import { memberName, memberRole, orderedResultDetails, type SearchResult } from './searchResultDetails';
+	import {
+		memberName,
+		memberRole,
+		orderedResultDetails,
+		type SearchResult
+	} from './searchResultDetails';
 
 	let {
 		open = $bindable(false),

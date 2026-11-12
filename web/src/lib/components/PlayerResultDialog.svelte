@@ -5,7 +5,12 @@
 	import { Tooltip } from 'bits-ui';
 	import { m } from '$lib/paraglide/messages.js';
 	import type { AppSettings } from '$lib/api/generated';
-	import { formatRole, isLeader, orderedResultDetails, type SearchResult } from './searchResultDetails';
+	import {
+		formatRole,
+		isLeader,
+		orderedResultDetails,
+		type SearchResult
+	} from './searchResultDetails';
 
 	let {
 		open = $bindable(false),

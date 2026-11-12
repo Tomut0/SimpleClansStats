@@ -12,6 +12,9 @@
 	import { refreshAll } from '$app/navigation';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { resolve } from '$app/paths';
+	import { locales, setLocale } from '$lib/paraglide/runtime';
+	import { getLocale } from '$lib/paraglide/runtime';
+	import Languages from '@lucide/svelte/icons/languages';
 
 	let {
 		servers = [],
@@ -48,6 +51,23 @@
 		<div class="flex space-x-2">
 			<ServerSelector {servers} />
 			<SearchBar {settings} />
+			{#if settings?.multilingual}
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						<Button variant="outline" size="icon" aria-label={m['language.change']()}>
+							<Languages />
+						</Button>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end">
+						{#each locales as locale (locale)}
+							<DropdownMenu.Item onclick={() => setLocale(locale)}>
+								<span class={`fi fi-${locale === 'en' ? 'gb' : locale}`} aria-hidden="true"></span>
+								{locale.toUpperCase()}{getLocale() === locale ? ' ✓' : ''}
+							</DropdownMenu.Item>
+						{/each}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			{/if}
 			<ThemeSwitcher />
 			{#if errorMessage}
 				<p class="text-sm text-destructive" role="alert">{errorMessage}</p>
@@ -67,7 +87,7 @@
 					<DropdownMenu.Content class="w-40" align="start">
 						<DropdownMenu.Group>
 							<DropdownMenu.Item>
-								<a href={resolve('/settings')}>Settings</a>
+								<a href={resolve('/(app)/settings')}>{m['pages.settings.title']()}</a>
 							</DropdownMenu.Item>
 							<DropdownMenu.Item>
 								<button onclick={logout} disabled={isSubmitting}>

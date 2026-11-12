@@ -12,12 +12,22 @@ type AppSetting struct {
 	ID              int64
 	AppName         string
 	RemoveAuthor    bool
+	RemoveTelemetry bool
+	InstallationID  string
 	TimeZone        string
 	DateFormat      string
 	TimeFormat      string
+	PlayerAvatarUrl string
 	Logo            []byte
 	LogoVersion     int64
-	RemoveTelemetry bool
+	Theme           string
+	PrimaryLanguage string
+	Multilingual    bool
+}
+
+type DashboardLayout struct {
+	UserID int64
+	Layout string
 }
 
 type IngestEvent struct {
@@ -38,6 +48,15 @@ type IngestSnapshot struct {
 	TakenAt    string
 	ReceivedAt string
 	Payload    string
+}
+
+type SearchDocument struct {
+	ServerID   string
+	EntityType string
+	EntityID   string
+	Name       string
+	Payload    string
+	SearchText string
 }
 
 type Server struct {

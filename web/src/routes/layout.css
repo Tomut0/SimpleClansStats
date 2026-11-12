@@ -3,6 +3,10 @@
 @import 'shadcn-svelte/tailwind.css';
 @import 'layerchart/shadcn-svelte.css';
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/figtree';
+@import '@fontsource-variable/eb-garamond';
+@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/space-grotesk';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -115,6 +119,8 @@
 	--radius-2xl: calc(var(--radius) * 1.8);
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-4xl: calc(var(--radius) * 2.6);
+	--font-serif: 'EB Garamond Variable', serif;
+	--font-mono: 'JetBrains Mono Variable', monospace;
 }
 
 @layer base {

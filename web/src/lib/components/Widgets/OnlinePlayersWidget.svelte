@@ -11,7 +11,7 @@
 		{m['pages.dashboard.widget_online']()}
 	</header>
 	<ul class="min-h-0 flex-1 space-y-2 overflow-auto px-4 pb-4">
-		{#each players as player}<li class="flex items-center gap-3">
+		{#each players as player, index (`${player.name ?? index}`)}<li class="flex items-center gap-3">
 				{#if player.name}<img
 						src={avatarUrlTemplate.replace('{username}', encodeURIComponent(String(player.name)))}
 						alt=""

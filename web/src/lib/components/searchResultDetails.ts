@@ -38,7 +38,8 @@ const dateFields = new Set([
 ]);
 
 function fieldLabel(key: string) {
-	if (key === 'details' || key === 'killsByType' || key === 'killStats') return m['searchBar.fields.killsByType']();
+	if (key === 'details' || key === 'killsByType' || key === 'killStats')
+		return m['searchBar.fields.killsByType']();
 	if (key === 'colorHex' || key === 'colorTag') return m['searchBar.fields.colorTag']();
 	return (
 		messages[`searchBar.fields.${key}`]?.() ??
@@ -53,12 +54,26 @@ function fieldLabel(key: string) {
 
 const fieldOrder: Record<SearchResult['type'], string[][]> = {
 	player: [
-		['name'], ['role', 'currentRole'], ['kdr', 'kdRatio', 'kd'], ['kills'], ['deaths'],
-		['details', 'killsByType', 'killStats'], ['joinedClanAt', 'joinedCurrentClanAt'], ['lastSeenAt', 'lastSeen']
+		['name'],
+		['role', 'currentRole'],
+		['kdr', 'kdRatio', 'kd'],
+		['kills'],
+		['deaths'],
+		['details', 'killsByType', 'killStats'],
+		['joinedClanAt', 'joinedCurrentClanAt'],
+		['lastSeenAt', 'lastSeen']
 	],
 	clan: [
-		['name'], ['description'], ['colorHex', 'colorTag'], ['tag'], ['members'], ['balance'],
-		['kdr', 'kdRatio', 'kd'], ['kills'], ['deaths'], ['foundedAt', 'createdAt']
+		['name'],
+		['description'],
+		['colorHex', 'colorTag'],
+		['tag'],
+		['members'],
+		['balance'],
+		['kdr', 'kdRatio', 'kd'],
+		['kills'],
+		['deaths'],
+		['foundedAt', 'createdAt']
 	]
 };
 

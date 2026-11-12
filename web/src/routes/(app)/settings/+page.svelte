@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
+	import { locales, setLocale } from '$lib/paraglide/runtime.js';
 	import { API_URL, APP_NAME, PAGE_SEPARATOR } from '$app/env/public';
 	import { invalidate } from '$app/navigation';
 	import Settings from '@lucide/svelte/icons/settings';
@@ -62,6 +63,7 @@
 		const body = new FormData(event.currentTarget as HTMLFormElement);
 		body.set('removeAuthor', String(body.has('removeAuthor')));
 		body.set('removeTelemetry', String(body.has('removeTelemetry')));
+		body.set('multilingual', String(body.has('multilingual')));
 		const logo = body.get('logo');
 		if (logo instanceof File && !logo.name) body.delete('logo');
 
@@ -81,6 +83,13 @@
 				return;
 			}
 			await invalidate('app:settings');
+			const primaryLanguage = body.get('primaryLanguage');
+			if (
+				typeof primaryLanguage === 'string' &&
+				locales.includes(primaryLanguage as (typeof locales)[number])
+			) {
+				setLocale(primaryLanguage as (typeof locales)[number]);
+			}
 			toast.success(m['pages.settings.saved']());
 		} catch {
 			toast.error(m['pages.settings.save_failed']());
@@ -115,7 +124,7 @@
 				<Button type="submit" form="app-settings" {disabled}>
 					{m['pages.settings.save']()}
 				</Button>
-				<Button variant="secondary" href={resolve('/')} onclick={notifyIfServersEmpty}>
+				<Button variant="secondary" href={resolve('')} onclick={notifyIfServersEmpty}>
 					{m['pages.settings.backToDashboard']()}
 				</Button>
 			</div>

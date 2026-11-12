@@ -4,13 +4,11 @@
 	import { m } from '$lib/paraglide/messages.js';
 	let { clans }: { clans: Record<string, unknown>[] } = $props();
 	const chartData = $derived(
-		clans
-			.slice(0, 8)
-			.map((clan) => ({
-				name: String(clan.tag ?? clan.name ?? '—'),
-				balance: Number(clan.balance ?? 0),
-				players: Number(clan.playerCount ?? clan.memberCount ?? 0)
-			}))
+		clans.slice(0, 8).map((clan) => ({
+			name: String(clan.tag ?? clan.name ?? '—'),
+			balance: Number(clan.balance ?? 0),
+			players: Number(clan.playerCount ?? clan.memberCount ?? 0)
+		}))
 	);
 	const config = {
 		balance: { label: m['pages.dashboard.table_balance'](), color: 'var(--primary)' },

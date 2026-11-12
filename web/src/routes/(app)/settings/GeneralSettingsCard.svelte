@@ -9,12 +9,14 @@
 	import { APP_NAME } from '$app/env/public';
 	import { asset } from '$app/paths';
 	import type { AppSettings } from '$lib/api/generated';
+	import * as Select from '$lib/components/ui/select/index.js';
+	import { locales } from '$lib/paraglide/runtime';
 
 	let {
 		id,
 		title,
 		settings = null,
-		logoUrl = asset('/favicon.svg'),
+		logoUrl = asset('favicon.svg'),
 		disabled = true
 	}: {
 		id: string;
@@ -23,6 +25,7 @@
 		logoUrl?: string;
 		disabled?: boolean;
 	} = $props();
+	let primaryLanguage = $derived(settings?.primaryLanguage ?? 'en');
 </script>
 
 <fieldset class="min-w-0" {disabled}>
@@ -83,6 +86,50 @@
 						maxlength={500}
 						class="max-w-lg"
 					/>
+				</Field.Field>
+
+				<Field.Field orientation="horizontal">
+					<Field.Content>
+						<Field.Label for="primary-language"
+							>{m['pages.settings.categories.general.primary_language']()}</Field.Label
+						>
+						<Field.Description
+							>{m['pages.settings.categories.general.primary_language_desc']()}</Field.Description
+						>
+					</Field.Content>
+					<Select.Root
+						type="single"
+						name="primaryLanguage"
+						items={locales.map((value) => ({ value, label: value.toUpperCase() }))}
+						bind:value={primaryLanguage}
+					>
+						<Select.Trigger id="primary-language"
+							><span
+								class={`fi fi-${primaryLanguage === 'en' ? 'gb' : primaryLanguage}`}
+								aria-hidden="true"
+							></span><Select.Value /></Select.Trigger
+						>
+						<Select.Content>
+							{#each locales as locale (locale)}<Select.Item
+									value={locale}
+									label={locale.toUpperCase()}
+									><span class={`fi fi-${locale === 'en' ? 'gb' : locale}`} aria-hidden="true"
+									></span>{locale.toUpperCase()}</Select.Item
+								>{/each}
+						</Select.Content>
+					</Select.Root>
+				</Field.Field>
+
+				<Field.Field orientation="horizontal">
+					<Field.Content>
+						<Field.Label for="multilingual"
+							>{m['pages.settings.categories.general.multilingual']()}</Field.Label
+						>
+						<Field.Description
+							>{m['pages.settings.categories.general.multilingual_desc']()}</Field.Description
+						>
+					</Field.Content>
+					<Switch id="multilingual" name="multilingual" checked={settings?.multilingual ?? false} />
 				</Field.Field>
 
 				<Field.Field orientation="horizontal">

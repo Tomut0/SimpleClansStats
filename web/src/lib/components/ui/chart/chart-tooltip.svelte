@@ -6,7 +6,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function defaultFormatter(value: any, _payload: TooltipPayload[]) {
+	function defaultFormatter(value: any) {
 		return `${value}`;
 	}
 

@@ -12,7 +12,7 @@ RUN CGO_ENABLED=0 go build \
     -trimpath \
     -ldflags="-s -w" \
     -o /out/simpleclansstats \
-    ./cmd/server
+    ./cmd
 
 # Goose
 RUN CGO_ENABLED=0 go build \
@@ -35,18 +35,23 @@ WORKDIR /app
 COPY --from=builder /out/simpleclansstats /app/simpleclansstats
 COPY --from=builder /out/goose /usr/local/bin/goose
 COPY sql/migrations /app/sql/migrations
-COPY web/components.json /app/web/components.json
-COPY web/package.json /app/web/package.json
-COPY web/src/routes/layout.css /app/web/src/routes/layout.css
+COPY web/package*.json web/.npmrc /app/web/
+WORKDIR /app/web
+RUN npm ci
+COPY web/ /app/web/
+ENV API_URL=/api/v1 APP_NAME=SCStats PAGE_SEPARATOR=" - "
+RUN npm run build
+WORKDIR /app
 
 # SQLite database
 VOLUME ["/data"]
 
-ENV DATABASE_PATH=/data/simpleclansstats.sqlite
+ENV DATABASE_PATH=/data/simpleclansstats.sqlite GOOSE_DRIVER=sqlite3 GOOSE_DBSTRING=/data/simpleclansstats.sqlite
 ENV SHADCN_PROJECT_DIR=/app/web
 ENV APP_THEME_CSS_PATH=/data/theme.css
 
 COPY deploy/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh /app/simpleclansstats
 
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["--static"]

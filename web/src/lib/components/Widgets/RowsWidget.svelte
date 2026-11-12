@@ -16,15 +16,16 @@
 		<Table.Root class="text-xs">
 			<Table.Header class="bg-muted/50"
 				><Table.Row
-					>{#each fields as field}<Table.Head class="h-8 px-2 font-normal text-muted-foreground"
-							>{field}</Table.Head
+					>{#each fields as field (field)}<Table.Head
+							class="h-8 px-2 font-normal text-muted-foreground">{field}</Table.Head
 						>{/each}</Table.Row
 				></Table.Header
 			>
 			<Table.Body>
 				{#each rows as row, index (`${row.id ?? row.uuid ?? row.name ?? row.tag ?? index}`)}
 					<Table.Row
-						>{#each fields as field}<Table.Cell class="p-2">{String(row[field] ?? '—')}</Table.Cell
+						>{#each fields as field (field)}<Table.Cell class="p-2"
+								>{String(row[field] ?? '—')}</Table.Cell
 							>{/each}</Table.Row
 					>
 				{:else}<Table.Row

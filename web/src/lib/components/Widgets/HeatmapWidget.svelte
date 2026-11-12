@@ -17,7 +17,7 @@
 			role="img"
 			aria-label={m['pages.dashboard.heatmap_type']()}
 		>
-			{#each values as value, index}<Tooltip.Root
+			{#each values as value, index (index)}<Tooltip.Root
 					><Tooltip.Trigger
 						>{#snippet child({ props })}<span
 								{...props}

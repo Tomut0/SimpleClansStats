@@ -162,7 +162,9 @@ type AppSettings struct {
 	DateFormat                 AppSettingsDateFormat `json:"dateFormat"`
 	IngestRetentionDays        int64                 `json:"ingestRetentionDays"`
 	LogoVersion                int64                 `json:"logoVersion"`
+	Multilingual               bool                  `json:"multilingual"`
 	PlayerAvatarUrl            string                `json:"playerAvatarUrl"`
+	PrimaryLanguage            string                `json:"primaryLanguage"`
 	RemoveAuthor               bool                  `json:"removeAuthor"`
 	RemoveTelemetry            bool                  `json:"removeTelemetry"`
 	ServerOnlineTimeoutMinutes int64                 `json:"serverOnlineTimeoutMinutes"`
@@ -183,7 +185,9 @@ type AppSettingsTimeFormat string
 type AppSettingsFields struct {
 	AppName         string                      `json:"appName"`
 	DateFormat      AppSettingsFieldsDateFormat `json:"dateFormat"`
+	Multilingual    bool                        `json:"multilingual"`
 	PlayerAvatarUrl string                      `json:"playerAvatarUrl"`
+	PrimaryLanguage string                      `json:"primaryLanguage"`
 	RemoveAuthor    bool                        `json:"removeAuthor"`
 	RemoveTelemetry bool                        `json:"removeTelemetry"`
 	TimeFormat      AppSettingsFieldsTimeFormat `json:"timeFormat"`
@@ -257,7 +261,9 @@ type UpdateAppSettingsMultipartBody struct {
 
 	// Logo Optional PNG or JPEG up to 1 MiB
 	Logo                       *openapi_types.File                      `json:"logo,omitempty"`
+	Multilingual               bool                                     `json:"multilingual"`
 	PlayerAvatarUrl            string                                   `json:"playerAvatarUrl"`
+	PrimaryLanguage            string                                   `json:"primaryLanguage"`
 	RemoveAuthor               bool                                     `json:"removeAuthor"`
 	RemoveTelemetry            bool                                     `json:"removeTelemetry"`
 	ServerOnlineTimeoutMinutes *int64                                   `json:"serverOnlineTimeoutMinutes,omitempty"`

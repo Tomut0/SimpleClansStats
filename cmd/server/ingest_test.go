@@ -75,7 +75,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := db.Db.Exec(`INSERT INTO users (id, email, username, password_hash, role) VALUES (2, 'member@example.com', 'member', 'hash', 'member')`); err != nil {
+	if _, err := db.Db.Exec(`INSERT INTO users (id, email, username, password_hash, role) VALUES (1, 'admin@example.com', 'admin', 'hash', 'admin'), (2, 'member@example.com', 'member', 'hash', 'member')`); err != nil {
 		t.Fatal(err)
 	}
 
@@ -85,7 +85,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	search := application.NewSearchService(sqlite.NewSQLiteSearchRepository(db.Db))
 	settings := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
 	servers := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
-	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, dashboard, ingest, settings, servers, search), sessions, "")
+	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, dashboard, ingest, settings, servers, search), sessions, "", false)
 	request := func(method, path, body, key string, userID int64, wantStatus int) *httptest.ResponseRecorder {
 		t.Helper()
 		req := httptest.NewRequest(method, "/api/v1"+path, strings.NewReader(body))
@@ -134,9 +134,10 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	if string(storedHash) != string(hash[:]) {
 		t.Fatal("collector key was not stored as a hash")
 	}
-	request("GET", "/dashboard/layout", "", "", 0, 401)
-	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"clans","x":0,"y":0,"w":4,"h":2}]}`, "", 2, 204)
-	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"custom-html","x":0,"y":0,"w":4,"h":2}]}`, "", 2, 400)
+	request("GET", "/dashboard/layout", "", "", 0, 200)
+	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"clans","x":0,"y":0,"w":4,"h":2}]}`, "", 2, 403)
+	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"clans","x":0,"y":0,"w":4,"h":2}]}`, "", 1, 204)
+	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"custom-html","x":0,"y":0,"w":4,"h":2}]}`, "", 1, 400)
 	layout := request("GET", "/dashboard/layout", "", "", 2, 200)
 	if !strings.Contains(layout.Body.String(), `"id":"clans"`) {
 		t.Fatalf("layout did not persist: %s", layout.Body.String())
@@ -241,9 +242,9 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	changed := strings.Replace(heartbeat, "15:05:00", "15:10:00", 1)
 	changed = strings.Replace(changed, `"clans":[]`, `"clans":[{"externalId":"x","tag":"X","name":"Clan X"}]`, 1)
 	request("POST", "/ingest", changed, registered.ApiKey, 0, 202)
-	search := request("GET", "/search?serverId="+id+"&q=Clan", "", "", 0, 200)
-	if !strings.Contains(search.Body.String(), `"name":"Clan X"`) || strings.Contains(search.Body.String(), `"uuid"`) {
-		t.Fatalf("public search did not return sanitized clan details: %s", search.Body.String())
+	searchResponse := request("GET", "/search?serverId="+id+"&q=Clan", "", "", 0, 200)
+	if !strings.Contains(searchResponse.Body.String(), `"name":"Clan X"`) || strings.Contains(searchResponse.Body.String(), `"uuid"`) {
+		t.Fatalf("public search did not return sanitized clan details: %s", searchResponse.Body.String())
 	}
 	request("POST", "/ingest", heartbeat, registered.ApiKey, 0, 202)
 	if err := db.Db.QueryRow("SELECT count(*) FROM ingest_snapshots").Scan(&count); err != nil || count != 2 {
@@ -303,7 +304,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 		t.Fatalf("deleted server left snapshots behind: %d (%v)", count, err)
 	}
 	request("POST", "/ingest", payload, registered.ApiKey, 0, 401)
-	router = newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers, search), sessions, "")
+	router = newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers, search), sessions, "", false)
 	request("POST", "/servers", name, "", 1, 401)
 	request("DELETE", "/servers/"+id, "", "", 1, 401)
 }
