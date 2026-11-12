@@ -43,6 +43,11 @@ func (r *ingestRepository) SaveIngest(ctx context.Context, serverID string, take
 	if updated == 0 {
 		return sql.ErrNoRows
 	}
+	var currentHash, currentTaken string
+	if err := tx.QueryRowContext(ctx, `SELECT state_hash, last_taken_at FROM servers WHERE id = ?`, serverID).Scan(&currentHash, &currentTaken); err != nil {
+		return err
+	}
+	stateChanged := taken > currentTaken && stateHash != currentHash
 	for _, event := range events {
 		if err := queries.SaveIngestEvent(ctx, generated.SaveIngestEventParams{ServerID: serverID, EventID: event.ID, ReceivedAt: received, Payload: event.Payload}); err != nil {
 			return err
@@ -53,6 +58,11 @@ func (r *ingestRepository) SaveIngest(ctx context.Context, serverID string, take
 	}
 	if err := queries.UpdateIngestState(ctx, generated.UpdateIngestStateParams{ServerID: serverID, TakenAt: taken, StateHash: stateHash, Payload: string(state)}); err != nil {
 		return err
+	}
+	if stateChanged {
+		if err := indexSearchDocuments(ctx, tx, serverID, payload); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }

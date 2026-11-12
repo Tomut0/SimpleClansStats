@@ -11,13 +11,14 @@ type ServerHandler struct {
 	authService     *application.AuthService
 	dashboard       *application.DashboardService
 	ingest          *application.IngestService
+	search          *application.SearchService
 	settingsService *application.SettingsService
 	serverService   *application.ServerService
 	sessions        *scs.SessionManager
 }
 
-func NewServerHandler(authService *application.AuthService, sessions *scs.SessionManager, dashboard *application.DashboardService, ingest *application.IngestService, settingsService *application.SettingsService, serverService *application.ServerService) *ServerHandler {
-	return &ServerHandler{authService: authService, dashboard: dashboard, ingest: ingest, settingsService: settingsService, serverService: serverService, sessions: sessions}
+func NewServerHandler(authService *application.AuthService, sessions *scs.SessionManager, dashboard *application.DashboardService, ingest *application.IngestService, settingsService *application.SettingsService, serverService *application.ServerService, search *application.SearchService) *ServerHandler {
+	return &ServerHandler{authService: authService, dashboard: dashboard, ingest: ingest, search: search, settingsService: settingsService, serverService: serverService, sessions: sessions}
 }
 
 // Login Log in with username/password

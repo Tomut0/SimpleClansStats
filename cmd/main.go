@@ -39,8 +39,9 @@ func main() {
 
 	dashboardService := application.NewDashboardService(sqlite.NewSQLiteDashboardRepository(db.Db))
 	ingestService := application.NewIngestService(sqlite.NewSQLiteIngestRepository(db.Db))
+	searchService := application.NewSearchService(sqlite.NewSQLiteSearchRepository(db.Db))
 	settingsService := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
 	serverService := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
-	serverHandler := presentation.NewServerHandler(authService, sessionManager, dashboardService, ingestService, settingsService, serverService)
+	serverHandler := presentation.NewServerHandler(authService, sessionManager, dashboardService, ingestService, settingsService, serverService, searchService)
 	server.RunHttpServer(serverHandler, sessionManager)
 }

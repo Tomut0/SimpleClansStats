@@ -57,9 +57,10 @@ func TestAppSettings(t *testing.T) {
 	sessions := scs.New()
 	dashboard := application.NewDashboardService(sqlite.NewSQLiteDashboardRepository(db.Db))
 	ingest := application.NewIngestService(sqlite.NewSQLiteIngestRepository(db.Db))
+	search := application.NewSearchService(sqlite.NewSQLiteSearchRepository(db.Db))
 	settings := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
 	servers := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
-	handler := Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{}, nil), sessions, dashboard, ingest, settings, servers), nil))
+	handler := Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{}, nil), sessions, dashboard, ingest, settings, servers, search), nil))
 	request := func(method, path, name string, logo []byte, userID int64, wantStatus int, extra ...map[string]string) *httptest.ResponseRecorder {
 		t.Helper()
 		var body bytes.Buffer
@@ -156,6 +157,6 @@ func TestAppSettings(t *testing.T) {
 	if res.Header().Get("Content-Type") != "image/png" || !bytes.Equal(res.Body.Bytes(), logo.Bytes()) {
 		t.Fatal("stored logo differs from the uploaded PNG")
 	}
-	handler = Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers), nil))
+	handler = Handler(NewStrictHandler(NewServerHandler(application.NewAuthService(settingsTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers, search), nil))
 	request("POST", "/settings", "Rejected", nil, 1, 401)
 }

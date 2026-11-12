@@ -64,6 +64,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 		"20261109190000_create_app_settings.sql",
 		"20261110120000_create_servers_and_ingest_snapshots.sql",
 		"20261111100000_create_dashboard_layouts.sql",
+		"20261112100000_create_search_index.sql",
 	} {
 		migration, err := os.ReadFile("../../sql/migrations/" + name)
 		if err != nil {
@@ -81,9 +82,10 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	sessions := scs.New()
 	dashboard := application.NewDashboardService(sqlite.NewSQLiteDashboardRepository(db.Db))
 	ingest := application.NewIngestService(sqlite.NewSQLiteIngestRepository(db.Db))
+	search := application.NewSearchService(sqlite.NewSQLiteSearchRepository(db.Db))
 	settings := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
 	servers := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
-	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, dashboard, ingest, settings, servers), sessions)
+	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, dashboard, ingest, settings, servers, search), sessions)
 	request := func(method, path, body, key string, userID int64, wantStatus int) *httptest.ResponseRecorder {
 		t.Helper()
 		req := httptest.NewRequest(method, "/api/v1"+path, strings.NewReader(body))
@@ -239,6 +241,10 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	changed := strings.Replace(heartbeat, "15:05:00", "15:10:00", 1)
 	changed = strings.Replace(changed, `"clans":[]`, `"clans":[{"externalId":"x","tag":"X","name":"Clan X"}]`, 1)
 	request("POST", "/ingest", changed, registered.ApiKey, 0, 202)
+	search := request("GET", "/search?serverId="+id+"&q=Clan", "", "", 0, 200)
+	if !strings.Contains(search.Body.String(), `"name":"Clan X"`) || strings.Contains(search.Body.String(), `"uuid"`) {
+		t.Fatalf("public search did not return sanitized clan details: %s", search.Body.String())
+	}
 	request("POST", "/ingest", heartbeat, registered.ApiKey, 0, 202)
 	if err := db.Db.QueryRow("SELECT count(*) FROM ingest_snapshots").Scan(&count); err != nil || count != 2 {
 		t.Fatalf("expected initial and changed snapshots only, got %d (%v)", count, err)
@@ -297,7 +303,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 		t.Fatalf("deleted server left snapshots behind: %d (%v)", count, err)
 	}
 	request("POST", "/ingest", payload, registered.ApiKey, 0, 401)
-	router = newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers), sessions)
+	router = newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers, search), sessions)
 	request("POST", "/servers", name, "", 1, 401)
 	request("DELETE", "/servers/"+id, "", "", 1, 401)
 }

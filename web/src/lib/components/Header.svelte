@@ -8,22 +8,26 @@
 	import SearchBar from './SearchBar.svelte';
 	import ServerSelector from './ServerSelector.svelte';
 	import Separator from './ui/separator/separator.svelte';
-	import type { Server, User } from '$lib/api/generated';
+	import type { AppSettings, Server, User } from '$lib/api/generated';
 	import { refreshAll } from '$app/navigation';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { resolve } from '$app/paths';
 
-	let { servers = [], user }: { servers: Server[]; user: User | null } = $props();
+	let {
+		servers = [],
+		user,
+		settings
+	}: { servers: Server[]; user: User | null; settings: AppSettings | null } = $props();
 
 	let errorMessage = $state('');
 	let isSubmitting = $state(false);
-	
+
 	async function logout() {
-	    try {
-            isSubmitting = true
-            
+		try {
+			isSubmitting = true;
+
 			const res = await fetch(`${API_URL}/auth/logout`, {
-			    credentials: 'include',
+				credentials: 'include',
 				method: 'POST'
 			});
 
@@ -31,9 +35,9 @@
 				refreshAll();
 			}
 		} catch {
-		  errorMessage = m['errors.http_error']()
+			errorMessage = m['errors.http_error']();
 		} finally {
-		  isSubmitting = false
+			isSubmitting = false;
 		}
 	}
 </script>
@@ -43,12 +47,12 @@
 		<BrandIcon />
 		<div class="flex space-x-2">
 			<ServerSelector {servers} />
-			<SearchBar />
+			<SearchBar {settings} />
 			<ThemeSwitcher />
 			{#if errorMessage}
 				<p class="text-sm text-destructive" role="alert">{errorMessage}</p>
 			{/if}
-			
+
 			{#if user?.email}
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger
@@ -63,7 +67,7 @@
 					<DropdownMenu.Content class="w-40" align="start">
 						<DropdownMenu.Group>
 							<DropdownMenu.Item>
-							    <a href={resolve('/settings')}>Settings</a>
+								<a href={resolve('/settings')}>Settings</a>
 							</DropdownMenu.Item>
 							<DropdownMenu.Item>
 								<button onclick={logout} disabled={isSubmitting}>

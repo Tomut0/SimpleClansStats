@@ -86,6 +86,9 @@ func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionM
 	api := chi.NewRouter()
 	api.Post("/ingest", serverHandler.Ingest)
 	api.Get("/dashboard/events", serverHandler.DashboardEvents)
+	api.With(httprate.LimitBy(60, time.Minute, func(r *http.Request) (string, error) {
+		return httprate.CanonicalizeIP(middleware.GetClientIP(r.Context())), nil
+	})).Get("/search", serverHandler.Search)
 	api.Get("/dashboard/layout", serverHandler.GetDashboardLayout)
 	api.Put("/dashboard/layout", serverHandler.SaveDashboardLayout)
 	r.Mount("/api/v1", presentation.HandlerFromMux(presentation.NewStrictHandler(serverHandler, nil), api))

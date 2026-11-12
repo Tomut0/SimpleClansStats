@@ -34,15 +34,8 @@ type IngestEvent struct {
 type IngestSnapshot struct {
 	TakenAt  time.Time `json:"takenAt"`
 	ServerID string    `json:"serverId"`
-	Clans    []struct {
-		ExternalID string `json:"externalId"`
-		Tag        string `json:"tag"`
-		Name       string `json:"name"`
-	} `json:"clans"`
-	Players []struct {
-		UUID uuid.UUID `json:"uuid"`
-		Name string    `json:"name"`
-	} `json:"players"`
+	Clans    []Clan    `json:"clans"`
+	Players  []Player  `json:"players"`
 }
 
 func (s IngestSnapshot) Valid(serverID string) bool {
@@ -50,12 +43,13 @@ func (s IngestSnapshot) Valid(serverID string) bool {
 		return false
 	}
 	for _, clan := range s.Clans {
-		if strings.TrimSpace(clan.ExternalID) == "" || strings.TrimSpace(clan.Tag) == "" || strings.TrimSpace(clan.Name) == "" {
+		if strings.TrimSpace(stringField(clan, "externalId")) == "" || strings.TrimSpace(stringField(clan, "tag")) == "" || strings.TrimSpace(stringField(clan, "name")) == "" {
 			return false
 		}
 	}
 	for _, player := range s.Players {
-		if player.UUID == uuid.Nil || strings.TrimSpace(player.Name) == "" {
+		id, err := uuid.Parse(stringField(player, "uuid"))
+		if err != nil || id == uuid.Nil || strings.TrimSpace(stringField(player, "name")) == "" {
 			return false
 		}
 	}
