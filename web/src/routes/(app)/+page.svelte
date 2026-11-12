@@ -96,58 +96,60 @@
 							>{:else}{m['server.never_updated']()}{/if}</span
 					>
 					{#if selectedServer && !selectedServer.disabled}
-						{#if editing}
-							<Tooltip.Root
-								><Tooltip.Trigger
-									><button
-										class="grid size-9 place-items-center rounded-md border text-foreground"
-										aria-label={m['pages.dashboard.add_widget_button']()}
-										onclick={addWidget}><Plus class="size-4" aria-hidden="true" /></button
-									></Tooltip.Trigger
-								><Tooltip.Content
-									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-									>{m['pages.dashboard.add_widget_button']()}</Tooltip.Content
-								></Tooltip.Root
-							>
-							<Tooltip.Root
-								><Tooltip.Trigger
-									><button
-										class="grid size-9 place-items-center rounded-md border text-foreground"
-										aria-label={m['pages.dashboard.restore_default']()}
-										onclick={restoreDefaults}
-										><RotateCcw class="size-4" aria-hidden="true" /></button
-									></Tooltip.Trigger
-								><Tooltip.Content
-									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-									>{m['pages.dashboard.restore_default']()}</Tooltip.Content
-								></Tooltip.Root
-							>
-							<Tooltip.Root
-								><Tooltip.Trigger
-									><button
-										class="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground"
-										aria-label={m['pages.dashboard.save_dashboard']()}
-										onclick={saveDashboard}><Save class="size-4" aria-hidden="true" /></button
-									></Tooltip.Trigger
-								><Tooltip.Content
-									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-									>{m['pages.dashboard.save_dashboard']()}</Tooltip.Content
-								></Tooltip.Root
-							>
-						{:else}
-							<Tooltip.Root
-								><Tooltip.Trigger
-									><button
-										class="grid size-9 place-items-center rounded-md border text-foreground"
-										aria-label="Customize dashboard"
-										onclick={() => (editing = true)}
-										><SlidersHorizontal class="size-4" aria-hidden="true" /></button
-									></Tooltip.Trigger
-								><Tooltip.Content
-									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-									>Customize dashboard</Tooltip.Content
-								></Tooltip.Root
-							>
+						{#if data.user?.role === 'admin'}
+							{#if editing}
+								<Tooltip.Root
+									><Tooltip.Trigger
+										><button
+											class="grid size-9 place-items-center rounded-md border text-foreground"
+											aria-label={m['pages.dashboard.add_widget_button']()}
+											onclick={addWidget}><Plus class="size-4" aria-hidden="true" /></button
+										></Tooltip.Trigger
+									><Tooltip.Content
+										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+										>{m['pages.dashboard.add_widget_button']()}</Tooltip.Content
+									></Tooltip.Root
+								>
+								<Tooltip.Root
+									><Tooltip.Trigger
+										><button
+											class="grid size-9 place-items-center rounded-md border text-foreground"
+											aria-label={m['pages.dashboard.restore_default']()}
+											onclick={restoreDefaults}
+											><RotateCcw class="size-4" aria-hidden="true" /></button
+										></Tooltip.Trigger
+									><Tooltip.Content
+										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+										>{m['pages.dashboard.restore_default']()}</Tooltip.Content
+									></Tooltip.Root
+								>
+								<Tooltip.Root
+									><Tooltip.Trigger
+										><button
+											class="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground"
+											aria-label={m['pages.dashboard.save_dashboard']()}
+											onclick={saveDashboard}><Save class="size-4" aria-hidden="true" /></button
+										></Tooltip.Trigger
+									><Tooltip.Content
+										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+										>{m['pages.dashboard.save_dashboard']()}</Tooltip.Content
+									></Tooltip.Root
+								>
+							{:else}
+								<Tooltip.Root
+									><Tooltip.Trigger
+										><button
+											class="grid size-9 place-items-center rounded-md border text-foreground"
+											aria-label="Customize dashboard"
+											onclick={() => (editing = true)}
+											><SlidersHorizontal class="size-4" aria-hidden="true" /></button
+										></Tooltip.Trigger
+									><Tooltip.Content
+										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+										>Customize dashboard</Tooltip.Content
+									></Tooltip.Root
+								>
+							{/if}
 						{/if}
 					{/if}
 				</div>

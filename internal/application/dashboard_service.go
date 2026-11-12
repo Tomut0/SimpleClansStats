@@ -141,8 +141,8 @@ func numberValue(value any) float64 {
 	}
 }
 
-func (s *DashboardService) Layout(ctx context.Context, userID int64) (domain.DashboardLayout, error) {
-	return s.repository.GetLayout(ctx, userID)
+func (s *DashboardService) Layout(ctx context.Context) (domain.DashboardLayout, error) {
+	return s.repository.GetLayout(ctx)
 }
 
 func (s *DashboardService) SaveLayout(ctx context.Context, userID int64, layout domain.DashboardLayout) error {

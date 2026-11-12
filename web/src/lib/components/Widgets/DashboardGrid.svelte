@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { GridStack, type GridStackWidget } from 'gridstack';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -37,9 +38,10 @@
 		apiUrl,
 		avatarUrlTemplate,
 		editing = $bindable(false),
-		onAddWidget = $bindable(() => {}),
-		onRestoreDefaults = $bindable(() => {}),
-		onSaveDashboard = $bindable(() => {}),
+		// These defaults are exported to the parent through bindable callback props.
+		onAddWidget = $bindable(openWidgetCatalog), // eslint-disable-line no-useless-assignment
+		onRestoreDefaults = $bindable(restoreDefaults), // eslint-disable-line no-useless-assignment
+		onSaveDashboard = $bindable(() => void saveDashboard()), // eslint-disable-line no-useless-assignment
 		onSnapshot = () => {}
 	}: {
 		serverId: string;
@@ -184,8 +186,7 @@
 	let counterFormat = $state<CounterFormat>('number');
 	let tableLimit = $state(10);
 	let hoverTile = $state<{ x: number; y: number; width: number; height: number } | null>(null);
-	let mounted = new Set<string>();
-	let storageKey = $derived('simpleclansstats.dashboard.v1');
+	let mounted = new SvelteSet<string>();
 	let available = $derived(widgets.length >= 24 ? [] : configurableTypes);
 	const snapshotState = $derived(data?.state ?? {});
 	const collector = $derived(
@@ -428,15 +429,7 @@
 						widgets = saved.widgets;
 				} else throw new Error('layout unavailable');
 			} catch {
-				try {
-					const saved = localStorage.getItem(storageKey);
-					if (saved) {
-						const parsed = JSON.parse(saved) as WidgetLayout[];
-						if (validWidgets(parsed)) widgets = parsed;
-					}
-				} catch {
-					localStorage.removeItem(storageKey);
-				}
+				// Keep the built-in layout if the shared layout cannot be loaded.
 			}
 			await tick();
 			if (disposed) return;
@@ -461,7 +454,9 @@
 	$effect(() => {
 		const count = widgets.length;
 		const editingNow = editing;
-		if (!grid || (!count && !editingNow)) return;
+		if (!grid) return;
+		grid.setStatic(!editingNow);
+		if (!count && !editingNow) return;
 		void tick().then(() => {
 			for (const node of gridElement.querySelectorAll<HTMLElement>('.grid-stack-item')) {
 				const id = node.dataset.widgetId;
@@ -509,11 +504,6 @@
 		editing = value;
 		grid?.setStatic(!value);
 	}
-	onMount(() => {
-		onAddWidget = openWidgetCatalog;
-		onRestoreDefaults = restoreDefaults;
-		onSaveDashboard = () => void saveDashboard();
-	});
 	function moveAddTile(event: PointerEvent) {
 		if (!editing || event.pointerType === 'touch') return;
 		if (event.target instanceof Element && event.target.closest('.add-widget-hover')) return;
@@ -554,16 +544,12 @@
 		if (node && grid) grid.removeWidget(node, false);
 		mounted.delete(id);
 		widgets = widgets.filter((widget) => widget.id !== id);
-		void tick().then(() =>
-			localStorage.setItem(storageKey, JSON.stringify(serializeLayout().widgets))
-		);
 	}
 	function restoreDefaults() {
 		grid?.destroy(false);
 		grid = undefined;
 		mounted.clear();
 		widgets = defaults.map((widget) => ({ ...widget }));
-		localStorage.removeItem(storageKey);
 		void tick().then(() => {
 			connectGrid();
 			grid?.setStatic(!editing);
@@ -579,7 +565,6 @@
 				body: JSON.stringify(layout)
 			});
 			if (!response.ok) throw new Error('save failed');
-			localStorage.setItem(storageKey, JSON.stringify(layout.widgets));
 			saveError = false;
 			setEditing(false);
 		} catch {
@@ -646,9 +631,7 @@
 		);
 		for (const node of gridElement.querySelectorAll<HTMLElement>('.grid-stack-item'))
 			mounted.add(node.dataset.widgetId!);
-		grid.on('change', () => {
-			if (editing) localStorage.setItem(storageKey, JSON.stringify(serializeLayout().widgets));
-		});
+		grid.on('change', () => {});
 	}
 	function serializeLayout(): DashboardLayout {
 		const saved = grid?.save(false, false);
@@ -823,7 +806,7 @@
 				<label class="grid gap-2 text-sm font-medium">
 					{m['pages.dashboard.counter_field_label']()}
 					<select class="h-10 rounded-md border bg-background px-3" bind:value={selectedField}>
-						{#each configurableFields[configuringType] as field}
+						{#each configurableFields[configuringType] as field (field)}
 							<option value={field}>{configuredFieldTitle(field)}</option>
 						{/each}
 					</select>
@@ -865,7 +848,7 @@
 			</div>
 		{:else if available.length}
 			<div class="grid gap-2 sm:grid-cols-2">
-				{#each available as type}
+				{#each available as type (type)}
 					<button
 						class="flex items-center gap-3 rounded-md border p-3 text-left hover:bg-accent"
 						onclick={() => configureWidgetType(type)}

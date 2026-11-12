@@ -14,12 +14,7 @@ import (
 )
 
 func (s *ServerHandler) GetDashboardLayout(w http.ResponseWriter, r *http.Request) {
-	userID, ok := s.sessions.Get(r.Context(), "user_id").(int64)
-	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	layout, err := s.dashboard.Layout(r.Context(), userID)
+	layout, err := s.dashboard.Layout(r.Context())
 	if err != nil {
 		http.Error(w, "could not load layout", http.StatusInternalServerError)
 		return
@@ -30,6 +25,10 @@ func (s *ServerHandler) GetDashboardLayout(w http.ResponseWriter, r *http.Reques
 }
 
 func (s *ServerHandler) SaveDashboardLayout(w http.ResponseWriter, r *http.Request) {
+	if status := s.adminStatus(r.Context()); status != http.StatusOK {
+		http.Error(w, http.StatusText(status), status)
+		return
+	}
 	userID, ok := s.sessions.Get(r.Context(), "user_id").(int64)
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)

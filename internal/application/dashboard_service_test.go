@@ -92,7 +92,7 @@ func TestDashboardClanBalanceChangesUsesLatestMatchingClans(t *testing.T) {
 		t.Fatalf("unexpected balance changes: %s", changes)
 	}
 }
-func (r *dashboardRepositoryTest) GetLayout(context.Context, int64) (domain.DashboardLayout, error) {
+func (r *dashboardRepositoryTest) GetLayout(context.Context) (domain.DashboardLayout, error) {
 	return r.saved, nil
 }
 func (r *dashboardRepositoryTest) SaveLayout(_ context.Context, _ int64, layout domain.DashboardLayout) error {

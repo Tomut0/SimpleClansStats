@@ -55,9 +55,9 @@ func (r *dashboardRepository) GetDashboardData(ctx context.Context, serverID str
 	return data, snapshots.Err()
 }
 
-func (r *dashboardRepository) GetLayout(ctx context.Context, userID int64) (domain.DashboardLayout, error) {
+func (r *dashboardRepository) GetLayout(ctx context.Context) (domain.DashboardLayout, error) {
 	var value string
-	err := r.db.QueryRowContext(ctx, `SELECT layout FROM dashboard_layouts WHERE user_id = ?`, userID).Scan(&value)
+	err := r.db.QueryRowContext(ctx, `SELECT dl.layout FROM dashboard_layouts dl JOIN users u ON u.id = dl.user_id WHERE u.role = 'admin' ORDER BY dl.rowid DESC LIMIT 1`).Scan(&value)
 	if err == sql.ErrNoRows {
 		return domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{}}, nil
 	}
@@ -74,6 +74,17 @@ func (r *dashboardRepository) SaveLayout(ctx context.Context, userID int64, layo
 	if err != nil {
 		return err
 	}
-	_, err = r.db.ExecContext(ctx, `INSERT INTO dashboard_layouts (user_id, layout) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET layout = excluded.layout`, userID, string(value))
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `DELETE FROM dashboard_layouts WHERE user_id IN (SELECT id FROM users WHERE role = 'admin' AND id != ?)`, userID); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO dashboard_layouts (user_id, layout) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET layout = excluded.layout`, userID, string(value)); err != nil {
+		return err
+	}
+	err = tx.Commit()
 	return err
 }
