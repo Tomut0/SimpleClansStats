@@ -93,9 +93,38 @@ func (s *ServerHandler) GetAppLogo(ctx context.Context, _ GetAppLogoRequestObjec
 	}
 }
 
+func (s *ServerHandler) ApplyAppTheme(ctx context.Context, request ApplyAppThemeRequestObject) (ApplyAppThemeResponseObject, error) {
+	switch s.adminStatus(ctx) {
+	case http.StatusUnauthorized:
+		return ApplyAppTheme401JSONResponse{}, nil
+	case http.StatusForbidden:
+		return ApplyAppTheme403Response{}, nil
+	}
+	if request.Body == nil {
+		return ApplyAppTheme400Response{}, nil
+	}
+	if err := s.settingsService.ApplyTheme(ctx, request.Body.Preset); err != nil {
+		if errors.Is(err, application.ErrInvalidSettings) {
+			return ApplyAppTheme400Response{}, nil
+		}
+		log.Printf("apply app theme: %v", err)
+		return ApplyAppTheme500Response{}, nil
+	}
+	return ApplyAppTheme204Response{}, nil
+}
+
+func (s *ServerHandler) GetAppThemeCSS(ctx context.Context, _ GetAppThemeCSSRequestObject) (GetAppThemeCSSResponseObject, error) {
+	css, err := s.settingsService.ThemeCSS(ctx)
+	if err != nil {
+		log.Printf("read app theme: %v", err)
+		return GetAppThemeCSS500Response{}, nil
+	}
+	return GetAppThemeCSS200TextcssResponse{Body: bytes.NewReader([]byte(css)), ContentLength: int64(len(css))}, nil
+}
+
 func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
 	var params domain.AppSettingsUpdate
-	for _, name := range []string{"appName", "removeAuthor", "timeZone", "dateFormat", "timeFormat", "playerAvatarUrl"} {
+	for _, name := range []string{"appName", "removeAuthor", "removeTelemetry", "timeZone", "dateFormat", "timeFormat", "playerAvatarUrl"} {
 		if len(form.Value[name]) != 1 {
 			return params, false
 		}
@@ -107,6 +136,8 @@ func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
 	params.PlayerAvatarURL = form.Value["playerAvatarUrl"][0]
 	removeAuthor := form.Value["removeAuthor"][0]
 	params.RemoveAuthor = removeAuthor == "true"
+	removeTelemetry := form.Value["removeTelemetry"][0]
+	params.RemoveTelemetry = removeTelemetry == "true"
 	var ok bool
 	params.ServerOnlineTimeoutMinutes, ok = optionalSettingsInt(form.Value["serverOnlineTimeoutMinutes"])
 	if !ok {
@@ -117,7 +148,7 @@ func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
 		return params, false
 	}
 
-	if removeAuthor != "true" && removeAuthor != "false" {
+	if (removeAuthor != "true" && removeAuthor != "false") || (removeTelemetry != "true" && removeTelemetry != "false") {
 		return params, false
 	}
 	return params, true
@@ -163,6 +194,7 @@ func appSettingsResponse(row domain.AppSettings) AppSettings {
 	return AppSettings{
 		AppName:                    row.AppName,
 		RemoveAuthor:               row.RemoveAuthor,
+		RemoveTelemetry:            row.RemoveTelemetry,
 		TimeZone:                   row.TimeZone,
 		DateFormat:                 AppSettingsDateFormat(row.DateFormat),
 		TimeFormat:                 AppSettingsTimeFormat(row.TimeFormat),
@@ -170,5 +202,6 @@ func appSettingsResponse(row domain.AppSettings) AppSettings {
 		LogoVersion:                row.LogoVersion,
 		ServerOnlineTimeoutMinutes: row.ServerOnlineTimeoutMinutes,
 		IngestRetentionDays:        row.IngestRetentionDays,
+		Theme:                      row.Theme,
 	}
 }

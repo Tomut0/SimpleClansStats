@@ -5,7 +5,7 @@
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import './layout.css';
 	import { ModeWatcher } from 'mode-watcher';
-	import { APP_NAME } from '$app/env/public';
+	import { API_URL, APP_NAME } from '$app/env/public';
 	import { Tooltip } from 'bits-ui';
 
 	let { children } = $props();
@@ -13,6 +13,7 @@
 </script>
 
 <svelte:head>
+	<link rel="stylesheet" href={`${API_URL}/settings/theme.css?v=${page.data.settings?.theme ?? ''}`} />
 	<title>
 		{page.data.title ? `${page.data.title} - ${appName}` : appName}
 	</title>

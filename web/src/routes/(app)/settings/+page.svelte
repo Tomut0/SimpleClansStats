@@ -14,6 +14,7 @@
 	import GeneralSettingsCard from './GeneralSettingsCard.svelte';
 	import ServersSettingsCard from './ServersSettingsCard.svelte';
 	import TimezoneSettingsCard from './TimezoneSettingsCard.svelte';
+	import ThemeSettingsCard from './ThemeSettingsCard.svelte';
 
 	const { data }: PageProps = $props();
 	const serversEmpty = $derived(data.servers?.length === 0);
@@ -45,6 +46,12 @@
 			title: m['pages.settings.categories.timezone.title'](),
 			component: TimezoneSettingsCard,
 			props: { settings: data.settings, disabled }
+		},
+		{
+			id: 'theme',
+			title: m['pages.settings.categories.theme.title'](),
+			component: ThemeSettingsCard,
+			props: { settings: data.settings, disabled }
 		}
 	]);
 
@@ -54,6 +61,7 @@
 
 		const body = new FormData(event.currentTarget as HTMLFormElement);
 		body.set('removeAuthor', String(body.has('removeAuthor')));
+		body.set('removeTelemetry', String(body.has('removeTelemetry')));
 		const logo = body.get('logo');
 		if (logo instanceof File && !logo.name) body.delete('logo');
 

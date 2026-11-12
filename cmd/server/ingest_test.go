@@ -85,7 +85,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	search := application.NewSearchService(sqlite.NewSQLiteSearchRepository(db.Db))
 	settings := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
 	servers := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
-	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, dashboard, ingest, settings, servers, search), sessions)
+	router := newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{}, nil), sessions, dashboard, ingest, settings, servers, search), sessions, "")
 	request := func(method, path, body, key string, userID int64, wantStatus int) *httptest.ResponseRecorder {
 		t.Helper()
 		req := httptest.NewRequest(method, "/api/v1"+path, strings.NewReader(body))
@@ -303,7 +303,7 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 		t.Fatalf("deleted server left snapshots behind: %d (%v)", count, err)
 	}
 	request("POST", "/ingest", payload, registered.ApiKey, 0, 401)
-	router = newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers, search), sessions)
+	router = newRouter(presentation.NewServerHandler(application.NewAuthService(ingestTestUsers{lookupErr: true}, nil), sessions, dashboard, ingest, settings, servers, search), sessions, "")
 	request("POST", "/servers", name, "", 1, 401)
 	request("DELETE", "/servers/"+id, "", "", 1, 401)
 }

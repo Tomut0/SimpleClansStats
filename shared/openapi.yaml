@@ -21,6 +21,7 @@ tags:
   - name: servers
   - name: ingest
   - name: dashboard
+  - name: settings
 
 paths:
   /auth/me:
@@ -130,6 +131,38 @@ paths:
         "403": { description: Administrator required }
         "413": { description: Request too large }
         "500": { description: Internal Server Error }
+
+  /settings/theme:
+    post:
+      tags: [settings]
+      summary: Apply a shadcn-svelte theme preset as an administrator
+      operationId: applyAppTheme
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ThemePresetRequest" }
+      responses:
+        "204": { description: Theme applied }
+        "400": { description: Invalid preset code }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Administrator access required }
+        "500": { description: Theme application failed }
+
+  /settings/theme.css:
+    get:
+      tags: [settings]
+      summary: Get the active theme stylesheet
+      operationId: getAppThemeCSS
+      responses:
+        "200":
+          description: CSS variables generated from the active preset
+          content:
+            text/css:
+              schema: { type: string }
+        "500": { description: Theme stylesheet generation failed }
 
   /settings/logo:
     get:
@@ -413,12 +446,19 @@ components:
         server: { $ref: "#/components/schemas/Server" }
         apiKey: { type: string }
 
+    ThemePresetRequest:
+      type: object
+      required: [preset]
+      properties:
+        preset: { type: string, pattern: '^[A-Za-z0-9]{6,32}$' }
+
     AppSettingsFields:
       type: object
-      required: [appName, removeAuthor, timeZone, dateFormat, timeFormat, playerAvatarUrl]
+      required: [appName, removeAuthor, removeTelemetry, timeZone, dateFormat, timeFormat, playerAvatarUrl]
       properties:
         appName: { type: string, maxLength: 100 }
         removeAuthor: { type: boolean }
+        removeTelemetry: { type: boolean }
         timeZone: { type: string, example: Europe/Moscow }
         dateFormat: { type: string, enum: [DD.MM.YYYY, YYYY-MM-DD, MM/DD/YYYY] }
         timeFormat: { type: string, enum: [24h, 12h] }
@@ -428,11 +468,12 @@ components:
       allOf:
         - $ref: "#/components/schemas/AppSettingsFields"
         - type: object
-          required: [logoVersion, serverOnlineTimeoutMinutes, ingestRetentionDays]
+          required: [logoVersion, serverOnlineTimeoutMinutes, ingestRetentionDays, theme]
           properties:
             logoVersion: { type: integer, format: int64, minimum: 0 }
             serverOnlineTimeoutMinutes: { type: integer, format: int64, minimum: 1, maximum: 1440 }
             ingestRetentionDays: { type: integer, format: int64, minimum: 0, maximum: 36500 }
+            theme: { type: string, description: Current shadcn-svelte preset code }
 
 
 

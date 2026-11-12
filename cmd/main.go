@@ -19,6 +19,10 @@ import (
 func main() {
 	db := sqlite.New(os.Getenv("GOOSE_DBSTRING"))
 	defer db.Close()
+	installationID, err := sqlite.EnsureInstallationID(db.Db)
+	if err != nil {
+		log.Fatalf("initialize installation ID: %v", err)
+	}
 	startIngestCleanup(db.Queries)
 
 	argonHasher := security.NewArgonHasher(3, 64*1024, 4)
@@ -43,5 +47,5 @@ func main() {
 	settingsService := application.NewSettingsService(sqlite.NewSQLiteSettingsRepository(db.Db))
 	serverService := application.NewServerService(sqlite.NewSQLiteServerRepository(db.Db))
 	serverHandler := presentation.NewServerHandler(authService, sessionManager, dashboardService, ingestService, settingsService, serverService, searchService)
-	server.RunHttpServer(serverHandler, sessionManager)
+	server.RunHttpServer(serverHandler, sessionManager, installationID)
 }

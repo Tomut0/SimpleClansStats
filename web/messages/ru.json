@@ -112,7 +112,9 @@
 					"player_avatar_url_title": "Ссылка на голову игрока",
 					"player_avatar_url_desc": "Используйте токен username вместо ника Minecraft. Только HTTPS.",
 					"remove_author_title": "Убрать автора",
-					"remove_author_description": "Убрать упоминание об авторе из футера"
+					"remove_author_description": "Убрать упоминание об авторе из футера",
+					"remove_telemetry_title": "Отключить телеметрию",
+					"remove_telemetry_description": "Не отправлять URL приложения, версию и последнюю активность"
 				},
 				"servers": {
 					"title": "Сервера",
@@ -162,6 +164,17 @@
 					"time_format_placeholder": "24 ч",
 					"search": "Поиск часового пояса...",
 					"no_results": "Часовой пояс не найден."
+				},
+				"theme": {
+					"title": "Тема",
+					"preset": "Код темы",
+					"description_before": "Создайте тему в",
+					"description_after": "и вставьте код пресета.",
+					"apply": "Применить",
+					"applying": "Применяем…",
+					"applied": "Тема применена",
+					"apply_failed": "Не удалось применить тему",
+					"reset": "Сбросить"
 				}
 			}
 		}

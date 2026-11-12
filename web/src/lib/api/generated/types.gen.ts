@@ -14,7 +14,7 @@ export type DashboardWidget = {
     type?: 'counter' | 'table' | 'leaderboard' | 'activityFeed' | 'onlineSnapshot' | 'distribution' | 'timeSeries' | 'clanCard' | 'playerCard' | 'warCenter' | 'clanRoster' | 'network' | 'compare' | 'heatmap' | 'gainersLosers' | 'economy' | 'killFeed' | 'peakOnline' | 'pendingInvites' | 'claims';
     field?: 'clans' | 'players' | 'wars' | 'balance' | 'onlinePlayers' | 'kills' | 'clanBalance' | 'recentActions' | 'killTypes' | 'clanStatus' | 'clan' | 'player' | 'clanPlayers' | 'clanRelations' | 'clanMetrics' | 'playerActivity' | 'clanBalanceChange' | 'recentKills' | 'pendingInvites' | 'claims';
     format?: 'number' | 'compact' | 'plain';
-    limit?: number;
+    limit?: 5 | 10 | 20;
     x: number;
     y: number;
     w: number;
@@ -48,9 +48,14 @@ export type ServerRegistration = {
     apiKey: string;
 };
 
+export type ThemePresetRequest = {
+    preset: string;
+};
+
 export type AppSettingsFields = {
     appName: string;
     removeAuthor: boolean;
+    removeTelemetry: boolean;
     timeZone: string;
     dateFormat: 'DD.MM.YYYY' | 'YYYY-MM-DD' | 'MM/DD/YYYY';
     timeFormat: '24h' | '12h';
@@ -61,6 +66,10 @@ export type AppSettings = AppSettingsFields & {
     logoVersion: number;
     serverOnlineTimeoutMinutes: number;
     ingestRetentionDays: number;
+    /**
+     * Current shadcn-svelte preset code
+     */
+    theme: string;
 };
 
 export type LoginRequest = {
@@ -238,6 +247,66 @@ export type UpdateAppSettingsResponses = {
 };
 
 export type UpdateAppSettingsResponse = UpdateAppSettingsResponses[keyof UpdateAppSettingsResponses];
+
+export type ApplyAppThemeData = {
+    body: ThemePresetRequest;
+    path?: never;
+    query?: never;
+    url: '/settings/theme';
+};
+
+export type ApplyAppThemeErrors = {
+    /**
+     * Invalid preset code
+     */
+    400: unknown;
+    /**
+     * Invalid credentials
+     */
+    401: Error;
+    /**
+     * Administrator access required
+     */
+    403: unknown;
+    /**
+     * Theme application failed
+     */
+    500: unknown;
+};
+
+export type ApplyAppThemeError = ApplyAppThemeErrors[keyof ApplyAppThemeErrors];
+
+export type ApplyAppThemeResponses = {
+    /**
+     * Theme applied
+     */
+    204: void;
+};
+
+export type ApplyAppThemeResponse = ApplyAppThemeResponses[keyof ApplyAppThemeResponses];
+
+export type GetAppThemeCssData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/settings/theme.css';
+};
+
+export type GetAppThemeCssErrors = {
+    /**
+     * Theme stylesheet generation failed
+     */
+    500: unknown;
+};
+
+export type GetAppThemeCssResponses = {
+    /**
+     * CSS variables generated from the active preset
+     */
+    200: Blob | File;
+};
+
+export type GetAppThemeCssResponse = GetAppThemeCssResponses[keyof GetAppThemeCssResponses];
 
 export type GetAppLogoData = {
     body?: never;

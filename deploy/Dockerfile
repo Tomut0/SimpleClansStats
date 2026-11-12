@@ -28,20 +28,25 @@ RUN CGO_ENABLED=0 go build \
 
 FROM alpine:3.24.1
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates nodejs npm
 
 WORKDIR /app
 
 COPY --from=builder /out/simpleclansstats /app/simpleclansstats
 COPY --from=builder /out/goose /usr/local/bin/goose
-COPY sql/migrations /app/migrations
+COPY sql/migrations /app/sql/migrations
+COPY web/components.json /app/web/components.json
+COPY web/package.json /app/web/package.json
+COPY web/src/routes/layout.css /app/web/src/routes/layout.css
 
 # SQLite database
 VOLUME ["/data"]
 
 ENV DATABASE_PATH=/data/simpleclansstats.sqlite
+ENV SHADCN_PROJECT_DIR=/app/web
+ENV APP_THEME_CSS_PATH=/data/theme.css
 
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY deploy/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

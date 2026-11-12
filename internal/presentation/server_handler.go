@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/Tomut0/SimpleClansStats/internal/application"
 	"github.com/alexedwards/scs/v2"
@@ -15,6 +16,11 @@ type ServerHandler struct {
 	settingsService *application.SettingsService
 	serverService   *application.ServerService
 	sessions        *scs.SessionManager
+}
+
+func (s *ServerHandler) TelemetryAllowed(r *http.Request) bool {
+	settings, err := s.settingsService.Get(r.Context())
+	return err == nil && !settings.RemoveTelemetry
 }
 
 func NewServerHandler(authService *application.AuthService, sessions *scs.SessionManager, dashboard *application.DashboardService, ingest *application.IngestService, settingsService *application.SettingsService, serverService *application.ServerService, search *application.SearchService) *ServerHandler {

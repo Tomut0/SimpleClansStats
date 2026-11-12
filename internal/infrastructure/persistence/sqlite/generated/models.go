@@ -9,14 +9,15 @@ import (
 )
 
 type AppSetting struct {
-	ID           int64
-	AppName      string
-	RemoveAuthor bool
-	TimeZone     string
-	DateFormat   string
-	TimeFormat   string
-	Logo         []byte
-	LogoVersion  int64
+	ID              int64
+	AppName         string
+	RemoveAuthor    bool
+	TimeZone        string
+	DateFormat      string
+	TimeFormat      string
+	Logo            []byte
+	LogoVersion     int64
+	RemoveTelemetry bool
 }
 
 type IngestEvent struct {

@@ -68,7 +68,7 @@ func TestAppSettings(t *testing.T) {
 		if method == http.MethodPost {
 			form := multipart.NewWriter(&body)
 			for key, value := range map[string]string{
-				"appName": name, "removeAuthor": "true", "timeZone": "America/New_York",
+				"appName": name, "removeAuthor": "true", "removeTelemetry": "true", "timeZone": "America/New_York",
 				"dateFormat": "YYYY-MM-DD", "timeFormat": "12h",
 				"playerAvatarUrl": "https://mc-heads.net/avatar/{username}/32",
 			} {
@@ -144,7 +144,7 @@ func TestAppSettings(t *testing.T) {
 		if err := json.Unmarshal(res.Body.Bytes(), &got); err != nil {
 			t.Fatal(err)
 		}
-		want := AppSettings{AppName: wantName, RemoveAuthor: true, TimeZone: "America/New_York", DateFormat: "YYYY-MM-DD",
+		want := AppSettings{AppName: wantName, RemoveAuthor: true, RemoveTelemetry: true, TimeZone: "America/New_York", DateFormat: "YYYY-MM-DD",
 			TimeFormat: "12h", PlayerAvatarUrl: "https://mc-heads.net/avatar/{username}/32", LogoVersion: 1, ServerOnlineTimeoutMinutes: 15, IngestRetentionDays: 0}
 		if got != want {
 			t.Fatalf("stored settings: got %+v, want %+v", got, want)

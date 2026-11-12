@@ -35,6 +35,7 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 				body: JSON.stringify({
 					appName: 'SCStats',
 					removeAuthor: false,
+					removeTelemetry: false,
 					timeZone: 'Europe/Moscow',
 					dateFormat: 'DD.MM.YYYY',
 					timeFormat: '24h',

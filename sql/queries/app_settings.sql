@@ -1,12 +1,13 @@
 -- name: GetAppSettings :one
-SELECT app_name, remove_author, time_zone, date_format, time_format, player_avatar_url, logo_version,
-       server_online_timeout_minutes, ingest_retention_days
+SELECT app_name, remove_author, remove_telemetry, time_zone, date_format, time_format, player_avatar_url, logo_version,
+       server_online_timeout_minutes, ingest_retention_days, theme
 FROM app_settings CROSS JOIN ingest_settings WHERE app_settings.id = 1 AND ingest_settings.id = 1;
 
 -- name: UpdateAppSettings :exec
 UPDATE app_settings
 SET app_name = sqlc.arg(app_name),
     remove_author = sqlc.arg(remove_author),
+    remove_telemetry = sqlc.arg(remove_telemetry),
     time_zone = sqlc.arg(time_zone),
     date_format = sqlc.arg(date_format),
     time_format = sqlc.arg(time_format),

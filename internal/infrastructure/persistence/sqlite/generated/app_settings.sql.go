@@ -22,14 +22,15 @@ func (q *Queries) GetAppLogo(ctx context.Context) ([]byte, error) {
 }
 
 const getAppSettings = `-- name: GetAppSettings :one
-SELECT app_name, remove_author, time_zone, date_format, time_format, player_avatar_url, logo_version,
-       server_online_timeout_minutes, ingest_retention_days
+SELECT app_name, remove_author, remove_telemetry, time_zone, date_format, time_format, player_avatar_url, logo_version,
+       server_online_timeout_minutes, ingest_retention_days, theme
 FROM app_settings CROSS JOIN ingest_settings WHERE app_settings.id = 1 AND ingest_settings.id = 1
 `
 
 type GetAppSettingsRow struct {
 	AppName                    string
 	RemoveAuthor               bool
+	RemoveTelemetry            bool
 	TimeZone                   string
 	DateFormat                 string
 	TimeFormat                 string
@@ -37,6 +38,7 @@ type GetAppSettingsRow struct {
 	LogoVersion                int64
 	ServerOnlineTimeoutMinutes int64
 	IngestRetentionDays        int64
+	Theme                      string
 }
 
 func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error) {
@@ -45,6 +47,7 @@ func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error)
 	err := row.Scan(
 		&i.AppName,
 		&i.RemoveAuthor,
+		&i.RemoveTelemetry,
 		&i.TimeZone,
 		&i.DateFormat,
 		&i.TimeFormat,
@@ -52,6 +55,7 @@ func (q *Queries) GetAppSettings(ctx context.Context) (GetAppSettingsRow, error)
 		&i.LogoVersion,
 		&i.ServerOnlineTimeoutMinutes,
 		&i.IngestRetentionDays,
+		&i.Theme,
 	)
 	return i, err
 }
@@ -71,18 +75,20 @@ const updateAppSettings = `-- name: UpdateAppSettings :exec
 UPDATE app_settings
 SET app_name = ?1,
     remove_author = ?2,
-    time_zone = ?3,
-    date_format = ?4,
-    time_format = ?5,
-    player_avatar_url = ?6,
-    logo = COALESCE(?7, logo),
-    logo_version = logo_version + (?7 IS NOT NULL)
+    remove_telemetry = ?3,
+    time_zone = ?4,
+    date_format = ?5,
+    time_format = ?6,
+    player_avatar_url = ?7,
+    logo = COALESCE(?8, logo),
+    logo_version = logo_version + (?8 IS NOT NULL)
 WHERE id = 1
 `
 
 type UpdateAppSettingsParams struct {
 	AppName         string
 	RemoveAuthor    bool
+	RemoveTelemetry bool
 	TimeZone        string
 	DateFormat      string
 	TimeFormat      string
@@ -94,6 +100,7 @@ func (q *Queries) UpdateAppSettings(ctx context.Context, arg UpdateAppSettingsPa
 	_, err := q.db.ExecContext(ctx, updateAppSettings,
 		arg.AppName,
 		arg.RemoveAuthor,
+		arg.RemoveTelemetry,
 		arg.TimeZone,
 		arg.DateFormat,
 		arg.TimeFormat,

@@ -112,7 +112,9 @@
 					"player_avatar_url_title": "Player head image URL",
 					"player_avatar_url_desc": "Use the username token where the Minecraft name should go. HTTPS URLs only.",
 					"remove_author_title": "Remove Author",
-					"remove_author_description": "Remove the author's mention in footer"
+					"remove_author_description": "Remove the author's mention in footer",
+					"remove_telemetry_title": "Remove Telemetry",
+					"remove_telemetry_description": "Stop sending application URL, version, and last activity"
 				},
 				"servers": {
 					"title": "Servers",
@@ -162,6 +164,17 @@
 					"time_format_placeholder": "24h",
 					"search": "Search timezone...",
 					"no_results": "No timezone found."
+				},
+				"theme": {
+					"title": "Theme",
+					"preset": "Theme code",
+					"description_before": "Create a theme in",
+					"description_after": "and paste its preset code.",
+					"apply": "Apply",
+					"applying": "Applying…",
+					"applied": "Theme applied",
+					"apply_failed": "Could not apply theme",
+					"reset": "Reset"
 				}
 			}
 		}

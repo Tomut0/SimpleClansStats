@@ -162,11 +162,15 @@ type AppSettings struct {
 	DateFormat                 AppSettingsDateFormat `json:"dateFormat"`
 	IngestRetentionDays        int64                 `json:"ingestRetentionDays"`
 	LogoVersion                int64                 `json:"logoVersion"`
-	RemoveAuthor               bool                  `json:"removeAuthor"`
-	ServerOnlineTimeoutMinutes int64                 `json:"serverOnlineTimeoutMinutes"`
-	TimeFormat                 AppSettingsTimeFormat `json:"timeFormat"`
 	PlayerAvatarUrl            string                `json:"playerAvatarUrl"`
-	TimeZone                   string                `json:"timeZone"`
+	RemoveAuthor               bool                  `json:"removeAuthor"`
+	RemoveTelemetry            bool                  `json:"removeTelemetry"`
+	ServerOnlineTimeoutMinutes int64                 `json:"serverOnlineTimeoutMinutes"`
+
+	// Theme Current shadcn-svelte preset code
+	Theme      string                `json:"theme"`
+	TimeFormat AppSettingsTimeFormat `json:"timeFormat"`
+	TimeZone   string                `json:"timeZone"`
 }
 
 // AppSettingsDateFormat defines model for AppSettings.DateFormat.
@@ -179,10 +183,11 @@ type AppSettingsTimeFormat string
 type AppSettingsFields struct {
 	AppName         string                      `json:"appName"`
 	DateFormat      AppSettingsFieldsDateFormat `json:"dateFormat"`
+	PlayerAvatarUrl string                      `json:"playerAvatarUrl"`
 	RemoveAuthor    bool                        `json:"removeAuthor"`
+	RemoveTelemetry bool                        `json:"removeTelemetry"`
 	TimeFormat      AppSettingsFieldsTimeFormat `json:"timeFormat"`
 	TimeZone        string                      `json:"timeZone"`
-	PlayerAvatarUrl string                      `json:"playerAvatarUrl"`
 }
 
 // AppSettingsFieldsDateFormat defines model for AppSettingsFields.DateFormat.
@@ -221,6 +226,11 @@ type ServerRegistration struct {
 	Server Server `json:"server"`
 }
 
+// ThemePresetRequest defines model for ThemePresetRequest.
+type ThemePresetRequest struct {
+	Preset string `json:"preset"`
+}
+
 // User defines model for User.
 type User struct {
 	Email    string   `json:"email"`
@@ -247,11 +257,12 @@ type UpdateAppSettingsMultipartBody struct {
 
 	// Logo Optional PNG or JPEG up to 1 MiB
 	Logo                       *openapi_types.File                      `json:"logo,omitempty"`
+	PlayerAvatarUrl            string                                   `json:"playerAvatarUrl"`
 	RemoveAuthor               bool                                     `json:"removeAuthor"`
+	RemoveTelemetry            bool                                     `json:"removeTelemetry"`
 	ServerOnlineTimeoutMinutes *int64                                   `json:"serverOnlineTimeoutMinutes,omitempty"`
 	TimeFormat                 UpdateAppSettingsMultipartBodyTimeFormat `json:"timeFormat"`
 	TimeZone                   string                                   `json:"timeZone"`
-	PlayerAvatarUrl            string                                   `json:"playerAvatarUrl"`
 }
 
 // UpdateAppSettingsMultipartBodyDateFormat defines parameters for UpdateAppSettings.
@@ -268,6 +279,9 @@ type CreateServerJSONRequestBody CreateServerJSONBody
 
 // UpdateAppSettingsMultipartRequestBody defines body for UpdateAppSettings for multipart/form-data ContentType.
 type UpdateAppSettingsMultipartRequestBody UpdateAppSettingsMultipartBody
+
+// ApplyAppThemeJSONRequestBody defines body for ApplyAppTheme for application/json ContentType.
+type ApplyAppThemeJSONRequestBody = ThemePresetRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -298,6 +312,12 @@ type ServerInterface interface {
 	// GetAppLogo Get the application logo
 	// (GET /settings/logo)
 	GetAppLogo(w http.ResponseWriter, r *http.Request)
+	// ApplyAppTheme Apply a shadcn-svelte theme preset as an administrator
+	// (POST /settings/theme)
+	ApplyAppTheme(w http.ResponseWriter, r *http.Request)
+	// GetAppThemeCSS Get the active theme stylesheet
+	// (GET /settings/theme.css)
+	GetAppThemeCSS(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -355,6 +375,18 @@ func (_ Unimplemented) UpdateAppSettings(w http.ResponseWriter, r *http.Request)
 // GetAppLogo Get the application logo
 // (GET /settings/logo)
 func (_ Unimplemented) GetAppLogo(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ApplyAppTheme Apply a shadcn-svelte theme preset as an administrator
+// (POST /settings/theme)
+func (_ Unimplemented) ApplyAppTheme(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetAppThemeCSS Get the active theme stylesheet
+// (GET /settings/theme.css)
+func (_ Unimplemented) GetAppThemeCSS(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -505,6 +537,34 @@ func (siw *ServerInterfaceWrapper) GetAppLogo(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
+// ApplyAppTheme operation middleware
+func (siw *ServerInterfaceWrapper) ApplyAppTheme(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ApplyAppTheme(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetAppThemeCSS operation middleware
+func (siw *ServerInterfaceWrapper) GetAppThemeCSS(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAppThemeCSS(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -632,6 +692,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/settings", wrapper.UpdateAppSettings)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/settings/theme", wrapper.ApplyAppTheme)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/settings/theme.css", wrapper.GetAppThemeCSS)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/settings/logo", wrapper.GetAppLogo)
@@ -1058,6 +1124,95 @@ func (response GetAppLogo500Response) VisitGetAppLogoResponse(w http.ResponseWri
 	return nil
 }
 
+type ApplyAppThemeRequestObject struct {
+	Body *ApplyAppThemeJSONRequestBody
+}
+
+type ApplyAppThemeResponseObject interface {
+	VisitApplyAppThemeResponse(w http.ResponseWriter) error
+}
+
+type ApplyAppTheme204Response struct {
+}
+
+func (response ApplyAppTheme204Response) VisitApplyAppThemeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type ApplyAppTheme400Response struct {
+}
+
+func (response ApplyAppTheme400Response) VisitApplyAppThemeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(400)
+	return nil
+}
+
+type ApplyAppTheme401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response ApplyAppTheme401JSONResponse) VisitApplyAppThemeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApplyAppTheme403Response struct {
+}
+
+func (response ApplyAppTheme403Response) VisitApplyAppThemeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
+type ApplyAppTheme500Response struct {
+}
+
+func (response ApplyAppTheme500Response) VisitApplyAppThemeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type GetAppThemeCSSRequestObject struct {
+}
+
+type GetAppThemeCSSResponseObject interface {
+	VisitGetAppThemeCSSResponse(w http.ResponseWriter) error
+}
+
+type GetAppThemeCSS200TextcssResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response GetAppThemeCSS200TextcssResponse) VisitGetAppThemeCSSResponse(w http.ResponseWriter) error {
+
+	w.Header().Set("Content-Type", "text/css")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type GetAppThemeCSS500Response struct {
+}
+
+func (response GetAppThemeCSS500Response) VisitGetAppThemeCSSResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Login Log in with email/password
@@ -1087,6 +1242,12 @@ type StrictServerInterface interface {
 	// GetAppLogo Get the application logo
 	// (GET /settings/logo)
 	GetAppLogo(ctx context.Context, request GetAppLogoRequestObject) (GetAppLogoResponseObject, error)
+	// ApplyAppTheme Apply a shadcn-svelte theme preset as an administrator
+	// (POST /settings/theme)
+	ApplyAppTheme(ctx context.Context, request ApplyAppThemeRequestObject) (ApplyAppThemeResponseObject, error)
+	// GetAppThemeCSS Get the active theme stylesheet
+	// (GET /settings/theme.css)
+	GetAppThemeCSS(ctx context.Context, request GetAppThemeCSSRequestObject) (GetAppThemeCSSResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -1360,6 +1521,61 @@ func (sh *strictHandler) GetAppLogo(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetAppLogoResponseObject); ok {
 		if err := validResponse.VisitGetAppLogoResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ApplyAppTheme operation middleware
+func (sh *strictHandler) ApplyAppTheme(w http.ResponseWriter, r *http.Request) {
+	var request ApplyAppThemeRequestObject
+
+	var body ApplyAppThemeJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ApplyAppTheme(ctx, request.(ApplyAppThemeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ApplyAppTheme")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ApplyAppThemeResponseObject); ok {
+		if err := validResponse.VisitApplyAppThemeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAppThemeCSS operation middleware
+func (sh *strictHandler) GetAppThemeCSS(w http.ResponseWriter, r *http.Request) {
+	var request GetAppThemeCSSRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAppThemeCSS(ctx, request.(GetAppThemeCSSRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAppThemeCSS")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetAppThemeCSSResponseObject); ok {
+		if err := validResponse.VisitGetAppThemeCSSResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

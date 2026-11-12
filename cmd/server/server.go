@@ -15,10 +15,10 @@ import (
 	"github.com/go-chi/httprate"
 )
 
-func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager) {
+func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager, installationID string) {
 	srv := &http.Server{
 		Addr:           ":4000",
-		Handler:        newRouter(serverHandler, sessions),
+		Handler:        newRouter(serverHandler, sessions, installationID),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		IdleTimeout:    120 * time.Second,
@@ -31,7 +31,7 @@ func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.Sess
 	}
 }
 
-func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager) http.Handler {
+func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager, installationID string) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(func(h http.Handler) http.Handler {
@@ -82,6 +82,11 @@ func newRouter(serverHandler *presentation.ServerHandler, sessions *scs.SessionM
 
 	// Store sessions between requests
 	r.Use(sessions.LoadAndSave)
+	if telemetry := newPosthogTelemetry(installationID); telemetry != nil {
+		r.Use(func(next http.Handler) http.Handler {
+			return telemetry.middleware(next, serverHandler.TelemetryAllowed)
+		})
+	}
 
 	api := chi.NewRouter()
 	api.Post("/ingest", serverHandler.Ingest)

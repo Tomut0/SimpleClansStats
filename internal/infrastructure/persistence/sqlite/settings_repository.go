@@ -27,6 +27,11 @@ func (r *settingsRepository) GetAppLogo(ctx context.Context) ([]byte, error) {
 	return r.queries.GetAppLogo(ctx)
 }
 
+func (r *settingsRepository) SaveAppTheme(ctx context.Context, preset string) error {
+	_, err := r.db.ExecContext(ctx, `UPDATE app_settings SET theme = ? WHERE id = 1`, preset)
+	return err
+}
+
 func (r *settingsRepository) SaveAppSettings(ctx context.Context, update domain.AppSettingsUpdate) (domain.AppSettings, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -35,7 +40,7 @@ func (r *settingsRepository) SaveAppSettings(ctx context.Context, update domain.
 	defer tx.Rollback()
 	queries := r.queries.WithTx(tx)
 	if err = queries.UpdateAppSettings(ctx, generated.UpdateAppSettingsParams{
-		AppName: update.AppName, RemoveAuthor: update.RemoveAuthor, TimeZone: update.TimeZone,
+		AppName: update.AppName, RemoveAuthor: update.RemoveAuthor, RemoveTelemetry: update.RemoveTelemetry, TimeZone: update.TimeZone,
 		DateFormat: update.DateFormat, TimeFormat: update.TimeFormat, PlayerAvatarUrl: update.PlayerAvatarURL, Logo: update.Logo,
 	}); err != nil {
 		return domain.AppSettings{}, err
@@ -63,7 +68,7 @@ func nullInt(value *int64) sql.NullInt64 {
 }
 
 func settingsDomain(row generated.GetAppSettingsRow) domain.AppSettings {
-	return domain.AppSettings{AppName: row.AppName, RemoveAuthor: row.RemoveAuthor, TimeZone: row.TimeZone,
+	return domain.AppSettings{AppName: row.AppName, RemoveAuthor: row.RemoveAuthor, RemoveTelemetry: row.RemoveTelemetry, TimeZone: row.TimeZone,
 		DateFormat: row.DateFormat, TimeFormat: row.TimeFormat, PlayerAvatarURL: row.PlayerAvatarUrl, LogoVersion: row.LogoVersion,
-		ServerOnlineTimeoutMinutes: row.ServerOnlineTimeoutMinutes, IngestRetentionDays: row.IngestRetentionDays}
+		ServerOnlineTimeoutMinutes: row.ServerOnlineTimeoutMinutes, IngestRetentionDays: row.IngestRetentionDays, Theme: row.Theme}
 }

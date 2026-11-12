@@ -856,10 +856,11 @@ components:
   schemas:
     AppSettingsFields:
       type: object
-      required: [appName, removeAuthor, timeZone, dateFormat, timeFormat, playerAvatarUrl]
+      required: [appName, removeAuthor, removeTelemetry, timeZone, dateFormat, timeFormat, playerAvatarUrl]
       properties:
         appName: { type: string, maxLength: 100 }
         removeAuthor: { type: boolean }
+        removeTelemetry: { type: boolean }
         timeZone: { type: string, example: Europe/Moscow }
         dateFormat: { type: string, enum: [DD.MM.YYYY, YYYY-MM-DD, MM/DD/YYYY] }
         timeFormat: { type: string, enum: [24h, 12h] }
