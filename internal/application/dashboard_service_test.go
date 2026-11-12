@@ -74,7 +74,7 @@ func TestDashboardHistoryPointReadsSnapshotMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var decoded map[string]any
+	var decoded dashboardSnapshot
 	if err := json.Unmarshal(encoded, &decoded); err != nil {
 		t.Fatal(err)
 	}
@@ -85,8 +85,8 @@ func TestDashboardHistoryPointReadsSnapshotMetrics(t *testing.T) {
 }
 
 func TestDashboardClanBalanceChangesUsesLatestMatchingClans(t *testing.T) {
-	previous := map[string]any{"clans": []any{map[string]any{"externalId": "a", "tag": "A", "balance": float64(50)}, map[string]any{"externalId": "b", "tag": "B", "balance": float64(100)}}}
-	current := map[string]any{"clans": []any{map[string]any{"externalId": "a", "tag": "A", "balance": float64(80)}}}
+	previous := dashboardSnapshot{Clans: []domain.Clan{{"externalId": "a", "tag": "A", "balance": float64(50)}, {"externalId": "b", "tag": "B", "balance": float64(100)}}}
+	current := dashboardSnapshot{Clans: []domain.Clan{{"externalId": "a", "tag": "A", "balance": float64(80)}}}
 	changes := dashboardClanBalanceChanges(current, previous)
 	if len(changes) != 1 || string(changes[0]) != `{"balanceChange":30,"tag":"A"}` {
 		t.Fatalf("unexpected balance changes: %s", changes)

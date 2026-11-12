@@ -15,6 +15,13 @@ type DashboardService struct {
 	repository ports.DashboardRepository
 }
 
+type dashboardSnapshot struct {
+	TakenAt    string          `json:"takenAt"`
+	Clans      []domain.Clan   `json:"clans"`
+	Players    []domain.Player `json:"players"`
+	Extensions map[string]any  `json:"extensions"`
+}
+
 var ErrInvalidDashboardLayout = errors.New("invalid dashboard layout")
 
 var dashboardWidgetIDs = map[string]bool{"clans": true, "players": true, "wars": true, "balance": true, "kills": true, "status": true, "actions": true, "top": true, "online": true}
@@ -53,9 +60,9 @@ func (s *DashboardService) Data(ctx context.Context, serverID string) (domain.Da
 	if err != nil {
 		return data, err
 	}
-	var current, previous map[string]any
+	var current, previous dashboardSnapshot
 	for i := len(data.Snapshots) - 1; i >= 0; i-- {
-		var snapshot map[string]any
+		var snapshot dashboardSnapshot
 		if err := json.Unmarshal(data.Snapshots[i], &snapshot); err != nil {
 			return data, err
 		}
@@ -76,55 +83,31 @@ func (s *DashboardService) Data(ctx context.Context, serverID string) (domain.Da
 	return data, nil
 }
 
-func dashboardClanBalanceChanges(current, previous map[string]any) []json.RawMessage {
+func dashboardClanBalanceChanges(current, previous dashboardSnapshot) []json.RawMessage {
 	oldBalances := map[string]float64{}
-	if clans, ok := previous["clans"].([]any); ok {
-		for _, row := range clans {
-			if clan, ok := row.(map[string]any); ok {
-				oldBalances[clanKey(clan)] = numberValue(clan["balance"])
-			}
-		}
+	for _, clan := range previous.Clans {
+		oldBalances[clan.IdentityKey()] = clan.Balance()
 	}
 	var changes []json.RawMessage
-	if clans, ok := current["clans"].([]any); ok {
-		for _, row := range clans {
-			clan, ok := row.(map[string]any)
-			if !ok {
-				continue
-			}
-			key := clanKey(clan)
-			previousBalance, exists := oldBalances[key]
-			if !exists {
-				continue
-			}
-			change, _ := json.Marshal(map[string]any{"tag": clan["tag"], "balanceChange": numberValue(clan["balance"]) - previousBalance})
-			changes = append(changes, change)
+	for _, clan := range current.Clans {
+		previousBalance, exists := oldBalances[clan.IdentityKey()]
+		if !exists {
+			continue
 		}
+		change, _ := json.Marshal(map[string]any{"tag": clan["tag"], "balanceChange": clan.Balance() - previousBalance})
+		changes = append(changes, change)
 	}
 	return changes
 }
 
-func clanKey(clan map[string]any) string {
-	for _, key := range []string{"externalId", "tag", "name"} {
-		if value := stringValue(clan[key]); value != "" {
-			return key + ":" + value
-		}
-	}
-	return ""
-}
-
-func dashboardHistoryPoint(snapshot map[string]any) domain.DashboardHistoryPoint {
+func dashboardHistoryPoint(snapshot dashboardSnapshot) domain.DashboardHistoryPoint {
 	point := domain.DashboardHistoryPoint{At: time.Time{}}
-	point.At, _ = time.Parse(time.RFC3339Nano, stringValue(snapshot["takenAt"]))
-	clans, _ := snapshot["clans"].([]any)
-	players, _ := snapshot["players"].([]any)
-	point.Clans, point.Players = len(clans), len(players)
-	for _, clan := range clans {
-		if row, ok := clan.(map[string]any); ok {
-			point.Balance += numberValue(row["balance"])
-		}
+	point.At, _ = time.Parse(time.RFC3339Nano, snapshot.TakenAt)
+	point.Clans, point.Players = len(snapshot.Clans), len(snapshot.Players)
+	for _, clan := range snapshot.Clans {
+		point.Balance += clan.Balance()
 	}
-	if extensions, ok := snapshot["extensions"].(map[string]any); ok {
+	if extensions := snapshot.Extensions; extensions != nil {
 		if collector, ok := extensions["scCollectorV1"].(map[string]any); ok {
 			wars, _ := collector["wars"].([]any)
 			online, _ := collector["onlinePlayers"].([]any)
@@ -156,11 +139,6 @@ func numberValue(value any) float64 {
 	default:
 		return 0
 	}
-}
-
-func stringValue(value any) string {
-	result, _ := value.(string)
-	return result
 }
 
 func (s *DashboardService) Layout(ctx context.Context, userID int64) (domain.DashboardLayout, error) {

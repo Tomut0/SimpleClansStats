@@ -21,6 +21,7 @@
 	let addWidget = $state(() => {});
 	let restoreDefaults = $state(() => {});
 	let saveDashboard = $state(() => {});
+	let receivedSnapshot = $state(false);
 	const selectedServer = $derived(
 		data.servers.find((server) => server.id === serverState.selectedId)
 	);
@@ -31,7 +32,7 @@
 	});
 
 	const waitingForSnapshot = $derived(
-		selectedServer?.lastIngestAt === null && !selectedServer.disabled
+		selectedServer?.lastIngestAt === null && !selectedServer.disabled && !receivedSnapshot
 	);
 
 	const updatedAt = $derived.by(() => {
@@ -75,17 +76,78 @@
 	>
 		{#snippet actions()}
 			{#if selectedServer}
-				<div class="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm text-muted-foreground">
-					<span class="inline-flex items-center gap-2"><span class={['size-1.5 rounded-full', selectedServer.online ? 'bg-emerald-500' : 'bg-muted-foreground']} aria-hidden="true"></span>{selectedServer.online ? m['server.online']() : m['server.offline']()}</span>
+				<div
+					class="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm text-muted-foreground"
+				>
+					<span class="inline-flex items-center gap-2"
+						><span
+							class={[
+								'size-1.5 rounded-full',
+								selectedServer.online ? 'bg-emerald-500' : 'bg-muted-foreground'
+							]}
+							aria-hidden="true"
+						></span>{selectedServer.online ? m['server.online']() : m['server.offline']()}</span
+					>
 					<span class="h-3 w-px bg-border" aria-hidden="true"></span>
-					<span>{m['server.updated']()}{#if updatedAt && selectedServer.lastIngestAt}<time datetime={selectedServer.lastIngestAt} class="text-foreground">{updatedAt}</time>{:else}{m['server.never_updated']()}{/if}</span>
+					<span
+						>{m['server.updated']()}{#if updatedAt && selectedServer.lastIngestAt}<time
+								datetime={selectedServer.lastIngestAt}
+								class="text-foreground">{updatedAt}</time
+							>{:else}{m['server.never_updated']()}{/if}</span
+					>
 					{#if selectedServer && !selectedServer.disabled}
 						{#if editing}
-							<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md border text-foreground" aria-label={m['pages.dashboard.add_widget_button']()} onclick={addWidget}><Plus class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">{m['pages.dashboard.add_widget_button']()}</Tooltip.Content></Tooltip.Root>
-							<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md border text-foreground" aria-label={m['pages.dashboard.restore_default']()} onclick={restoreDefaults}><RotateCcw class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">{m['pages.dashboard.restore_default']()}</Tooltip.Content></Tooltip.Root>
-							<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground" aria-label={m['pages.dashboard.save_dashboard']()} onclick={saveDashboard}><Save class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">{m['pages.dashboard.save_dashboard']()}</Tooltip.Content></Tooltip.Root>
+							<Tooltip.Root
+								><Tooltip.Trigger
+									><button
+										class="grid size-9 place-items-center rounded-md border text-foreground"
+										aria-label={m['pages.dashboard.add_widget_button']()}
+										onclick={addWidget}><Plus class="size-4" aria-hidden="true" /></button
+									></Tooltip.Trigger
+								><Tooltip.Content
+									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+									>{m['pages.dashboard.add_widget_button']()}</Tooltip.Content
+								></Tooltip.Root
+							>
+							<Tooltip.Root
+								><Tooltip.Trigger
+									><button
+										class="grid size-9 place-items-center rounded-md border text-foreground"
+										aria-label={m['pages.dashboard.restore_default']()}
+										onclick={restoreDefaults}
+										><RotateCcw class="size-4" aria-hidden="true" /></button
+									></Tooltip.Trigger
+								><Tooltip.Content
+									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+									>{m['pages.dashboard.restore_default']()}</Tooltip.Content
+								></Tooltip.Root
+							>
+							<Tooltip.Root
+								><Tooltip.Trigger
+									><button
+										class="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground"
+										aria-label={m['pages.dashboard.save_dashboard']()}
+										onclick={saveDashboard}><Save class="size-4" aria-hidden="true" /></button
+									></Tooltip.Trigger
+								><Tooltip.Content
+									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+									>{m['pages.dashboard.save_dashboard']()}</Tooltip.Content
+								></Tooltip.Root
+							>
 						{:else}
-						<Tooltip.Root><Tooltip.Trigger><button class="grid size-9 place-items-center rounded-md border text-foreground" aria-label="Customize dashboard" onclick={() => (editing = true)}><SlidersHorizontal class="size-4" aria-hidden="true" /></button></Tooltip.Trigger><Tooltip.Content class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md">Customize dashboard</Tooltip.Content></Tooltip.Root>
+							<Tooltip.Root
+								><Tooltip.Trigger
+									><button
+										class="grid size-9 place-items-center rounded-md border text-foreground"
+										aria-label="Customize dashboard"
+										onclick={() => (editing = true)}
+										><SlidersHorizontal class="size-4" aria-hidden="true" /></button
+									></Tooltip.Trigger
+								><Tooltip.Content
+									class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+									>Customize dashboard</Tooltip.Content
+								></Tooltip.Root
+							>
 						{/if}
 					{/if}
 				</div>
@@ -105,7 +167,19 @@
 	{/if}
 	{#if selectedServer && !selectedServer.disabled}
 		{#key selectedServer.id}
-			<DashboardGrid serverId={selectedServer.id} apiUrl={API_URL} avatarUrlTemplate={data.settings?.playerAvatarUrl ?? 'https://mc-heads.net/avatar/{username}/32'} bind:editing bind:onAddWidget={addWidget} bind:onRestoreDefaults={restoreDefaults} bind:onSaveDashboard={saveDashboard} />
+			<div class:invisible={waitingForSnapshot}>
+				<DashboardGrid
+					serverId={selectedServer.id}
+					apiUrl={API_URL}
+					avatarUrlTemplate={data.settings?.playerAvatarUrl ??
+						'https://mc-heads.net/avatar/{username}/32'}
+					bind:editing
+					bind:onAddWidget={addWidget}
+					bind:onRestoreDefaults={restoreDefaults}
+					bind:onSaveDashboard={saveDashboard}
+					onSnapshot={(received) => (receivedSnapshot = received)}
+				/>
+			</div>
 		{/key}
 	{/if}
 </main>
