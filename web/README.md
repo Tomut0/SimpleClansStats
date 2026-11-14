@@ -1,42 +1,11 @@
-# sv
+# SimpleClansStats web client
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+The SvelteKit client uses the Go server for its API. During development, run `go run ./cmd --static` from the repository root and `npm ci` followed by `npm run dev` from `web/`, in separate terminals. Omit `--static` if another server, such as Nginx, serves the web client. If applying a preset changes npm dependencies while Vite is running, restart Vite.
 
-## Creating a project
+## Themes
 
-If you're seeing this, you've probably already done this step. Congrats!
+Applying a preset from **Settings → Theme** runs the full `shadcn-svelte apply <preset>` command (including dependency installation) and then `npm run build`. The full preset updates theme variables, fonts, `components.json`, and installed shadcn-svelte components. The settings page reloads after the build so the browser fetches the new production bundle. Make sure the web directory has its npm dependencies installed before running the Go server locally.
 
-```sh
-# create a new project
-npx sv create my-app
-```
+The Docker image installs the web dependencies, builds the initial static client, and starts with `--static`. To let Nginx serve the web client instead, override the container command with `--static=false`; Nginx must serve the same build directory if it should pick up theme rebuilds.
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.17.0 create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" playwright tailwindcss="plugins:none" sveltekit-adapter="adapter:static" paraglide="languageTags:en, ru+demo:yes" ai-tools="ide:other" --install npm web
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Build the static client manually with `npm run build`.

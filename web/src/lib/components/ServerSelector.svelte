@@ -3,6 +3,7 @@
 	import ServerIcon from '@lucide/svelte/icons/server';
 	import { m } from '$lib/paraglide/messages.js';
 	import type { Server } from '$lib/api/generated';
+	import { serverState } from '$lib/states/serverState.svelte';
 
 	let { servers = [] }: { servers: Server[] } = $props();
 
@@ -14,14 +15,22 @@
 		}))
 	);
 
-	let value = $state('');
+	const selectedValue = $derived(
+		items.some((item) => item.value === serverState.selectedId) ? serverState.selectedId : ''
+	);
 </script>
 
 {#if items.length > 0}
-	<Select.Root type="single" name="favoriteFruit" {items} bind:value>
+	<Select.Root
+		type="single"
+		name="server"
+		{items}
+		value={selectedValue}
+		onValueChange={(next) => (serverState.selectedId = next)}
+	>
 		<Select.Trigger class="min-w-50">
 			<ServerIcon class="h-4 w-4 text-muted-foreground" />
-			<Select.Value placeholder={m['dashboard.serverSelector.placeholder']()} />
+			<Select.Value placeholder={m['serverSelector.placeholder']()} />
 		</Select.Trigger>
 		<Select.Content>
 			<Select.Group>

@@ -18,6 +18,10 @@ servers:
 
 tags:
   - name: auth
+  - name: servers
+  - name: ingest
+  - name: dashboard
+  - name: settings
 
 paths:
   /auth/me:
@@ -33,17 +37,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user:
-                    type: ["object", "null"]
-                    properties:
-                      username: { type: string }
-                      role: { type: string, enum: [admin, member, guest] }
+                $ref: '#/components/schemas/User'
               example:
                 user:
-                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                   email: player1@example.com
+                  username: player1
                   role: user
         "401": { $ref: "#/components/responses/Unauthorized" }
   /auth/login:
@@ -59,7 +57,7 @@ paths:
             schema:
               $ref: "#/components/schemas/LoginRequest"
             example:
-              username: player1
+              email: player1@example.com
               password: hunter2
       responses:
         "200":
@@ -78,11 +76,110 @@ paths:
                 role: user
         "401":
           $ref: "#/components/responses/Unauthorized"
-        "429":
-          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          description: Internal Server Error
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Log out
+      operationId: logout
+      responses:
+        "204":
+          description: Session destroyed
+        "500":
+          description: Internal Server Error
+          
   # ===========================================================================
   # Servers
   # ===========================================================================
+  /settings:
+    get:
+      summary: Get application settings
+      operationId: getAppSettings
+      responses:
+        "200":
+          description: Application settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AppSettings" }
+        "500": { description: Internal Server Error }
+    post:
+      summary: Save application settings as an administrator
+      operationId: updateAppSettings
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/AppSettingsFields"
+                - type: object
+                  properties:
+                    logo: { type: string, format: binary, description: Optional PNG or JPEG up to 1 MiB }
+                    serverOnlineTimeoutMinutes: { type: integer, format: int64, minimum: 1, maximum: 1440 }
+                    ingestRetentionDays: { type: integer, format: int64, minimum: 0, maximum: 36500 }
+      responses:
+        "200":
+          description: Saved application settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AppSettings" }
+        "400": { description: Invalid settings or logo }
+        "401": { description: Login required }
+        "403": { description: Administrator required }
+        "413": { description: Request too large }
+        "500": { description: Internal Server Error }
+
+  /settings/theme:
+    post:
+      tags: [settings]
+      summary: Apply a shadcn-svelte theme preset as an administrator
+      operationId: applyAppTheme
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ThemePresetRequest" }
+      responses:
+        "204": { description: Theme applied }
+        "400": { description: Invalid preset code }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Administrator access required }
+        "500": { description: Theme application failed }
+
+  /settings/theme.css:
+    get:
+      tags: [settings]
+      summary: Get the active theme stylesheet
+      operationId: getAppThemeCSS
+      responses:
+        "200":
+          description: CSS variables generated from the active preset
+          content:
+            text/css:
+              schema: { type: string }
+        "500": { description: Theme stylesheet generation failed }
+
+  /settings/logo:
+    get:
+      summary: Get the application logo
+      operationId: getAppLogo
+      responses:
+        "200":
+          description: Application logo
+          content:
+            image/png:
+              schema: { type: string, format: binary }
+            image/jpeg:
+              schema: { type: string, format: binary }
+        "404": { description: No custom logo }
+        "500": { description: Internal Server Error }
+
+
   /servers:
     get:
       tags: [servers]
@@ -108,19 +205,287 @@ paths:
                       displayName: "My Server"
                       disabled: false
                       online: true
+                      lastIngestAt: "2026-11-10T12:00:00Z"
         "500":
           description: Internal Server Error
+    post:
+      tags: [servers]
+      summary: Register a Minecraft server and issue its collector key
+      operationId: createServer
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [displayName]
+              properties:
+                displayName: { type: string, minLength: 1, maxLength: 100 }
+      responses:
+        "201":
+          description: Registered server. The API key is returned only by this operation.
+          headers:
+            Cache-Control:
+              schema: { type: string, example: no-store }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServerRegistration" }
+        "400": { description: Invalid server name }
+        "401": { description: Login required }
+        "403": { description: Administrator required }
+        "500": { description: Internal Server Error }
+
+  /servers/{serverId}:
+    delete:
+      tags: [servers]
+      summary: Delete a server and its snapshot history
+      operationId: deleteServer
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Server deleted or already absent }
+        "400": { description: Invalid server ID }
+        "401": { description: Login required }
+        "403": { description: Administrator required }
+        "500": { description: Internal Server Error }
+
+  /dashboard/layout:
+    get:
+      tags: [dashboard]
+      summary: Get the shared dashboard layout
+      operationId: getDashboardLayout
+      responses:
+        "200":
+          description: Saved layout, or an empty widget list when the client should render the default arrangement
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardLayout" }
+        "500": { description: Internal Server Error }
+    put:
+      tags: [dashboard]
+      summary: Save the shared dashboard layout (administrators only)
+      operationId: saveDashboardLayout
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DashboardLayout" }
+      responses:
+        "204": { description: Layout saved }
+        "400": { description: Unsupported widget or invalid layout }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Administrator required }
+        "500": { description: Internal Server Error }
+
+  /dashboard/events:
+    get:
+      tags: [dashboard]
+      summary: Subscribe to live dashboard data using Server-Sent Events
+      operationId: getDashboardEvents
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: serverId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: A stream emits a snapshot event whenever collector data changes
+          content:
+            text/event-stream:
+              schema: { type: string, description: 'SSE event: event: snapshot followed by JSON DashboardData in data:' }
+              example: |-
+                event: snapshot
+                data: {"state":{"clans":[],"players":[]},"events":[]}
+        "400": { description: Missing or invalid server ID }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { description: Streaming unavailable }
+
+  /ingest:
+    post:
+      tags: [ingest]
+      summary: Record receipt, events and any state change from SCCollector
+      operationId: ingest
+      security:
+        - ingestApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [takenAt, clans, players]
+              properties:
+                takenAt: { type: string, format: date-time, description: When SCCollector captured the state }
+                serverId: { type: string, format: uuid, description: Optional assertion of the server bound to the API key }
+                clans:
+                  type: array
+                  items:
+                    type: object
+                    required: [externalId, tag, name]
+                    properties:
+                      externalId: { type: string }
+                      tag: { type: string }
+                      name: { type: string }
+                players:
+                  type: array
+                  items:
+                    type: object
+                    required: [uuid, name]
+                    properties:
+                      uuid: { type: string, format: uuid }
+                      name: { type: string }
+                extensions:
+                  type: object
+                  properties:
+                    scCollectorV1:
+                      type: object
+                      description: SCCollector v1 data for online players, wars, invites, claims and events
+                      additionalProperties: true
+                  additionalProperties: true
+      responses:
+        "202":
+          description: Ingest accepted. A snapshot is stored only when the state changes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted, processedAt]
+                properties:
+                  accepted: { type: boolean }
+                  processedAt: { type: string, format: date-time }
+        "400": { description: Invalid snapshot }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413": { description: Snapshot exceeds 8 MiB }
+        "415": { description: Expected application/json }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+        "500": { description: Internal Server Error }
 
 components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+    ingestApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
   schemas:
+    DashboardLayout:
+      type: object
+      required: [version, widgets]
+      properties:
+        version: { type: integer, enum: [1] }
+        widgets:
+          type: array
+          minItems: 1
+          maxItems: 24
+          items: { $ref: "#/components/schemas/DashboardWidget" }
+
+    DashboardWidget:
+      type: object
+      required: [id, x, y, w, h]
+      properties:
+        id: { type: string, maxLength: 64, pattern: '^(clans|players|wars|balance|kills|status|actions|top|online|counter-[0-9a-fA-F-]{36}|widget-[0-9a-fA-F-]{36})$' }
+        type: { type: string, enum: [counter, table, leaderboard, activityFeed, onlineSnapshot, distribution, timeSeries, clanCard, playerCard, warCenter, clanRoster, network, compare, heatmap, gainersLosers, economy, killFeed, peakOnline, pendingInvites, claims] }
+        field: { type: string, enum: [clans, players, wars, balance, onlinePlayers, kills, clanBalance, recentActions, killTypes, clanStatus, clan, player, clanPlayers, clanRelations, clanMetrics, playerActivity, clanBalanceChange, recentKills, pendingInvites, claims] }
+        format: { type: string, enum: [number, compact, plain] }
+        limit: { type: integer, enum: [5, 10, 20] }
+        x: { type: integer, minimum: 0, maximum: 11 }
+        y: { type: integer, minimum: 0, maximum: 10000 }
+        w: { type: integer, minimum: 1, maximum: 12 }
+        h: { type: integer, minimum: 1, maximum: 12 }
+
+    DashboardData:
+      type: object
+      required: [state, events, history, clanBalanceChanges]
+      properties:
+        state: { type: object, additionalProperties: true }
+        events:
+          type: array
+          items: { type: object, additionalProperties: true }
+        history:
+          type: array
+          items:
+            type: object
+            required: [at, clans, players, wars, balance, onlinePlayers, kills]
+            properties:
+              at: { type: string, format: date-time }
+              clans: { type: integer }
+              players: { type: integer }
+              wars: { type: integer }
+              balance: { type: number }
+              onlinePlayers: { type: integer }
+              kills: { type: number }
+        clanBalanceChanges:
+          type: array
+          items:
+            type: object
+            required: [tag, balanceChange]
+            properties:
+              tag: { type: string }
+              balanceChange: { type: number }
+
+    ServerRegistration:
+      type: object
+      required: [server, apiKey]
+      properties:
+        server: { $ref: "#/components/schemas/Server" }
+        apiKey: { type: string }
+
+    ThemePresetRequest:
+      type: object
+      required: [preset]
+      properties:
+        preset: { type: string, pattern: '^[A-Za-z0-9]{6,32}$' }
+
+    AppSettingsFields:
+      type: object
+      required: [appName, removeAuthor, removeTelemetry, primaryLanguage, multilingual, timeZone, dateFormat, timeFormat, playerAvatarUrl]
+      properties:
+        appName: { type: string, maxLength: 100 }
+        removeAuthor: { type: boolean }
+        removeTelemetry: { type: boolean }
+        primaryLanguage: { type: string, minLength: 2, maxLength: 35 }
+        multilingual: { type: boolean }
+        timeZone: { type: string, example: Europe/Moscow }
+        dateFormat: { type: string, enum: [DD.MM.YYYY, YYYY-MM-DD, MM/DD/YYYY] }
+        timeFormat: { type: string, enum: [24h, 12h] }
+        playerAvatarUrl: { type: string, maxLength: 500, example: 'https://mc-heads.net/avatar/{username}/32' }
+
+    AppSettings:
+      allOf:
+        - $ref: "#/components/schemas/AppSettingsFields"
+        - type: object
+          required: [logoVersion, serverOnlineTimeoutMinutes, ingestRetentionDays, theme]
+          properties:
+            logoVersion: { type: integer, format: int64, minimum: 0 }
+            serverOnlineTimeoutMinutes: { type: integer, format: int64, minimum: 1, maximum: 1440 }
+            ingestRetentionDays: { type: integer, format: int64, minimum: 0, maximum: 36500 }
+            theme: { type: string, description: Current shadcn-svelte preset code }
+
+
+
     LoginRequest:
       type: object
       required:
-        - username
+        - email
         - password
       properties:
-        username:
+        email:
           type: string
+          format: email
         password:
           type: string
           format: password
@@ -128,9 +493,12 @@ components:
     User:
       type: object
       required:
+        - email
         - username
         - role
       properties:
+        email:
+          type: string
         username:
           type: string
         role:
@@ -142,13 +510,14 @@ components:
 
     Server:
       type: object
-      required: [id, displayName]
+      required: [id, displayName, disabled, online, lastIngestAt]
       properties:
         id: { type: string, format: uuid }
         displayName: { type: string, example: "My Server" }
         online: { type: boolean, example: true }
         disabled: { type: boolean, example: false }
-
+        lastIngestAt: { type: [string, "null"], format: date-time, description: When the last successful ingest was received }
+  
     Error:
       type: object
       required:

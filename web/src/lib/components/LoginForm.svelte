@@ -31,7 +31,7 @@
 				method: 'POST',
 				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email: email, password })
+				body: JSON.stringify({ email, password })
 			});
 
 			if (!response.ok) {
@@ -41,7 +41,7 @@
 
 			window.location.assign('/');
 		} catch {
-			errorMessage = 'Could not reach the server. Please try again.';
+			errorMessage = m['errors.http_error']();
 		} finally {
 			isSubmitting = false;
 		}
@@ -51,26 +51,26 @@
 <Card.Root class="mx-auto w-full max-w-sm">
 	<Card.Header>
 		<Card.Title class="text-2xl">{m['auth.login']()}</Card.Title>
-		<Card.Description>{m['auth.loginForm.description']()}</Card.Description>
+		<Card.Description>{m['pages.login.form.description']()}</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<form onsubmit={submit}>
 			<FieldGroup>
 				<Field>
-					<FieldLabel for="email-{id}">{m['auth.loginForm.email']()}</FieldLabel>
+					<FieldLabel for="email-{id}">{m['pages.login.form.email']()}</FieldLabel>
 					<Input
 						id="email-{id}"
 						name="email"
 						type="email"
-						placeholder={m['auth.loginForm.emailPlaceholder']()}
+						placeholder={m['pages.login.form.emailPlaceholder']()}
 						required
 					/>
 				</Field>
 				<Field>
 					<div class="flex items-center">
-						<FieldLabel for="password-{id}">{m['auth.loginForm.password']()}</FieldLabel>
+						<FieldLabel for="password-{id}">{m['pages.login.form.password']()}</FieldLabel>
 						<a href="##" class="ms-auto inline-block text-sm underline">
-							{m['auth.loginForm.forgotPassword']()}
+							{m['pages.login.form.forgotPassword']()}
 						</a>
 					</div>
 					<Input
@@ -95,10 +95,10 @@
 								fill="currentColor"
 							/>
 						</svg>
-						{m['auth.loginForm.loginWithGoogle']()}
+						{m['pages.login.form.loginWithGoogle']()}
 					</Button>
 					<FieldDescription class="text-center">
-						{m['auth.loginForm.noAccount']()} <a href="##">{m['auth.loginForm.signUp']()}</a>
+						{m['pages.login.form.noAccount']()} <a href="##">{m['pages.login.form.signUp']()}</a>
 					</FieldDescription>
 				</Field>
 			</FieldGroup>
