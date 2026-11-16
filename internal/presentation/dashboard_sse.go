@@ -59,10 +59,6 @@ func (s *ServerHandler) SaveDashboardLayout(w http.ResponseWriter, r *http.Reque
 
 // DashboardEvents streams the latest collector snapshot whenever it changes.
 func (s *ServerHandler) DashboardEvents(w http.ResponseWriter, r *http.Request) {
-	if _, ok := s.sessions.Get(r.Context(), "user_id").(int64); !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
 	serverID := r.URL.Query().Get("serverId")
 	if _, err := uuid.Parse(serverID); err != nil {
 		http.Error(w, "serverId is required", http.StatusBadRequest)

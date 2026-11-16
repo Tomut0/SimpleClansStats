@@ -1,7 +1,10 @@
 package server
 
 import (
+	"bytes"
+	"embed"
 	"errors"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -22,6 +25,9 @@ const (
 	responseWriteTimeout = 10 * time.Second
 	themeApplyTimeout    = 5 * time.Minute
 )
+
+//go:embed all:static
+var staticFiles embed.FS
 
 func RunHttpServer(serverHandler *presentation.ServerHandler, sessions *scs.SessionManager, installationID string, serveStatic bool) {
 	srv := &http.Server{
@@ -132,17 +138,26 @@ func serveFrontend(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	buildDir := os.Getenv("WEB_BUILD_DIR")
-	if buildDir == "" {
-		buildDir = filepath.Join("web", "build")
+	var frontend fs.FS
+	if buildDir := os.Getenv("WEB_BUILD_DIR"); buildDir != "" {
+		frontend = os.DirFS(buildDir)
+	} else if _, err := fs.Stat(staticFiles, "static/200.html"); err == nil {
+		frontend, _ = fs.Sub(staticFiles, "static")
+	} else {
+		frontend = os.DirFS(filepath.Join("web", "build"))
 	}
-	file := filepath.Join(buildDir, filepath.FromSlash(strings.TrimPrefix(path.Clean(r.URL.Path), "/")))
-	if info, err := os.Stat(file); err == nil && !info.IsDir() {
-		http.ServeFile(w, r, file)
-		return
+	file := strings.TrimPrefix(path.Clean(r.URL.Path), "/")
+	content, err := fs.ReadFile(frontend, file)
+	if err != nil {
+		file = "200.html"
+		content, err = fs.ReadFile(frontend, file)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Cache-Control", "no-cache")
 	}
-	w.Header().Set("Cache-Control", "no-cache")
-	http.ServeFile(w, r, filepath.Join(buildDir, "200.html"))
+	http.ServeContent(w, r, filepath.Base(file), time.Time{}, bytes.NewReader(content))
 }
 
 func corsAllowedOrigins() []string {

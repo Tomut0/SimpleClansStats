@@ -172,16 +172,6 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 	list(true, true)
 	streamContext, cancelStream := context.WithCancel(context.Background())
 	streamRequest := httptest.NewRequest("GET", "/api/v1/dashboard/events?serverId="+id, nil)
-	streamContext, err := sessions.Load(streamContext, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	sessions.Put(streamContext, "user_id", int64(1))
-	token, _, err := sessions.Commit(streamContext)
-	if err != nil {
-		t.Fatal(err)
-	}
-	streamRequest.AddCookie(&http.Cookie{Name: sessions.Cookie.Name, Value: token})
 	streamRequest = streamRequest.WithContext(streamContext)
 	stream := httptest.NewRecorder()
 	streamWriter := &changingSnapshotWriter{

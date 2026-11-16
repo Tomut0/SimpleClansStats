@@ -11,7 +11,7 @@ info:
   version: 2.0.0
 
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:4000/api/v1
     description: Local development
   - url: https://stats.example.com/api/v1
     description: Production
@@ -291,8 +291,6 @@ paths:
       tags: [dashboard]
       summary: Subscribe to live dashboard data using Server-Sent Events
       operationId: getDashboardEvents
-      security:
-        - sessionCookie: []
       parameters:
         - name: serverId
           in: query
@@ -308,7 +306,6 @@ paths:
                 event: snapshot
                 data: {"state":{"clans":[],"players":[]},"events":[]}
         "400": { description: Missing or invalid server ID }
-        "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { description: Streaming unavailable }
 
   /ingest:

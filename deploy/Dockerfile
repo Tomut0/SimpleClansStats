@@ -49,9 +49,10 @@ VOLUME ["/data"]
 ENV DATABASE_PATH=/data/simpleclansstats.sqlite GOOSE_DRIVER=sqlite3 GOOSE_DBSTRING=/data/simpleclansstats.sqlite
 ENV SHADCN_PROJECT_DIR=/app/web
 ENV APP_THEME_CSS_PATH=/data/theme.css
+ENV WEB_BUILD_DIR=/app/web/build
 
 COPY deploy/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh /app/simpleclansstats
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["--static"]
+CMD ["--mode=web"]

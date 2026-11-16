@@ -90,10 +90,10 @@
 					>
 					<span class="h-3 w-px bg-border" aria-hidden="true"></span>
 					<span
-						>{m['server.updated']()}{#if updatedAt && selectedServer.lastIngestAt}<time
+						>{m['server.updated']()} {#if updatedAt && selectedServer.lastIngestAt}<time
 								datetime={selectedServer.lastIngestAt}
 								class="text-foreground">{updatedAt}</time
-							>{:else}{m['server.never_updated']()}{/if}</span
+							>{:else} {m['server.never_updated']()}{/if}</span
 					>
 					{#if selectedServer && !selectedServer.disabled}
 						{#if data.user?.role === 'admin'}
