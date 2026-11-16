@@ -20,15 +20,15 @@ The interface is available in English and Russian (contributions for additional 
 
 ## Features
 
-- Customizable Dashboard: \ Administrators can add, remove and reposition widgets to create their preferred dashboard layout.
-- Real-time Updates: \ Server data and activity are updated in real time, keeping your dashboard up to date.
-- Clan & Player Search: \ Find clans and players and explore their detailed statistics and information.
-- Multilingual Support: \ Let users choose their preferred language or enforce a single application-wide language.
-- Multi-Server Support: \ Connect and monitor multiple Minecraft servers from a single installation.
-- Theme Customization: \ Choose from different themes powered by shadcn-svelte.
-- Custom Branding: \ Personalize your installation with a custom application name and logo.
-- Light & Dark Mode: \ Switch between light and dark appearances.
-- API & Web Modes: \ Run the application with its built-in web interface or in API-only mode to build your own frontend.
+- Customizable Dashboard: Administrators can add, remove and reposition widgets to create their preferred dashboard layout.
+- Real-time Updates: Server data and activity are updated in real time, keeping your dashboard up to date.
+- Clan & Player Search: Find clans and players and explore their detailed statistics and information.
+- Multilingual Support: Let users choose their preferred language or enforce a single application-wide language.
+- Multi-Server Support: Connect and monitor multiple Minecraft servers from a single installation.
+- Theme Customization: Choose from different themes powered by shadcn-svelte.
+- Custom Branding: Personalize your installation with a custom application name and logo.
+- Light & Dark Mode: Switch between light and dark appearances.
+- API & Web Modes: Run the application with its built-in web interface or in API-only mode to build your own frontend.
 
 ## 📦 How to Install
 
@@ -60,6 +60,10 @@ docker run -d --name simpleclansstats `
   -e BOOTSTRAP_ADMIN_USERNAME=admin `
   -e BOOTSTRAP_ADMIN_PASSWORD='admin' `
   -e CORS_ALLOWED_ORIGINS=http://localhost:4000 `
+  -e APP_URL=https://stats.example.com `
+  -e APP_VERSION=2.0.0 `
+  -e POSTHOG_API_KEY=phc_wboArzoxaHWqADcRiazJLa4otEs7KViZNgvzzsjMsdXX `
+  -e POSTHOG_HOST=https://us.i.posthog.com `
   docker.io/minat0/scstats:latest
 ```
 
