@@ -1,96 +1,78 @@
 # SimpleClansStats
 
-<img src="https://mikasa.host/images/scstats.png" alt="image">
+A web dashboard for viewing and exploring [SimpleClans](https://github.com/RoinujNosde/SimpleClans) data across one or more Minecraft servers written in Golang and SvelteKit.
 
-Laravel based web interface for SimpleClans plugin. \
-Laravel version: 10.15.0
+Use the dashboard to monitor clan rosters, wars, balances, kills, online players, and recent activity. Search for a clan or player to view detailed information, or customize your dashboard widgets to focus on what matters most to your server. Manage multiple servers from a single installation.
 
-Watch demo of the application [here](https://scstats.roinujnosde.me/).
+The interface is available in English and Russian (contributions for additional translations are welcome!).
 
-* Laravel [documentation](https://laravel.com/docs)
-* SimpleClans [plugin](https://github.com/RoinujNosde/SimpleClans)
----
+[![Docker build](https://github.com/Tomut0/SimpleClansStats/actions/workflows/docker-publish.yml/badge.svg?branch=master)](https://github.com/Tomut0/SimpleClansStats/actions/workflows/docker-publish.yml) [![License](https://img.shields.io/github/license/Tomut0/SimpleClansStats)](LICENSE) [![Latest tag](https://img.shields.io/github/v/tag/Tomut0/SimpleClansStats?label=version)](https://github.com/Tomut0/SimpleClansStats/tags)
+
+## Screenshots
+
+| Dashboard | Add widget | Edit dashboard |
+| --- | --- | --- |
+| <img src="docs/images/dashboard.png" width="300" alt="Dashboard"> | <img src="docs/images/add-widget.png" width="300" alt="Add widget dialog"> | <img src="docs/images/edit-dashboard.png" width="300" alt="Edit dashboard"> |
+
+| Player details | Settings | Settings |
+| --- | --- | --- |
+| <img src="docs/images/player-modal.png" width="300" alt="Player details dialog"> | <img src="docs/images/settings-1.png" width="300" alt="Settings page"> | <img src="docs/images/settings-2.png" width="300" alt="Settings page, continued"> |
+
 ## Features
 
-* **Powerful Leaderboard**: \
-  Easily see which players have the best combat performance with sorting options for KDR (Kill-Death Ratio), Balance,
-  and Member count.
-* **Updates clan positions daily, weekly, and monthly**: \
-  Track your progress and see how your clan ranks over different time periods.
-* **Multi Language Support**: \
-  Seamless language switching without page reload. \
-  Instantly translate the page into supported languages for a smoother user experience. \
-  Currently supported languages are: English, Portuguese (Brazil), Russian.
-* **Comprehensive Statistics**: \
-  Displays latest kills between clan players, provides detailed kills by types, shows average clan balance, \
-  and tracks the total number of clans on the server.
-* **Extremely Fast and Configurable**: \
-  Built with Vue and Inertia for a smooth and dynamic user experience. \
-  Easily deployable with Docker, allowing you to quickly set up and configure your environment to meet your needs.
-* **Adaptive Design**: \
-  Responsive layout that adjusts seamlessly to different screen sizes and devices, \
-  ensuring an optimal viewing experience on desktops and mobile phones.
+- Customizable Dashboard: Administrators can add, remove and reposition widgets to create their preferred dashboard layout.
+- Real-time Updates: Server data and activity are updated in real time, keeping your dashboard up to date.
+- Clan & Player Search: Find clans and players and explore their detailed statistics and information.
+- Multilingual Support: Let users choose their preferred language or enforce a single application-wide language.
+- Multi-Server Support: Connect and monitor multiple Minecraft servers from a single installation.
+- Theme Customization: Choose from different themes powered by shadcn-svelte.
+- Custom Branding: Personalize your installation with a custom application name and logo.
+- Light & Dark Mode: Switch between light and dark appearances.
+- API & Web Modes: Run the application with its built-in web interface or in API-only mode to build your own frontend.
+
+## 📦 How to Install
+
+### Standalone
+For the very basic installation:
+1. Download the binary file from [latest release](https://github.com/Tomut0/SimpleClansStats/releases/latest).
+```bash
+curl -fL "https://github.com/Tomut0/SimpleClansStats/releases/latest/download/simpleclansstats-linux-$( [[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64" )" -o scstats
+```
+2. Make it executable and create a persistent folder:
+```bash
+chmod +x scstats
+mkdir -p data
+```
+3. Copy [.env.example](https://github.com/Tomut0/SimpleClansStats/blob/master/.env.example) and rename it to `.env`, open the file and set variables.
+4. Run! :)
+```
+./scstats --mode=web
+```
+
+Now visit `http://localhost:4000/` to see your web dashboard.
+
+### Docker
+```bash
+docker run -d --name simpleclansstats `
+  -p 4000:4000 `
+  -v simpleclansstats-data:/data `
+  -e BOOTSTRAP_ADMIN_EMAIL=admin@example.com `
+  -e BOOTSTRAP_ADMIN_USERNAME=admin `
+  -e BOOTSTRAP_ADMIN_PASSWORD='admin' `
+  -e CORS_ALLOWED_ORIGINS=http://localhost:4000 `
+  -e APP_URL=https://stats.example.com `
+  -e APP_VERSION=2.0.0 `
+  -e POSTHOG_API_KEY=phc_wboArzoxaHWqADcRiazJLa4otEs7KViZNgvzzsjMsdXX `
+  -e POSTHOG_HOST=https://us.i.posthog.com `
+  docker.io/minat0/scstats:latest
+```
+
+Now visit `http://localhost:4000/` to see your web dashboard.
+
 ## Support
 
 If you have faced any issues, I'll answer on any questions in official
 SimpleClans [discord](https://discord.gg/CkNwgdE).
-
-## 🚀 Getting Started
-
-### Docker
-
-To run SimpleClansStats under Docker, you have to use `minat0/scstats:latest` docker image in your compose file. \
-Example is located [here](https://github.com/Tomut0/SimpleClansStats/tree/master/docker).
-
-### Web server
-
-#### Prerequisites
-
-* Any http server. Most popular are Nginx or Apache.
-* PHP v8.1 or higher
-* Composer v2.7.2 or higher
-* Node.js v20.12.2 or higher
-* npm v10.8.2 or higher
-
-#### Step by step
-
-1. Clone from master branch or download from [release](https://github.com/Tomut0/SimpleClansStats/releases) page.
-2. Install php dependencies through composer:
-
-```bash
-composer install --no-dev --optimize-autoloader
-```
-
-3. Install and build node.js dependencies through npm:
-
-```bash
-npm install
-npm run build
-```
-
-4. Make copy of `.env.example` to `.env` and set up it.
-
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-You have to change `DB_`, `SC_` settings to connect to the databases. \
-Make sure `SC_` database has `sc_players`, `sc_clans`, `sc_kills` tables to work finely.
-
-5. Add task scheduling rule to crontab.
-
-```bash 
-crontab -e 
-* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
-```
-
-6. Configure your http server to process the SCStats. \
-   You may look an example of Nginx
-   configuration [here](https://github.com/Tomut0/SimpleClansStats/blob/master/docker/nginx.conf). \
-   Don't forget to change `fastcgi_pass scstats:9000;` to your php-fpm server.
-
-7. Profit!
 
 ## ✨ Sponsored By
 
@@ -100,8 +82,9 @@ crontab -e
 
 It is my game hosting, the perfect solution for launching your own Minecraft server. \
 For just $1 in a month, you can create a powerful server featuring top-tier components like Ryzen 9 5950X
-processors, DDR4 RAM, and NVMe disks. Mikasa.host offers convenient and speedy registration via Discord and supports
-hosting servers for a variety of games, not just Minecraft.
+processors, DDR4 RAM, and NVMe disks. Mikasa.host offers convenient and speedy registration via Discord and supports hosting servers for a variety of games, not just Minecraft.
+
+<br clear="left">
 
 ## 😎 Thank you especially 
 
@@ -111,4 +94,4 @@ hosting servers for a variety of games, not just Minecraft.
 
 ## License
 
-This project is under [Apache2](https://github.com/Tomut0/SimpleClansStats/blob/master/LICENSE) license.
+Licensed under the [Apache License 2.0](LICENSE).

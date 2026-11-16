@@ -1,0 +1,72 @@
+name: Build binaries
+
+on:
+  push:
+    branches: [v2]
+    tags: ['v*']
+  pull_request:
+    branches: [v2]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build frontend
+        working-directory: web
+        run: |
+          npm ci
+          API_URL=/api/v1 APP_NAME=SCStats PAGE_SEPARATOR=" - " npm run build
+      - name: Embed frontend
+        run: |
+          rm cmd/server/static/.gitkeep
+          cp -R web/build/. cmd/server/static/
+      - name: Build binary
+        shell: bash
+        run: |
+          output=simpleclansstats-${{ matrix.goos }}-${{ matrix.goarch }}
+          if [[ "${{ matrix.goos }}" == windows ]]; then output+=.exe; fi
+          CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -trimpath -ldflags="-s -w" -o "$output" ./cmd
+          echo "output=$output" >> "$GITHUB_OUTPUT"
+        id: build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: simpleclansstats-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ${{ steps.build.outputs.output }}
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release-assets/simpleclansstats-* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" release-assets/simpleclansstats-* --generate-notes
+          fi

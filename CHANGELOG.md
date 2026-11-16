@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/Tomut0/SimpleClansStats/compare/v1.2.0...v2.0.0) (2024-11-16)
+
+### Breaking Changes
+
+* replace the PHP/Laravel application with a Go API and SvelteKit web app; the previous deployment, environment variables, and API routes are not compatible. Reconfigure deployments using the new [.env.example](.env.example).
+
+### Features
+
+* add authentication, server management, and snapshot ingestion
+* add a customizable dashboard, clan and player search, themes, and language settings
+* support web and API-only modes
+
 ## [1.2.0](https://github.com/Tomut0/SimpleClansStats/compare/v1.1.0...v1.2.0) (2024-12-14)
 
 
