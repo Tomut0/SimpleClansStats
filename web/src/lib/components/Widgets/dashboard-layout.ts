@@ -1,4 +1,5 @@
-import type { DashboardWidget } from '$lib/api/generated';
+import type { DashboardLayout, DashboardWidget } from '$lib/api/generated';
+import type { GridStackWidget } from 'gridstack';
 import type {
 	ConfigurableWidgetField,
 	ConfigurableWidgetType,
@@ -7,84 +8,46 @@ import type {
 } from './types';
 
 export type WidgetLayout = DashboardWidget & {
-	x?: number;
-	y?: number;
-	w?: number;
-	h?: number;
-	minW?: number;
-	minH?: number;
+	autoPosition?: boolean;
 };
 
-export const defaults: WidgetLayout[] = [
-	{
-		id: 'clans',
-		type: 'counter',
-		field: 'clans',
-		format: 'number',
-		x: 0,
+export type WidgetConfiguration = Pick<DashboardWidget, 'type' | 'field' | 'format' | 'limit'>;
+
+export const layoutVersion = 1;
+export const maxWidgets = 24;
+export const tableLimits = [5, 10, 20] as const;
+
+const defaultCounterFields = ['clans', 'players', 'wars', 'balance'] as const;
+
+const defaultWidgetConfigurations: Omit<DashboardWidget, 'id'>[] = [
+	...defaultCounterFields.map((field, column) => ({
+		type: 'counter' as const,
+		field,
+		format: 'number' as const,
+		x: column * 2,
 		y: 0,
 		w: 2,
-		h: 2,
-		minW: 2,
-		minH: 2
-	},
-	{
-		id: 'players',
-		type: 'counter',
-		field: 'players',
-		format: 'number',
-		x: 2,
-		y: 0,
-		w: 2,
-		h: 2,
-		minW: 2,
-		minH: 2
-	},
-	{
-		id: 'wars',
-		type: 'counter',
-		field: 'wars',
-		format: 'number',
-		x: 4,
-		y: 0,
-		w: 2,
-		h: 2,
-		minW: 2,
-		minH: 2
-	},
-	{
-		id: 'balance',
-		type: 'counter',
-		field: 'balance',
-		format: 'number',
-		x: 6,
-		y: 0,
-		w: 2,
-		h: 2,
-		minW: 2,
-		minH: 2
-	},
-	{ id: 'kills', x: 0, y: 2, w: 4, h: 3, minW: 3, minH: 2 },
-	{ id: 'status', x: 4, y: 2, w: 4, h: 3, minW: 3, minH: 2 },
-	{ id: 'actions', x: 8, y: 0, w: 4, h: 5, minW: 3, minH: 2 },
-	{ id: 'top', x: 0, y: 5, w: 8, h: 3, minW: 3, minH: 2 },
-	{ id: 'online', x: 8, y: 5, w: 4, h: 3, minW: 3, minH: 2 }
+		h: 2
+	})),
+	{ type: 'distribution', field: 'killTypes', x: 0, y: 2, w: 4, h: 3 },
+	{ type: 'distribution', field: 'clanStatus', x: 4, y: 2, w: 4, h: 3 },
+	{ type: 'activityFeed', field: 'recentActions', x: 8, y: 0, w: 4, h: 5 },
+	{ type: 'leaderboard', field: 'clanBalance', x: 0, y: 5, w: 8, h: 3 },
+	{ type: 'onlineSnapshot', field: 'onlinePlayers', x: 8, y: 5, w: 4, h: 3 }
 ];
 
-export const legacyCounterFields: Record<string, CounterField> = {
-	clans: 'clans',
-	players: 'players',
-	wars: 'wars',
-	balance: 'balance'
-};
-export const counterFields: CounterField[] = [
-	'clans',
-	'players',
-	'wars',
-	'balance',
-	'onlinePlayers',
-	'kills'
-];
+export function createWidgetId(uuid: string = crypto.randomUUID()) {
+	return `widget-${uuid}`;
+}
+
+// Keep default IDs stable so a saved layout and a reset use the same widget identities.
+export const defaultWidgets: WidgetLayout[] = defaultWidgetConfigurations.map((widget, index) => {
+	const suffix = String(index + 1).padStart(12, '0');
+	const id = createWidgetId(`00000000-0000-4000-8000-${suffix}`);
+	return { ...widget, id };
+});
+
+export const counterFields: CounterField[] = [...defaultCounterFields, 'onlinePlayers', 'kills'];
 export const counterFormats: CounterFormat[] = ['number', 'compact', 'plain'];
 export const configurableTypes: ConfigurableWidgetType[] = [
 	'counter',
@@ -126,86 +89,57 @@ export const configurableFields: Record<ConfigurableWidgetType, ConfigurableWidg
 	heatmap: ['playerActivity'],
 	gainersLosers: ['clanBalanceChange']
 };
-const supportedWidgetTypes = Object.keys(configurableFields) as ConfigurableWidgetType[];
-const legacyWidgetIds = [
-	'clans',
-	'players',
-	'wars',
-	'balance',
-	'kills',
-	'status',
-	'actions',
-	'top',
-	'online'
-];
-
-export function isCounter(widget: DashboardWidget) {
-	return widget.type === 'counter' || (!widget.type && Boolean(legacyCounterFields[widget.id]));
-}
-function isCounterField(value: unknown): value is CounterField {
-	return typeof value === 'string' && counterFields.includes(value as CounterField);
-}
-function validCounter(widget: DashboardWidget) {
-	if (widget.type === 'counter') {
-		const legacyField = legacyCounterFields[widget.id];
-		const validId = legacyField
-			? legacyField === widget.field
-			: /^counter-[0-9a-f-]{36}$/i.test(widget.id);
-		return Boolean(
-			widget.format &&
-			validId &&
-			isCounterField(widget.field) &&
-			counterFormats.includes(widget.format)
-		);
-	}
-	return !widget.type && !widget.field && !widget.format && Boolean(legacyCounterFields[widget.id]);
-}
-function validConfiguredWidget(widget: DashboardWidget) {
-	if (!widget.type || !supportedWidgetTypes.includes(widget.type as ConfigurableWidgetType))
+function validWidgetConfiguration({ id, type, field, format, limit }: DashboardWidget) {
+	if (typeof id !== 'string' || !/^widget-[0-9a-fA-F-]{36}$/.test(id)) return false;
+	if (!Object.hasOwn(configurableFields, type) || !configurableFields[type].includes(field)) {
 		return false;
-	const type = widget.type as ConfigurableWidgetType;
-	const idPattern = type === 'counter' ? /^counter-[0-9a-f-]{36}$/i : /^widget-[0-9a-f-]{36}$/i;
-	const validId =
-		Boolean(legacyCounterFields[widget.id] && type === 'counter') || idPattern.test(widget.id);
+	}
+
+	const hasValidFormat = format !== undefined && counterFormats.includes(format);
+	if (type === 'counter') {
+		return hasValidFormat && limit === undefined;
+	}
+
+	if (format !== undefined && !hasValidFormat) return false;
+	return limit === undefined || (type === 'table' && tableLimits.includes(limit));
+}
+
+function validWidgetPosition({ x, y, w, h }: DashboardWidget) {
 	return (
-		validId &&
-		configurableFields[type].includes(widget.field as ConfigurableWidgetField) &&
-		(type !== 'table' || [5, 10, 20].includes(widget.limit ?? 10))
+		[x, y, w, h].every(Number.isInteger) &&
+		x >= 0 &&
+		y >= 0 &&
+		y <= 10000 &&
+		w >= 1 &&
+		h >= 1 &&
+		h <= 12 &&
+		x + w <= 12
 	);
 }
 
-export function validWidgets(value: WidgetLayout[]): value is WidgetLayout[] {
+export function validWidgets(widgets: DashboardWidget[]) {
 	return (
-		Array.isArray(value) &&
-		value.length > 0 &&
-		value.length <= 24 &&
-		value.every(
-			(item) =>
-				(isCounter(item)
-					? validCounter(item)
-					: item.type
-						? validConfiguredWidget(item)
-						: legacyWidgetIds.includes(item.id) && !item.field && !item.format) &&
-				Number.isInteger(item.x) &&
-				Number.isInteger(item.y) &&
-				Number.isInteger(item.w) &&
-				Number.isInteger(item.h) &&
-				item.x! >= 0 &&
-				item.x! <= 11 &&
-				item.y! >= 0 &&
-				item.y! <= 10000 &&
-				item.w! >= 1 &&
-				item.w! <= 12 &&
-				item.h! >= 1 &&
-				item.h! <= 12 &&
-				item.x! + item.w! <= 12
+		Array.isArray(widgets) &&
+		widgets.length > 0 &&
+		widgets.length <= maxWidgets &&
+		widgets.every(
+			(widget) => widget && validWidgetConfiguration(widget) && validWidgetPosition(widget)
 		) &&
-		new Set(value.map((item) => item.id)).size === value.length
+		new Set(widgets.map(({ id }) => id)).size === widgets.length
 	);
 }
 
-export function counterFieldFor(widget: DashboardWidget): CounterField {
-	return (
-		(isCounterField(widget.field) && widget.field) || legacyCounterFields[widget.id] || 'clans'
-	);
+export function serializeLayout(
+	widgets: DashboardWidget[],
+	positions: GridStackWidget[]
+): DashboardLayout {
+	const widgetsById = new Map(widgets.map((widget) => [widget.id, widget]));
+	const saved: DashboardWidget[] = [];
+	for (const { id, x = 0, y = 0, w = 1, h = 1 } of positions) {
+		const widget = widgetsById.get(String(id));
+		if (!widget) continue;
+		const { type, field, format, limit } = widget;
+		saved.push({ id: widget.id, type, field, format, limit, x, y, w, h });
+	}
+	return { version: layoutVersion, widgets: saved };
 }

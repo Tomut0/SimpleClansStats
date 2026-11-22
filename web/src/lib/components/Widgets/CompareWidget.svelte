@@ -20,12 +20,12 @@
 	class="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card text-card-foreground"
 >
 	<header class="widget-header px-4 py-3 text-sm font-medium text-muted-foreground">
-		{m['pages.dashboard.compare_type']()}
+		{m['pages.dashboard.widget_compare']()}
 	</header>
 	{#if chartData.length}<Chart.Container
 			{config}
 			class="min-h-0 flex-1 p-4"
-			aria-label={m['pages.dashboard.compare_type']()}
+			aria-label={m['pages.dashboard.widget_compare']()}
 			><BarChart
 				data={chartData}
 				x="name"

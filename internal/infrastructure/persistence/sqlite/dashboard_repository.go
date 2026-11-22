@@ -59,7 +59,7 @@ func (r *dashboardRepository) GetLayout(ctx context.Context) (domain.DashboardLa
 	var value string
 	err := r.db.QueryRowContext(ctx, `SELECT dl.layout FROM dashboard_layouts dl JOIN users u ON u.id = dl.user_id WHERE u.role = 'admin' ORDER BY dl.rowid DESC LIMIT 1`).Scan(&value)
 	if err == sql.ErrNoRows {
-		return domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{}}, nil
+		return domain.DashboardLayout{}, nil
 	}
 	if err != nil {
 		return domain.DashboardLayout{}, err

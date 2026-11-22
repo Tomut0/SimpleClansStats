@@ -1,5 +1,7 @@
 package domain
 
+const DashboardLayoutVersion = 1
+
 type DashboardLayout struct {
 	Version int               `json:"version"`
 	Widgets []DashboardWidget `json:"widgets"`
@@ -7,8 +9,8 @@ type DashboardLayout struct {
 
 type DashboardWidget struct {
 	ID     string `json:"id"`
-	Type   string `json:"type,omitempty"`
-	Field  string `json:"field,omitempty"`
+	Type   string `json:"type"`
+	Field  string `json:"field"`
 	Format string `json:"format,omitempty"`
 	Limit  int    `json:"limit,omitempty"`
 	X      int    `json:"x"`

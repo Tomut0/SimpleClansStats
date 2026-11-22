@@ -10,12 +10,12 @@
 	class="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card text-card-foreground"
 >
 	<header class="widget-header px-4 py-3 text-sm font-medium text-muted-foreground">
-		{m['pages.dashboard.heatmap_type']()}
+		{m['pages.dashboard.widget_heatmap']()}
 	</header>
 	{#if activity.length}<div
 			class="grid flex-1 grid-flow-col grid-rows-7 gap-1 p-4"
 			role="img"
-			aria-label={m['pages.dashboard.heatmap_type']()}
+			aria-label={m['pages.dashboard.widget_heatmap']()}
 		>
 			{#each values as value, index (index)}<Tooltip.Root
 					><Tooltip.Trigger

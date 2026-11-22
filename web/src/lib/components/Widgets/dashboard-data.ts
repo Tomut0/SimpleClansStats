@@ -1,103 +1,129 @@
 import type { DashboardData } from '$lib/api/generated';
 import { m } from '$lib/paraglide/messages.js';
-import type { ConfigurableWidgetField, CounterField, DonutSlice, WidgetData } from './types';
+import type {
+	Clan,
+	ConfigurableWidgetField,
+	CounterField,
+	DonutSlice,
+	KillTypeCount,
+	WidgetData
+} from './types';
 
 export function makeWidgetData(data: DashboardData | null): WidgetData {
-	const state = data?.state ?? {};
-	const collector =
-		(state.extensions as Record<string, Record<string, unknown>> | undefined)?.scCollectorV1 ?? {};
+	const state = data?.state;
+	const collector = readCollectorExtension(state?.extensions);
+	const { playerActivity, killsByType, killStats } = collector;
+
 	return {
-		clans: (state.clans as Record<string, unknown>[] | undefined) ?? [],
-		players: (state.players as Record<string, unknown>[] | undefined) ?? [],
-		wars: (collector.wars as Record<string, unknown>[] | undefined) ?? [],
-		onlinePlayers: (collector.onlinePlayers as Record<string, unknown>[] | undefined) ?? [],
+		clans: records(state?.clans),
+		players: records(state?.players),
+		wars: records(collector.wars),
+		onlinePlayers: records(collector.onlinePlayers),
+		pendingInvites: records(collector.pendingInvites),
+		claims: records(collector.claims),
+		playerActivity: Array.isArray(playerActivity) ? playerActivity : [],
+		killTypes: parseKillTypes(killsByType ?? killStats ?? state?.killsByType),
 		events: data?.events ?? [],
 		history: data?.history ?? [],
-		pendingInvites: (collector.pendingInvites as Record<string, unknown>[] | undefined) ?? [],
-		claims: (collector.claims as Record<string, unknown>[] | undefined) ?? [],
-		clanBalanceChanges: data?.clanBalanceChanges ?? [],
-		playerActivity: (collector.playerActivity as unknown[] | undefined) ?? [],
-		killTypes: parseKillTypes(collector.killsByType ?? collector.killStats ?? state.killsByType)
+		clanBalanceChanges: data?.clanBalanceChanges ?? []
 	};
 }
 
-export function parseKillTypes(value: unknown) {
-	if (Array.isArray(value))
-		return value
-			.map((item) => ({
-				type: String(item.type ?? item.name ?? 'other'),
-				count: Number(item.count ?? item.kills ?? 0)
-			}))
-			.filter((item) => Number.isFinite(item.count) && item.count > 0);
-	if (value && typeof value === 'object')
-		return Object.entries(value)
-			.map(([type, count]) => ({ type, count: Number(count) }))
-			.filter((item) => Number.isFinite(item.count) && item.count > 0);
-	return [];
+function readCollectorExtension(extensions: unknown): Record<string, unknown> {
+	const collector = isRecord(extensions) ? extensions.scCollectorV1 : undefined;
+	return isRecord(collector) ? collector : {};
 }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function records(value: unknown): Record<string, unknown>[] {
+	return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+export function parseKillTypes(value: unknown): KillTypeCount[] {
+	let counts: KillTypeCount[];
+	if (Array.isArray(value)) {
+		counts = value.filter(isRecord).map(({ type, name, count, kills }) => ({
+			type: String(type ?? name ?? 'other'),
+			count: Number(count ?? kills ?? 0)
+		}));
+	} else if (isRecord(value)) {
+		counts = Object.entries(value).map(([type, count]) => ({ type, count: Number(count) }));
+	} else {
+		return [];
+	}
+
+	return counts.filter(({ count }) => Number.isFinite(count) && count > 0);
+}
+
+const allyKill = { label: m['pages.dashboard.allies'], color: '#54b4ef' };
+const rivalKill = { label: m['pages.dashboard.rivals'], color: '#00c7b1' };
+const killStyles = new Map([
+	['ally', allyKill],
+	['allies', allyKill],
+	['rival', rivalKill],
+	['rivals', rivalKill],
+	['civilian', { label: m['pages.dashboard.civilian'], color: '#ffcc00' }]
+]);
 
 export function killSlices(widgetData: WidgetData): DonutSlice[] {
-	return widgetData.killTypes.map((item) => ({
-		label:
-			(
-				{
-					allies: m['pages.dashboard.allies'](),
-					ally: m['pages.dashboard.allies'](),
-					rivals: m['pages.dashboard.rivals'](),
-					rival: m['pages.dashboard.rivals'](),
-					civilian: m['pages.dashboard.civilian']()
-				} as Record<string, string>
-			)[item.type.toLowerCase()] ?? item.type,
-		count: item.count,
-		color:
-			(
-				{
-					allies: '#54b4ef',
-					ally: '#54b4ef',
-					rivals: '#00c7b1',
-					rival: '#00c7b1',
-					civilian: '#ffcc00'
-				} as Record<string, string>
-			)[item.type.toLowerCase()] ?? '#64748b'
-	}));
+	return widgetData.killTypes.map(({ type, count }) => {
+		const style = killStyles.get(type.toLowerCase());
+		return { label: style?.label() ?? type, count, color: style?.color ?? '#64748b' };
+	});
 }
+
+const clanStatuses = [
+	{ id: 'verified', label: m['pages.dashboard.verified'], color: '#54b4ef' },
+	{ id: 'unverified', label: m['pages.dashboard.unverified'], color: '#00c7b1' },
+	{ id: 'permanent', label: m['pages.dashboard.permanent'], color: '#ffcc00' }
+] as const;
 
 export function clanStatusSlices(widgetData: WidgetData): DonutSlice[] {
-	const statuses = [
-		{ id: 'verified', label: m['pages.dashboard.verified'](), color: '#54b4ef' },
-		{ id: 'unverified', label: m['pages.dashboard.unverified'](), color: '#00c7b1' },
-		{ id: 'permanent', label: m['pages.dashboard.permanent'](), color: '#ffcc00' }
-	];
-	return statuses.map((status) => ({
-		...status,
-		count: widgetData.clans.filter((clan) => classifyClanStatus(clan) === status.id).length
+	const counts = { verified: 0, unverified: 0, permanent: 0 };
+	for (const clan of widgetData.clans) {
+		const status = classifyClanStatus(clan);
+		if (status) counts[status] += 1;
+	}
+	return clanStatuses.map(({ id, label, color }) => ({
+		id,
+		label: label(),
+		color,
+		count: counts[id]
 	}));
 }
 
-function classifyClanStatus(clan: Record<string, unknown>) {
+function classifyClanStatus(clan: Clan) {
 	const status = String(clan.status ?? '').toLowerCase();
 	if (status.includes('permanent') || clan.permanent === true) return 'permanent';
 	if (status.includes('unverified') || clan.verified === false) return 'unverified';
 	if (status.includes('verified') || clan.verified === true) return 'verified';
-	return '';
 }
 
 export function counterValue(field: CounterField, widgetData: WidgetData) {
-	if (field === 'clans') return widgetData.clans.length;
-	if (field === 'players') return widgetData.players.length;
-	if (field === 'wars') return widgetData.wars.length;
-	if (field === 'onlinePlayers') return widgetData.onlinePlayers.length;
-	if (field === 'kills') return widgetData.killTypes.reduce((sum, kill) => sum + kill.count, 0);
-	return widgetData.clans.reduce((sum, clan) => sum + Number(clan.balance ?? 0), 0);
+	switch (field) {
+		case 'kills':
+			return widgetData.killTypes.reduce((sum, kill) => sum + kill.count, 0);
+		case 'balance':
+			return widgetData.clans.reduce((sum, clan) => sum + Number(clan.balance ?? 0), 0);
+		default:
+			return widgetData[field].length;
+	}
 }
 
 export function tableRows(field: ConfigurableWidgetField, widgetData: WidgetData) {
-	if (field === 'wars') return { rows: widgetData.wars, fields: ['name', 'status', 'startedAt'] };
-	if (field === 'clanPlayers')
-		return { rows: widgetData.players, fields: ['name', 'clanTag', 'rank'] };
-	if (field === 'pendingInvites')
-		return { rows: widgetData.pendingInvites, fields: ['playerName', 'clanTag', 'createdAt'] };
-	if (field === 'claims')
-		return { rows: widgetData.claims, fields: ['name', 'owner', 'world', 'size'] };
-	return { rows: widgetData.clanBalanceChanges, fields: ['tag', 'balanceChange'] };
+	switch (field) {
+		case 'wars':
+			return { rows: widgetData.wars, fields: ['name', 'status', 'startedAt'] };
+		case 'clanPlayers':
+			return { rows: widgetData.players, fields: ['name', 'clanTag', 'rank'] };
+		case 'pendingInvites':
+			return { rows: widgetData.pendingInvites, fields: ['playerName', 'clanTag', 'createdAt'] };
+		case 'claims':
+			return { rows: widgetData.claims, fields: ['name', 'owner', 'world', 'size'] };
+		default:
+			return { rows: widgetData.clanBalanceChanges, fields: ['tag', 'balanceChange'] };
+	}
 }

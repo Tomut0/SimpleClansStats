@@ -275,6 +275,7 @@ paths:
       security:
         - sessionCookie: []
       requestBody:
+        description: A layout containing one to 24 widgets.
         required: true
         content:
           application/json:
@@ -386,15 +387,14 @@ components:
         version: { type: integer, enum: [1] }
         widgets:
           type: array
-          minItems: 1
           maxItems: 24
           items: { $ref: "#/components/schemas/DashboardWidget" }
 
     DashboardWidget:
       type: object
-      required: [id, x, y, w, h]
+      required: [id, type, field, x, y, w, h]
       properties:
-        id: { type: string, maxLength: 64, pattern: '^(clans|players|wars|balance|kills|status|actions|top|online|counter-[0-9a-fA-F-]{36}|widget-[0-9a-fA-F-]{36})$' }
+        id: { type: string, pattern: '^widget-[0-9a-fA-F-]{36}$' }
         type: { type: string, enum: [counter, table, leaderboard, activityFeed, onlineSnapshot, distribution, timeSeries, clanCard, playerCard, warCenter, clanRoster, network, compare, heatmap, gainersLosers, economy, killFeed, peakOnline, pendingInvites, claims] }
         field: { type: string, enum: [clans, players, wars, balance, onlinePlayers, kills, clanBalance, recentActions, killTypes, clanStatus, clan, player, clanPlayers, clanRelations, clanMetrics, playerActivity, clanBalanceChange, recentKills, pendingInvites, claims] }
         format: { type: string, enum: [number, compact, plain] }

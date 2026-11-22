@@ -9,7 +9,7 @@
 	class="flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground"
 >
 	<header class="widget-header px-4 py-3 text-sm font-medium text-muted-foreground">
-		{m['pages.dashboard.clan_card_type']()}
+		{m['pages.dashboard.widget_clanCard']()}
 	</header>
 	{#if clan}<div class="grid flex-1 content-center gap-2 p-4">
 			<strong class="text-xl">{String(clan.tag ?? clan.name ?? '—')}</strong><span

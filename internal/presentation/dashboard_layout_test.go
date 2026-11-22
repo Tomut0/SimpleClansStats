@@ -30,20 +30,28 @@ var _ ports.DashboardRepository = (*dashboardLayoutRepositoryTest)(nil)
 
 func TestDashboardLayoutAccess(t *testing.T) {
 	sessions := scs.New()
-	repository := &dashboardLayoutRepositoryTest{layout: domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{{ID: "clans", X: 0, Y: 0, W: 12, H: 2}}}}
+	clans := domain.DashboardWidget{
+		ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "counter", Field: "clans", Format: "number",
+		W: 12, H: 2,
+	}
+	repository := &dashboardLayoutRepositoryTest{layout: domain.DashboardLayout{
+		Version: 1,
+		Widgets: []domain.DashboardWidget{clans},
+	}}
 	service := application.NewDashboardService(repository)
 	handler := NewServerHandler(application.NewAuthService(settingsTestUsers{}, nil), sessions, service, nil, nil, nil, nil)
 
 	get := httptest.NewRecorder()
 	sessions.LoadAndSave(http.HandlerFunc(handler.GetDashboardLayout)).ServeHTTP(get, httptest.NewRequest(http.MethodGet, "/dashboard/layout", nil))
-	if get.Code != http.StatusOK || !strings.Contains(get.Body.String(), `"id":"clans"`) {
+	if get.Code != http.StatusOK || !strings.Contains(get.Body.String(), `"id":"`+clans.ID+`"`) {
 		t.Fatalf("public layout read: got %d %s", get.Code, get.Body.String())
 	}
 
 	put := func(userID int64) *httptest.ResponseRecorder {
 		t.Helper()
 		response := httptest.NewRecorder()
-		request := httptest.NewRequest(http.MethodPut, "/dashboard/layout", strings.NewReader(`{"version":1,"widgets":[{"id":"players","x":0,"y":0,"w":12,"h":2}]}`))
+		body := `{"version":1,"widgets":[{"id":"widget-123e4567-e89b-12d3-a456-426614174001","type":"counter","field":"players","format":"number","x":0,"y":0,"w":12,"h":2}]}`
+		request := httptest.NewRequest(http.MethodPut, "/dashboard/layout", strings.NewReader(body))
 		sessions.LoadAndSave(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sessions.Put(r.Context(), "user_id", userID)
 			handler.SaveDashboardLayout(w, r)
@@ -57,7 +65,7 @@ func TestDashboardLayoutAccess(t *testing.T) {
 	if response := put(1); response.Code != http.StatusNoContent {
 		t.Fatalf("admin layout save: got %d, want %d", response.Code, http.StatusNoContent)
 	}
-	if repository.layout.Widgets[0].ID != "players" {
+	if repository.layout.Widgets[0].Field != "players" {
 		t.Fatalf("shared layout not saved: %+v", repository.layout)
 	}
 }

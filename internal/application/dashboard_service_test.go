@@ -103,15 +103,20 @@ func (r *dashboardRepositoryTest) SaveLayout(_ context.Context, _ int64, layout 
 func TestSaveDashboardLayoutValidatesWidgetBounds(t *testing.T) {
 	repository := &dashboardRepositoryTest{}
 	service := NewDashboardService(repository)
-	valid := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{{ID: "clans", X: 0, Y: 0, W: 12, H: 2}}}
-	if err := service.SaveLayout(context.Background(), 7, valid); err != nil {
+	widget := domain.DashboardWidget{
+		ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "counter", Field: "clans", Format: "number",
+		W: 12, H: 2,
+	}
+	layout := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{widget}}
+	if err := service.SaveLayout(t.Context(), 7, layout); err != nil {
 		t.Fatal(err)
 	}
-	if repository.saved.Widgets[0].ID != "clans" {
+	if repository.saved.Widgets[0] != widget {
 		t.Fatal("valid layout was not saved")
 	}
-	invalid := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{{ID: "clans", X: 1, Y: 0, W: 12, H: 2}}}
-	if err := service.SaveLayout(context.Background(), 7, invalid); err != ErrInvalidDashboardLayout {
+	widget.X = 1
+	layout.Widgets = []domain.DashboardWidget{widget}
+	if err := service.SaveLayout(t.Context(), 7, layout); err != ErrInvalidDashboardLayout {
 		t.Fatalf("expected invalid layout error, got %v", err)
 	}
 }
@@ -145,12 +150,9 @@ func TestSaveDashboardLayoutAcceptsConfiguredWidgetTypes(t *testing.T) {
 	service := NewDashboardService(&dashboardRepositoryTest{})
 	for _, tc := range tests {
 		t.Run(tc.typeName, func(t *testing.T) {
-			id := "widget-123e4567-e89b-12d3-a456-426614174000"
-			if tc.typeName == "counter" {
-				id = "counter-123e4567-e89b-12d3-a456-426614174000"
-			}
 			layout := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{{
-				ID: id, Type: tc.typeName, Field: tc.field, Format: tc.format, W: 2, H: 2,
+				ID:   "widget-123e4567-e89b-12d3-a456-426614174000",
+				Type: tc.typeName, Field: tc.field, Format: tc.format, W: 2, H: 2,
 			}}}
 			if err := service.SaveLayout(context.Background(), 1, layout); err != nil {
 				t.Fatalf("expected %s widget to be accepted, got %v", tc.typeName, err)
@@ -162,17 +164,16 @@ func TestSaveDashboardLayoutAcceptsConfiguredWidgetTypes(t *testing.T) {
 func TestSaveDashboardLayoutRejectsInvalidCounterSettings(t *testing.T) {
 	service := NewDashboardService(&dashboardRepositoryTest{})
 	invalid := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{{
-		ID: "counter-123e4567-e89b-12d3-a456-426614174000", Type: "counter", Field: "unknown", Format: "money", W: 2, H: 2,
+		ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "counter", Field: "unknown", Format: "money", W: 2, H: 2,
 	}}}
 	if err := service.SaveLayout(context.Background(), 1, invalid); err != ErrInvalidDashboardLayout {
 		t.Fatalf("expected invalid counter settings error, got %v", err)
 	}
 }
 
-func TestSaveDashboardLayoutPreservesLegacyAndTableLimits(t *testing.T) {
+func TestSaveDashboardLayoutValidatesTableLimits(t *testing.T) {
 	service := NewDashboardService(&dashboardRepositoryTest{})
 	for _, widget := range []domain.DashboardWidget{
-		{ID: "clans", Limit: 99, W: 2, H: 2},
 		{ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "table", Field: "wars", Limit: 0, W: 2, H: 2},
 		{ID: "widget-123e4567-e89b-12d3-a456-426614174000", Type: "table", Field: "wars", Limit: 20, W: 2, H: 2},
 	} {
@@ -186,5 +187,25 @@ func TestSaveDashboardLayoutPreservesLegacyAndTableLimits(t *testing.T) {
 	}}}
 	if err := service.SaveLayout(context.Background(), 1, invalid); err != ErrInvalidDashboardLayout {
 		t.Fatalf("expected unsupported table limit to fail, got %v", err)
+	}
+}
+
+func TestDashboardLayoutUsesDefaultsForLegacyWidgets(t *testing.T) {
+	for _, widget := range []domain.DashboardWidget{
+		{ID: "kills", W: 4, H: 3},
+		{ID: "clans", Type: "counter", Field: "clans", Format: "number", W: 2, H: 2},
+		{ID: "counter-123e4567-e89b-12d3-a456-426614174000", Type: "counter", Field: "clans", Format: "number", W: 2, H: 2},
+	} {
+		t.Run(widget.ID, func(t *testing.T) {
+			saved := domain.DashboardLayout{Version: 1, Widgets: []domain.DashboardWidget{widget}}
+			service := NewDashboardService(&dashboardRepositoryTest{saved: saved})
+			layout, err := service.Layout(t.Context())
+			if err != nil || layout.Version != 1 || layout.Widgets == nil || len(layout.Widgets) != 0 {
+				t.Fatalf("expected the default layout response, got %+v (%v)", layout, err)
+			}
+			if err := service.SaveLayout(t.Context(), 1, saved); err != ErrInvalidDashboardLayout {
+				t.Fatalf("expected an invalid layout error, got %v", err)
+			}
+		})
 	}
 }

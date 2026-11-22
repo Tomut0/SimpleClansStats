@@ -2,31 +2,28 @@
 	import { m } from '$lib/paraglide/messages.js';
 	let { clans }: { clans: Record<string, unknown>[] } = $props();
 	const perRing = 12;
+	const ringHeight = 220;
+	const centerX = 400;
+	const radiusX = 330;
+	const radiusY = 82;
 	const rings = $derived(Math.ceil(clans.length / perRing));
-	const viewHeight = $derived(Math.max(220, rings * 220));
+	const viewHeight = $derived(Math.max(ringHeight, rings * ringHeight));
 	const nodes = $derived(
-		clans.map((clan, index) => ({
-			key: String(clan.externalId ?? index),
-			label: String(clan.tag ?? clan.name ?? '—'),
-			x:
-				clans.length === 1
-					? 400
-					: 400 +
-						330 *
-							Math.cos(
-								(2 * Math.PI * (index % perRing)) /
-									Math.min(perRing, clans.length - Math.floor(index / perRing) * perRing)
-							),
-			y:
-				110 +
-				Math.floor(index / perRing) * 220 +
-				82 *
-					Math.sin(
-						(2 * Math.PI * (index % perRing)) /
-							Math.min(perRing, clans.length - Math.floor(index / perRing) * perRing)
-					),
-			clan
-		}))
+		clans.map((clan, index) => {
+			const ringIndex = Math.floor(index / perRing);
+			const indexInRing = index % perRing;
+			const clansInRing = Math.min(perRing, clans.length - ringIndex * perRing);
+			const angle = (2 * Math.PI * indexInRing) / clansInRing;
+			const centerY = ringHeight / 2 + ringIndex * ringHeight;
+
+			return {
+				key: String(clan.externalId ?? index),
+				label: String(clan.tag ?? clan.name ?? '—'),
+				x: clans.length === 1 ? centerX : centerX + radiusX * Math.cos(angle),
+				y: centerY + radiusY * Math.sin(angle),
+				clan
+			};
+		})
 	);
 	const links = $derived(
 		nodes.flatMap((node, index) => {
@@ -45,7 +42,7 @@
 	class="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card text-card-foreground"
 >
 	<header class="widget-header px-4 py-3 text-sm font-medium text-muted-foreground">
-		{m['pages.dashboard.network_type']()}
+		{m['pages.dashboard.widget_network']()}
 	</header>
 	{#if nodes.length}
 		<div class="min-h-0 flex-1 overflow-auto">
@@ -53,7 +50,7 @@
 				class="block h-auto w-full"
 				viewBox={`0 0 800 ${viewHeight}`}
 				role="img"
-				aria-label={m['pages.dashboard.network_type']()}
+				aria-label={m['pages.dashboard.widget_network']()}
 			>
 				{#each links as link (`${link.from.key}-${link.to.key}`)}<line
 						x1={link.from.x}

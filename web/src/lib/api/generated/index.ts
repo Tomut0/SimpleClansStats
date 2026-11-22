@@ -39,7 +39,6 @@ export type {
 	GetCurrentUserResponse,
 	GetCurrentUserResponses,
 	GetDashboardEventsData,
-	GetDashboardEventsError,
 	GetDashboardEventsErrors,
 	GetDashboardEventsResponse,
 	GetDashboardEventsResponses,

@@ -19,7 +19,7 @@
 	class="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card text-card-foreground"
 >
 	<header class="widget-header px-4 py-3 text-sm font-medium text-muted-foreground">
-		{m['pages.dashboard.economy_type']()}
+		{m['pages.dashboard.widget_economy']()}
 	</header>
 	{#if data.length}
 		<div class="min-h-0 flex-1 overflow-auto px-4 pb-4">

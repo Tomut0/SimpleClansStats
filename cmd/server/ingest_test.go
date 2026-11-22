@@ -135,12 +135,32 @@ func TestServerRegistrationAndIngest(t *testing.T) {
 		t.Fatal("collector key was not stored as a hash")
 	}
 	request("GET", "/dashboard/layout", "", "", 0, 200)
-	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"clans","x":0,"y":0,"w":4,"h":2}]}`, "", 2, 403)
-	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"clans","x":0,"y":0,"w":4,"h":2}]}`, "", 1, 204)
+	clansCounter := domain.DashboardWidget{
+		ID:     "widget-00000000-0000-4000-8000-000000000001",
+		Type:   "counter",
+		Field:  "clans",
+		Format: "number",
+		W:      4,
+		H:      2,
+	}
+	layoutJSON, err := json.Marshal(domain.DashboardLayout{
+		Version: domain.DashboardLayoutVersion,
+		Widgets: []domain.DashboardWidget{clansCounter},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request("PUT", "/dashboard/layout", string(layoutJSON), "", 2, 403)
+	request("PUT", "/dashboard/layout", string(layoutJSON), "", 1, 204)
 	request("PUT", "/dashboard/layout", `{"version":1,"widgets":[{"id":"custom-html","x":0,"y":0,"w":4,"h":2}]}`, "", 1, 400)
-	layout := request("GET", "/dashboard/layout", "", "", 2, 200)
-	if !strings.Contains(layout.Body.String(), `"id":"clans"`) {
-		t.Fatalf("layout did not persist: %s", layout.Body.String())
+
+	layoutResponse := request("GET", "/dashboard/layout", "", "", 2, 200)
+	var savedLayout domain.DashboardLayout
+	if err := json.Unmarshal(layoutResponse.Body.Bytes(), &savedLayout); err != nil {
+		t.Fatal(err)
+	}
+	if len(savedLayout.Widgets) != 1 || savedLayout.Widgets[0] != clansCounter {
+		t.Fatalf("layout did not persist: %+v", savedLayout)
 	}
 	list := func(online, hasSnapshot bool) {
 		t.Helper()

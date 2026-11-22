@@ -1,67 +1,45 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
-	import { getLocale } from '$lib/paraglide/runtime.js';
-	import { APP_NAME, PAGE_SEPARATOR } from '$app/env/public';
-	import { API_URL } from '$app/env/public';
+	import { API_URL, APP_NAME, PAGE_SEPARATOR } from '$app/env/public';
+	import { formatDateTime } from '$lib/date-time';
 	import type { PageProps } from './$types';
 	import { serverState } from '$lib/states/serverState.svelte';
 	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import * as Empty from '$lib/components/ui/empty';
 	import { Spinner } from '$lib/components/ui/spinner';
-	import DashboardGrid from '$lib/components/Widgets/DashboardGrid.svelte';
+	import DashboardGrid, {
+		type DashboardActions
+	} from '$lib/components/Widgets/DashboardGrid.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 	import Save from '@lucide/svelte/icons/save';
-	import { Tooltip } from 'bits-ui';
+	import DashboardActionButton from './DashboardActionButton.svelte';
 
 	const { data }: PageProps = $props();
 	let editing = $state(false);
-	let addWidget = $state(() => {});
-	let restoreDefaults = $state(() => {});
-	let saveDashboard = $state(() => {});
+	let dashboardActions = $state<DashboardActions | null>(null);
 	let receivedSnapshot = $state(false);
 	const selectedServer = $derived(
 		data.servers.find((server) => server.id === serverState.selectedId)
 	);
+	const firstAvailableServer = $derived(data.servers.find((server) => !server.disabled));
 
 	$effect.pre(() => {
 		if (selectedServer && !selectedServer.disabled) return;
-		serverState.selectedId = data.servers.find((server) => !server.disabled)?.id ?? '';
+		serverState.selectedId = firstAvailableServer?.id ?? '';
 	});
 
 	const waitingForSnapshot = $derived(
 		selectedServer?.lastIngestAt === null && !selectedServer.disabled && !receivedSnapshot
 	);
 
-	const updatedAt = $derived.by(() => {
-		if (!selectedServer?.lastIngestAt) return null;
-
-		const locale = getLocale();
-		const timeZone = data.settings?.timeZone ?? 'Europe/Moscow';
-		const receivedAt = new Date(selectedServer.lastIngestAt);
-		const dateFormatter = new Intl.DateTimeFormat(locale, {
-			timeZone,
-			year: 'numeric',
-			month: '2-digit',
-			day: '2-digit'
-		});
-		const { year, month, day } = Object.fromEntries(
-			dateFormatter.formatToParts(receivedAt).map(({ type, value }) => [type, value])
-		);
-		const date = (data.settings?.dateFormat ?? 'DD.MM.YYYY')
-			.replace('YYYY', year)
-			.replace('MM', month)
-			.replace('DD', day);
-		const time = new Intl.DateTimeFormat(locale, {
-			timeZone,
-			hour: '2-digit',
-			minute: '2-digit',
-			hourCycle: data.settings?.timeFormat === '12h' ? 'h12' : 'h23'
-		}).format(receivedAt);
-		return `${date}, ${time}`;
-	});
+	const updatedAt = $derived(
+		selectedServer?.lastIngestAt
+			? formatDateTime(new Date(selectedServer.lastIngestAt), data.settings)
+			: null
+	);
 </script>
 
 <svelte:head>
@@ -90,66 +68,37 @@
 					>
 					<span class="h-3 w-px bg-border" aria-hidden="true"></span>
 					<span
-						>{m['server.updated']()} {#if updatedAt && selectedServer.lastIngestAt}<time
+						>{m['server.updated']()}
+						{#if updatedAt && selectedServer.lastIngestAt}<time
 								datetime={selectedServer.lastIngestAt}
 								class="text-foreground">{updatedAt}</time
-							>{:else} {m['server.never_updated']()}{/if}</span
+							>{:else}
+							{m['server.never_updated']()}{/if}</span
 					>
-					{#if selectedServer && !selectedServer.disabled}
-						{#if data.user?.role === 'admin'}
-							{#if editing}
-								<Tooltip.Root
-									><Tooltip.Trigger
-										><button
-											class="grid size-9 place-items-center rounded-md border text-foreground"
-											aria-label={m['pages.dashboard.add_widget_button']()}
-											onclick={addWidget}><Plus class="size-4" aria-hidden="true" /></button
-										></Tooltip.Trigger
-									><Tooltip.Content
-										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-										>{m['pages.dashboard.add_widget_button']()}</Tooltip.Content
-									></Tooltip.Root
-								>
-								<Tooltip.Root
-									><Tooltip.Trigger
-										><button
-											class="grid size-9 place-items-center rounded-md border text-foreground"
-											aria-label={m['pages.dashboard.restore_default']()}
-											onclick={restoreDefaults}
-											><RotateCcw class="size-4" aria-hidden="true" /></button
-										></Tooltip.Trigger
-									><Tooltip.Content
-										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-										>{m['pages.dashboard.restore_default']()}</Tooltip.Content
-									></Tooltip.Root
-								>
-								<Tooltip.Root
-									><Tooltip.Trigger
-										><button
-											class="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground"
-											aria-label={m['pages.dashboard.save_dashboard']()}
-											onclick={saveDashboard}><Save class="size-4" aria-hidden="true" /></button
-										></Tooltip.Trigger
-									><Tooltip.Content
-										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-										>{m['pages.dashboard.save_dashboard']()}</Tooltip.Content
-									></Tooltip.Root
-								>
-							{:else}
-								<Tooltip.Root
-									><Tooltip.Trigger
-										><button
-											class="grid size-9 place-items-center rounded-md border text-foreground"
-											aria-label="Customize dashboard"
-											onclick={() => (editing = true)}
-											><SlidersHorizontal class="size-4" aria-hidden="true" /></button
-										></Tooltip.Trigger
-									><Tooltip.Content
-										class="z-50 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
-										>Customize dashboard</Tooltip.Content
-									></Tooltip.Root
-								>
-							{/if}
+					{#if !selectedServer.disabled && data.user?.role === 'admin' && dashboardActions}
+						{#if editing}
+							<DashboardActionButton
+								label={m['pages.dashboard.add_widget_button']()}
+								icon={Plus}
+								onclick={dashboardActions.addWidget}
+							/>
+							<DashboardActionButton
+								label={m['pages.dashboard.restore_default']()}
+								icon={RotateCcw}
+								onclick={dashboardActions.restoreDefaults}
+							/>
+							<DashboardActionButton
+								label={m['pages.dashboard.save_dashboard']()}
+								icon={Save}
+								onclick={dashboardActions.saveDashboard}
+								primary
+							/>
+						{:else}
+							<DashboardActionButton
+								label="Customize dashboard"
+								icon={SlidersHorizontal}
+								onclick={dashboardActions.beginEditing}
+							/>
 						{/if}
 					{/if}
 				</div>
@@ -169,18 +118,14 @@
 	{/if}
 	{#if selectedServer && !selectedServer.disabled}
 		{#key selectedServer.id}
-			<div class:invisible={waitingForSnapshot}>
+			<div class={{ invisible: waitingForSnapshot }}>
 				<DashboardGrid
 					serverId={selectedServer.id}
 					apiUrl={API_URL}
 					avatarUrlTemplate={data.settings?.playerAvatarUrl ??
 						'https://mc-heads.net/avatar/{username}/32'}
 					bind:editing
-					onActionsReady={(actions) => {
-						addWidget = actions.addWidget;
-						restoreDefaults = actions.restoreDefaults;
-						saveDashboard = actions.saveDashboard;
-					}}
+					onActionsReady={(actions) => (dashboardActions = actions)}
 					onSnapshot={(received) => (receivedSnapshot = received)}
 				/>
 			</div>

@@ -1,9 +1,15 @@
-import { expect, test } from '@playwright/test';
+import assert from 'node:assert/strict';
+import { expect, test, type Locator } from '@playwright/test';
+import type { DashboardLayout } from '$lib/api/generated';
+
+async function visibleBounds(element: Locator) {
+	const bounds = await element.boundingBox();
+	assert(bounds, 'Expected the element to have a visible bounding box');
+	return bounds;
+}
 
 test('edits the widget catalog and saves the dashboard layout', async ({ page }) => {
-	let savedLayout:
-		| { version: number; widgets: { id: string; x: number; y: number; w: number; h: number }[] }
-		| undefined;
+	let savedLayout: DashboardLayout | undefined;
 	await page.route('**/*', async (route) => {
 		const url = new URL(route.request().url());
 		if (url.pathname.endsWith('/auth/me')) {
@@ -49,11 +55,13 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 			return route.fulfill({
 				status: 200,
 				contentType: 'application/json',
-				body: JSON.stringify(savedLayout ?? { version: 1, widgets: [] })
+				body: JSON.stringify(
+					savedLayout ?? { version: 1, widgets: [{ id: 'kills', x: 0, y: 0, w: 4, h: 3 }] }
+				)
 			});
 		}
 		if (url.pathname.endsWith('/dashboard/layout') && route.request().method() === 'PUT') {
-			savedLayout = JSON.parse(route.request().postData() ?? '{}');
+			savedLayout = JSON.parse(route.request().postData() ?? '{}') as DashboardLayout;
 			return route.fulfill({ status: 204, body: '' });
 		}
 		if (url.pathname.endsWith('/dashboard/events')) {
@@ -71,14 +79,19 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 	let documentLoads = 0;
 	page.on('load', () => documentLoads++);
 	await page.goto('/');
-	await expect(page.locator('.grid-stack-item')).toHaveCount(9);
 	const grid = page.locator('.grid-stack');
+	const widgets = grid.locator('.grid-stack-item');
+	const widgetWithTitle = (title: RegExp) =>
+		widgets.filter({ has: page.locator('.widget-header').filter({ hasText: title }) });
+	await expect(widgets).toHaveCount(9);
+	const clansWidget = widgetWithTitle(/^Clans$/);
+	const clansWidgetId = await clansWidget.getAttribute('data-widget-id');
 	await expect(grid).toHaveAttribute('gs-static', 'true');
-	await expect(page.locator('[data-widget-id="clans"]')).toHaveClass(/ui-draggable-disabled/);
-	await expect(page.locator('[data-widget-id="clans"]')).toHaveClass(/ui-resizable-disabled/);
-	await expect(page.locator('[data-widget-id="clans"]')).toHaveAttribute('gs-h', '2');
-	await expect(page.locator('[data-widget-id="clans"] strong')).toHaveText('2');
-	await expect(page.locator('[data-widget-id="top"] table')).toBeVisible();
+	await expect(clansWidget).toHaveClass(/ui-draggable-disabled/);
+	await expect(clansWidget).toHaveClass(/ui-resizable-disabled/);
+	await expect(clansWidget).toHaveAttribute('gs-h', '2');
+	await expect(clansWidget.locator('strong')).toHaveText('2');
+	await expect(widgetWithTitle(/^Top clans by balance$/).locator('table')).toBeVisible();
 	await expect(page.getByText('Live updates connected')).toHaveCount(0);
 	await page.screenshot({ path: 'test-results/dashboard.png' });
 	documentLoads = 0;
@@ -86,37 +99,29 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 	expect(documentLoads).toBe(0);
 	await page.locator('button[aria-label="Customize dashboard"]').click();
 	await expect(grid).not.toHaveAttribute('gs-static', 'true');
-	const clansWidget = page.locator('[data-widget-id="clans"]');
 	await expect(clansWidget).not.toHaveClass(/ui-draggable-disabled/);
 	await page.getByRole('button', { name: 'Remove Kills by type' }).click();
-	const bounds = await grid.boundingBox();
-	expect(bounds).not.toBeNull();
-	await page.mouse.move(bounds!.x + bounds!.width * 0.5, bounds!.y + 3 * 76);
+	const bounds = await visibleBounds(grid);
+	await page.mouse.move(bounds.x + bounds.width * 0.5, bounds.y + 3 * 76);
 	await expect(page.locator('.add-widget-hover')).toHaveCount(0);
-	await page.mouse.move(bounds!.x + bounds!.width * 0.12, bounds!.y + 3 * 76);
+	await page.mouse.move(bounds.x + bounds.width * 0.12, bounds.y + 3 * 76);
 	const hoverTile = page.locator('.add-widget-hover');
 	await expect(hoverTile).toBeVisible();
-	const tileBounds = await hoverTile.boundingBox();
-	expect(tileBounds).not.toBeNull();
-	await page.mouse.click(
-		tileBounds!.x + tileBounds!.width / 2,
-		tileBounds!.y + tileBounds!.height / 2
-	);
+	const tileBounds = await visibleBounds(hoverTile);
+	await page.mouse.click(tileBounds.x + tileBounds.width / 2, tileBounds.y + tileBounds.height / 2);
 	await page.keyboard.press('Escape');
-	const playersWidget = page.locator('[data-widget-id="players"]');
+	const playersWidget = widgetWithTitle(/^Players$/);
 	const playersHeader = playersWidget.locator('.widget-header');
 	await playersHeader.hover();
-	const playersHeaderBounds = await playersHeader.boundingBox();
-	const gridBounds = await grid.boundingBox();
-	expect(playersHeaderBounds).not.toBeNull();
-	expect(gridBounds).not.toBeNull();
+	const playersHeaderBounds = await visibleBounds(playersHeader);
+	const gridBounds = await visibleBounds(grid);
 	const beforePosition = [
 		await playersWidget.getAttribute('gs-x'),
 		await playersWidget.getAttribute('gs-y')
 	];
 	await page.mouse.move(
-		playersHeaderBounds!.x + playersHeaderBounds!.width / 2,
-		playersHeaderBounds!.y + playersHeaderBounds!.height / 2
+		playersHeaderBounds.x + playersHeaderBounds.width / 2,
+		playersHeaderBounds.y + playersHeaderBounds.height / 2
 	);
 	await playersHeader.evaluate((element) =>
 		element.addEventListener(
@@ -128,7 +133,7 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 	);
 	await page.mouse.down();
 	await expect(playersHeader).toHaveAttribute('data-test-mousedown-prevented', 'true');
-	await page.mouse.move(gridBounds!.x + gridBounds!.width / 12, gridBounds!.y + 3.5 * 76, {
+	await page.mouse.move(gridBounds.x + gridBounds.width / 12, gridBounds.y + 3.5 * 76, {
 		steps: 8
 	});
 	await page.mouse.up();
@@ -143,7 +148,8 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 	await addDialog.getByRole('button', { name: 'Distribution' }).click();
 	await addDialog.getByLabel('Field').selectOption('killTypes');
 	await addDialog.getByRole('button', { name: 'Add widget' }).click();
-	const distributionWidget = page.locator('[data-widget-id^="widget-"]');
+	await expect(widgets).toHaveCount(9);
+	const distributionWidget = widgets.last();
 	await expect(distributionWidget).toHaveAttribute('gs-w', '3');
 	await expect(distributionWidget).toHaveAttribute('gs-h', '2');
 	await page.getByRole('button', { name: 'Add widget' }).first().click();
@@ -152,25 +158,20 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 	await addDialog.getByLabel('Field').selectOption('players');
 	await addDialog.getByLabel('Format').selectOption('compact');
 	await addDialog.getByRole('button', { name: 'Add widget' }).click();
-	const customCounter = page.locator('[data-widget-id^="counter-"]');
-	await expect(customCounter).toHaveCount(1);
+	await expect(widgets).toHaveCount(10);
+	const customCounter = widgets.last();
+	await expect(customCounter).toHaveAttribute('data-widget-id', /^widget-/);
 	await expect(customCounter.locator('strong')).toHaveText('2');
 	await clansWidget.hover();
 	const resizeHandle = clansWidget.locator('.ui-resizable-se');
 	await expect(resizeHandle).toBeVisible();
 	const beforeWidth = Number(await clansWidget.getAttribute('gs-w'));
-	const resizeBounds = await resizeHandle.boundingBox();
-	expect(resizeBounds).not.toBeNull();
-	await page.mouse.move(
-		resizeBounds!.x + resizeBounds!.width / 2,
-		resizeBounds!.y + resizeBounds!.height / 2
-	);
+	const resizeBounds = await visibleBounds(resizeHandle);
+	const resizeX = resizeBounds.x + resizeBounds.width / 2;
+	const resizeY = resizeBounds.y + resizeBounds.height / 2;
+	await page.mouse.move(resizeX, resizeY);
 	await page.mouse.down();
-	await page.mouse.move(
-		resizeBounds!.x + resizeBounds!.width / 2 + 100,
-		resizeBounds!.y + resizeBounds!.height / 2 + 76,
-		{ steps: 5 }
-	);
+	await page.mouse.move(resizeX + 100, resizeY + 76, { steps: 5 });
 	await page.mouse.up();
 	await expect.poll(() => clansWidget.getAttribute('gs-w')).not.toBe(String(beforeWidth));
 	await page.locator('button[aria-label="Save dashboard"]').click();
@@ -182,12 +183,11 @@ test('edits the widget catalog and saves the dashboard layout', async ({ page })
 		expect.objectContaining({ type: 'counter', field: 'players', format: 'compact' })
 	);
 	await page.reload();
-	await expect(page.locator('.grid-stack-item')).toHaveCount(10);
-	await expect(page.locator('[data-widget-id="clans"]')).toHaveAttribute(
-		'gs-w',
-		String(savedLayout!.widgets.find((widget) => widget.id === 'clans')!.w)
-	);
+	await expect(widgets).toHaveCount(10);
+	const savedClansWidget = savedLayout?.widgets.find((widget) => widget.id === clansWidgetId);
+	expect(savedClansWidget).toBeDefined();
+	await expect(clansWidget).toHaveAttribute('gs-w', String(savedClansWidget?.w));
 	await page.locator('button[aria-label="Customize dashboard"]').click();
 	await page.locator('button[aria-label="Restore default"]').click();
-	await expect(page.locator('.grid-stack-item')).toHaveCount(9);
+	await expect(widgets).toHaveCount(9);
 });
