@@ -123,38 +123,48 @@ func (s *ServerHandler) GetAppThemeCSS(ctx context.Context, _ GetAppThemeCSSRequ
 }
 
 func parseAppSettings(form *multipart.Form) (domain.AppSettingsUpdate, bool) {
-	var params domain.AppSettingsUpdate
-	for _, name := range []string{"appName", "removeAuthor", "removeTelemetry", "primaryLanguage", "multilingual", "timeZone", "dateFormat", "timeFormat", "playerAvatarUrl"} {
-		if len(form.Value[name]) != 1 {
-			return params, false
+	values := form.Value
+	requiredFields := []string{
+		"appName", "removeAuthor", "removeTelemetry", "playerAvatarUrl",
+		"primaryLanguage", "multilingual", "timeZone", "dateFormat", "timeFormat",
+	}
+	for _, field := range requiredFields {
+		if len(values[field]) != 1 {
+			return domain.AppSettingsUpdate{}, false
 		}
 	}
-	params.AppName = form.Value["appName"][0]
-	params.TimeZone = form.Value["timeZone"][0]
-	params.DateFormat = form.Value["dateFormat"][0]
-	params.TimeFormat = form.Value["timeFormat"][0]
-	params.PlayerAvatarURL = form.Value["playerAvatarUrl"][0]
-	params.PrimaryLanguage = form.Value["primaryLanguage"][0]
-	params.Multilingual = form.Value["multilingual"][0] == "true"
-	removeAuthor := form.Value["removeAuthor"][0]
-	params.RemoveAuthor = removeAuthor == "true"
-	removeTelemetry := form.Value["removeTelemetry"][0]
-	params.RemoveTelemetry = removeTelemetry == "true"
-	var ok bool
-	params.ServerOnlineTimeoutMinutes, ok = optionalSettingsInt(form.Value["serverOnlineTimeoutMinutes"])
-	if !ok {
-		return params, false
-	}
-	params.IngestRetentionDays, ok = optionalSettingsInt(form.Value["ingestRetentionDays"])
-	if !ok {
-		return params, false
+
+	removeAuthor := values["removeAuthor"][0]
+	removeTelemetry := values["removeTelemetry"][0]
+	multilingual := values["multilingual"][0]
+	for _, value := range []string{removeAuthor, removeTelemetry, multilingual} {
+		if value != "true" && value != "false" {
+			return domain.AppSettingsUpdate{}, false
+		}
 	}
 
-	multilingual := form.Value["multilingual"][0]
-	if (removeAuthor != "true" && removeAuthor != "false") || (removeTelemetry != "true" && removeTelemetry != "false") || (multilingual != "true" && multilingual != "false") {
-		return params, false
+	onlineTimeout, ok := optionalSettingsInt(values["serverOnlineTimeoutMinutes"])
+	if !ok {
+		return domain.AppSettingsUpdate{}, false
 	}
-	return params, true
+	retentionDays, ok := optionalSettingsInt(values["ingestRetentionDays"])
+	if !ok {
+		return domain.AppSettingsUpdate{}, false
+	}
+
+	return domain.AppSettingsUpdate{
+		AppName:                    values["appName"][0],
+		RemoveAuthor:               removeAuthor == "true",
+		RemoveTelemetry:            removeTelemetry == "true",
+		PrimaryLanguage:            values["primaryLanguage"][0],
+		Multilingual:               multilingual == "true",
+		TimeZone:                   values["timeZone"][0],
+		DateFormat:                 values["dateFormat"][0],
+		TimeFormat:                 values["timeFormat"][0],
+		PlayerAvatarURL:            values["playerAvatarUrl"][0],
+		ServerOnlineTimeoutMinutes: onlineTimeout,
+		IngestRetentionDays:        retentionDays,
+	}, true
 }
 
 func optionalSettingsInt(values []string) (*int64, bool) {

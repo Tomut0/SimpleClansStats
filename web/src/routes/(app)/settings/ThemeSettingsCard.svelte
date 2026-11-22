@@ -88,7 +88,7 @@
 					disabled={disabled || applying || settings?.theme === defaultPreset}
 					onclick={() => {
 						preset = defaultPreset;
-						applyTheme(defaultPreset);
+						void applyTheme(defaultPreset);
 					}}
 				>
 					{m['pages.settings.categories.theme.reset']()}

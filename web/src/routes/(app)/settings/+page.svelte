@@ -46,6 +46,7 @@
 			id: 'timezone',
 			title: m['pages.settings.categories.timezone.title'](),
 			component: TimezoneSettingsCard,
+			formResetKey: data.settings,
 			props: { settings: data.settings, disabled }
 		},
 		{
@@ -88,7 +89,7 @@
 				typeof primaryLanguage === 'string' &&
 				locales.includes(primaryLanguage as (typeof locales)[number])
 			) {
-				setLocale(primaryLanguage as (typeof locales)[number]);
+				await setLocale(primaryLanguage as (typeof locales)[number]);
 			}
 			toast.success(m['pages.settings.saved']());
 		} catch {
@@ -152,7 +153,9 @@
 			{/if}
 			<form id="app-settings" class="space-y-4" onsubmit={saveSettings}>
 				{#each sections as section (section.id)}
-					<section.component id={section.id} title={section.title} {...section.props} />
+					{#key section.formResetKey}
+						<section.component id={section.id} title={section.title} {...section.props} />
+					{/key}
 				{/each}
 			</form>
 		</div>
