@@ -1,6 +1,6 @@
-import { formatDateTime } from '$lib/date-time';
-import { m } from '$lib/paraglide/messages.js';
-import type { AppSettings } from '$lib/api/generated';
+import { formatDateTime } from '#lib/date-time.js';
+import { m } from '#lib/paraglide/messages.js';
+import type { AppSettings } from '#lib/api/generated/index.js';
 
 export type SearchResult = {
 	type: 'clan' | 'player';

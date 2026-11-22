@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { PieChart } from 'layerchart';
-	import * as Chart from '$lib/components/ui/chart';
+	import * as Chart from '#lib/components/ui/chart/index.js';
 	import type { DonutSlice } from './types';
 	let {
 		title,

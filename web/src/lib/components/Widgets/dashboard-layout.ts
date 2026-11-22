@@ -1,4 +1,4 @@
-import type { DashboardLayout, DashboardWidget } from '$lib/api/generated';
+import type { DashboardLayout, DashboardWidget } from '#lib/api/generated/index.js';
 import type { GridStackWidget } from 'gridstack';
 import type {
 	ConfigurableWidgetField,

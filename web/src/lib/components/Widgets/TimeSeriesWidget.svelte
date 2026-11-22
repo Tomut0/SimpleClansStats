@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { AreaChart } from 'layerchart';
-	import * as Chart from '$lib/components/ui/chart';
-	import { m } from '$lib/paraglide/messages.js';
+	import * as Chart from '#lib/components/ui/chart/index.js';
+	import { m } from '#lib/paraglide/messages.js';
 	type Point = {
 		at: string;
 		clans: number;

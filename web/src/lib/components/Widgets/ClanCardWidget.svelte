@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import type { Clan } from './types';
 	let { clans }: { clans: Clan[] } = $props();
 	const clan = $derived(clans[0]);

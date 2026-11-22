@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import { API_URL } from '$app/env/public';
 	import { invalidate } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import AddServerDialog from '$lib/components/AddServerDialog.svelte';
-	import * as Empty from '$lib/components/ui/empty/index.js';
-	import * as Field from '$lib/components/ui/field/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import Separator from '#lib/components/ui/separator/separator.svelte';
+	import AddServerDialog from '#lib/components/AddServerDialog.svelte';
+	import * as Empty from '#lib/components/ui/empty/index.js';
+	import * as Field from '#lib/components/ui/field/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import ServerIcon from '@lucide/svelte/icons/server';
-	import type { AppSettings, Server } from '$lib/api/generated';
+	import type { AppSettings, Server } from '#lib/api/generated/index.js';
 
 	let {
 		id,

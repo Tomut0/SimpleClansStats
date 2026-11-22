@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BarChart } from 'layerchart';
-	import * as Chart from '$lib/components/ui/chart';
-	import { m } from '$lib/paraglide/messages.js';
+	import * as Chart from '#lib/components/ui/chart/index.js';
+	import { m } from '#lib/paraglide/messages.js';
 	let { clans }: { clans: Record<string, unknown>[] } = $props();
 	const chartData = $derived(
 		clans.slice(0, 8).map((clan) => ({

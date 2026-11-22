@@ -1,4 +1,4 @@
-import type { DashboardData, DashboardWidget } from '$lib/api/generated';
+import type { DashboardData, DashboardWidget } from '#lib/api/generated/index.js';
 
 export type Clan = Record<string, unknown>;
 export type Player = Record<string, unknown>;

@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { API_URL } from '$app/env/public';
-	import BrandIcon from '$lib/components/BrandIcon.svelte';
-	import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
-	import * as Avatar from '$lib/components/ui/avatar/index.js';
+	import BrandIcon from '#lib/components/BrandIcon.svelte';
+	import ThemeSwitcher from '#lib/components/ThemeSwitcher.svelte';
+	import * as Avatar from '#lib/components/ui/avatar/index.js';
 	import Button from './ui/button/button.svelte';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import SearchBar from './SearchBar.svelte';
 	import ServerSelector from './ServerSelector.svelte';
 	import Separator from './ui/separator/separator.svelte';
-	import type { AppSettings, Server, User } from '$lib/api/generated';
+	import type { AppSettings, Server, User } from '#lib/api/generated/index.js';
 	import { refreshAll } from '$app/navigation';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
 	import { resolve } from '$app/paths';
-	import { locales, setLocale } from '$lib/paraglide/runtime';
-	import { getLocale } from '$lib/paraglide/runtime';
+	import { locales, setLocale } from '#lib/paraglide/runtime.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 	import Languages from '@lucide/svelte/icons/languages';
 
 	let {

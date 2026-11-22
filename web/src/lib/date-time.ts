@@ -1,5 +1,5 @@
-import type { AppSettings } from '$lib/api/generated';
-import { getLocale } from '$lib/paraglide/runtime.js';
+import type { AppSettings } from '#lib/api/generated/index.js';
+import { getLocale } from '#lib/paraglide/runtime.js';
 
 type DateTimeSettings = Pick<AppSettings, 'timeZone' | 'dateFormat' | 'timeFormat'>;
 

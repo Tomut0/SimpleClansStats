@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import { API_URL, APP_NAME, PAGE_SEPARATOR } from '$app/env/public';
-	import { formatDateTime } from '$lib/date-time';
+	import { formatDateTime } from '#lib/date-time.js';
 	import type { PageProps } from './$types';
-	import { serverState } from '$lib/states/serverState.svelte';
+	import { serverState } from '#lib/states/serverState.svelte.js';
 	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
-	import PageHeader from '$lib/components/PageHeader.svelte';
-	import * as Empty from '$lib/components/ui/empty';
-	import { Spinner } from '$lib/components/ui/spinner';
+	import PageHeader from '#lib/components/PageHeader.svelte';
+	import * as Empty from '#lib/components/ui/empty/index.js';
+	import { Spinner } from '#lib/components/ui/spinner/index.js';
 	import DashboardGrid, {
 		type DashboardActions
-	} from '$lib/components/Widgets/DashboardGrid.svelte';
+	} from '#lib/components/Widgets/DashboardGrid.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';

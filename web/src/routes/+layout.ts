@@ -1,6 +1,6 @@
 import { API_URL } from '$app/env/public';
 import { asset } from '$app/paths';
-import type { AppSettings, Server, User } from '$lib/api/generated';
+import type { AppSettings, Server, User } from '#lib/api/generated/index.js';
 import type { LayoutLoad } from './$types';
 
 export const ssr = false;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	let { clans }: { clans: Record<string, unknown>[] } = $props();
 	const perRing = 12;
 	const ringHeight = 220;

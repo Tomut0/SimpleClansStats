@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
-	import { locales, setLocale } from '$lib/paraglide/runtime.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import { locales, setLocale } from '#lib/paraglide/runtime.js';
 	import { API_URL, APP_NAME, PAGE_SEPARATOR } from '$app/env/public';
 	import { invalidate } from '$app/navigation';
 	import Settings from '@lucide/svelte/icons/settings';
-	import PageHeader from '$lib/components/PageHeader.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import PageHeader from '#lib/components/PageHeader.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import GeneralSettingsCard from './GeneralSettingsCard.svelte';
 	import ServersSettingsCard from './ServersSettingsCard.svelte';

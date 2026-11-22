@@ -2,7 +2,7 @@
 	import type { Path } from '$app/types';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { locales, localizeHref } from '$lib/paraglide/runtime';
+	import { locales, localizeHref } from '#lib/paraglide/runtime.js';
 	import './layout.css';
 	import 'flag-icons/css/flag-icons.min.css';
 	import { ModeWatcher } from 'mode-watcher';

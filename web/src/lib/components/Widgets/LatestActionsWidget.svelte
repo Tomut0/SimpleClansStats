@@ -5,8 +5,8 @@
 	import Wallet from '@lucide/svelte/icons/wallet';
 	import UserRoundMinus from '@lucide/svelte/icons/user-round-minus';
 	import Activity from '@lucide/svelte/icons/activity';
-	import { getLocale } from '$lib/paraglide/runtime.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import type { DashboardEvent } from './types';
 	let {
 		events,

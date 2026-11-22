@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { m } from '$lib/paraglide/messages.js';
-	import { Input } from '$lib/components/ui/input/index.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import { Input } from '#lib/components/ui/input/index.js';
 
 	let { logoUrl }: { logoUrl: string } = $props();
 	let previewUrl = $state<string>();

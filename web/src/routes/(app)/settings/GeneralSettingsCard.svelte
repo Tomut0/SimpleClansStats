@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import LogoPreview from '$lib/components/LogoPreview.svelte';
-	import * as Field from '$lib/components/ui/field/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import { Switch } from '$lib/components/ui/switch/index.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import Separator from '#lib/components/ui/separator/separator.svelte';
+	import LogoPreview from '#lib/components/LogoPreview.svelte';
+	import * as Field from '#lib/components/ui/field/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Switch } from '#lib/components/ui/switch/index.js';
 	import { APP_NAME } from '$app/env/public';
 	import { asset } from '$app/paths';
-	import type { AppSettings } from '$lib/api/generated';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import { locales } from '$lib/paraglide/runtime';
+	import type { AppSettings } from '#lib/api/generated/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import { locales } from '#lib/paraglide/runtime.js';
 
 	let {
 		id,

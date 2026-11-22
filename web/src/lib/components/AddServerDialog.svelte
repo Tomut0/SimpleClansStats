@@ -3,14 +3,14 @@
 	import { API_URL } from '$app/env/public';
 	import { invalidate } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import type { ServerRegistration } from '$lib/api/generated';
-	import { m } from '$lib/paraglide/messages.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import * as InputGroup from '$lib/components/ui/input-group/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
+	import type { ServerRegistration } from '#lib/api/generated/index.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import * as InputGroup from '#lib/components/ui/input-group/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Separator } from '#lib/components/ui/separator/index.js';
 
 	const id = $props.id();
 	let displayName = $state('');

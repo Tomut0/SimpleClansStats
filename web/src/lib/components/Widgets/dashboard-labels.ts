@@ -1,5 +1,5 @@
-import type { DashboardWidget } from '$lib/api/generated';
-import { m } from '$lib/paraglide/messages.js';
+import type { DashboardWidget } from '#lib/api/generated/index.js';
+import { m } from '#lib/paraglide/messages.js';
 
 const labels: Partial<Record<`pages.dashboard.${'widget' | 'counter'}_${string}`, () => string>> =
 	m;

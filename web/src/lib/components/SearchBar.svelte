@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { API_URL } from '$app/env/public';
-	import * as InputGroup from '$lib/components/ui/input-group/index.js';
+	import * as InputGroup from '#lib/components/ui/input-group/index.js';
 	import SearchIcon from '@lucide/svelte/icons/search';
-	import { m } from '$lib/paraglide/messages.js';
-	import type { AppSettings } from '$lib/api/generated';
-	import { serverState } from '$lib/states/serverState.svelte';
+	import { m } from '#lib/paraglide/messages.js';
+	import type { AppSettings } from '#lib/api/generated/index.js';
+	import { serverState } from '#lib/states/serverState.svelte.js';
 	import ClanResultDialog from './ClanResultDialog.svelte';
 	import PlayerResultDialog from './PlayerResultDialog.svelte';
 	import type { SearchResult } from './searchResultDetails';

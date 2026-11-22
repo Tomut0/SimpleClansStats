@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import { Tooltip } from 'bits-ui';
 	let { activity }: { activity: unknown[] } = $props();
 	const values = $derived(Array.from({ length: 168 }, (_, i) => Number(activity[i] ?? 0)));

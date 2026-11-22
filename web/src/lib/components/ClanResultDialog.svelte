@@ -1,9 +1,9 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
 	import Check from '@lucide/svelte/icons/check';
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
-	import { m } from '$lib/paraglide/messages.js';
-	import type { AppSettings } from '$lib/api/generated';
+	import { m } from '#lib/paraglide/messages.js';
+	import type { AppSettings } from '#lib/api/generated/index.js';
 	import {
 		memberName,
 		memberRole,

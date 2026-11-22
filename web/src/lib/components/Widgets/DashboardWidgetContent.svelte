@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { DashboardWidget } from '$lib/api/generated';
-	import { m } from '$lib/paraglide/messages.js';
+	import type { DashboardWidget } from '#lib/api/generated/index.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import type { ConfigurableWidgetField, CounterField, WidgetData } from './types';
 	import { clanStatusSlices, counterValue, killSlices, tableRows } from './dashboard-data';
 	import { dashboardWidgetLabel } from './dashboard-labels';

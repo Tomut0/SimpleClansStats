@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { expect, test, type Locator } from '@playwright/test';
-import type { DashboardLayout } from '$lib/api/generated';
+import type { DashboardLayout } from '#lib/api/generated/index.js';
 
 async function visibleBounds(element: Locator) {
 	const bounds = await element.boundingBox();

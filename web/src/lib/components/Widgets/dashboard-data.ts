@@ -1,5 +1,5 @@
-import type { DashboardData } from '$lib/api/generated';
-import { m } from '$lib/paraglide/messages.js';
+import type { DashboardData } from '#lib/api/generated/index.js';
+import { m } from '#lib/paraglide/messages.js';
 import type {
 	Clan,
 	ConfigurableWidgetField,

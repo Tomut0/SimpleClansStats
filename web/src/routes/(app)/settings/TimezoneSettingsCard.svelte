@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import { m } from '#lib/paraglide/messages.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import Separator from '#lib/components/ui/separator/separator.svelte';
 	import { tick, untrack } from 'svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Field from '$lib/components/ui/field/index.js';
-	import * as Command from '$lib/components/ui/command/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import { CalendarDays, Clock3, Globe2 } from '@lucide/svelte';
-	import type { AppSettings } from '$lib/api/generated';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import * as Field from '#lib/components/ui/field/index.js';
+	import * as Command from '#lib/components/ui/command/index.js';
+	import * as Popover from '#lib/components/ui/popover/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import { CalendarDays, Clock3, Earth } from '@lucide/svelte';
+	import type { AppSettings } from '#lib/api/generated/index.js';
 
 	let {
 		id,
@@ -72,7 +72,7 @@
 								aria-label={m['pages.settings.categories.timezone.timezone_title']()}
 								class="w-full justify-start bg-input/50 font-normal text-muted-foreground hover:bg-input/50 aria-expanded:bg-input/50 sm:w-64"
 							>
-								<Globe2 />
+								<Earth />
 								{timeZone}
 							</Button>
 						{/snippet}

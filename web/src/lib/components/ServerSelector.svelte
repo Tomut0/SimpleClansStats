@@ -1,9 +1,9 @@
 <script lang="ts">
-	import * as Select from '$lib/components/ui/select/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
 	import ServerIcon from '@lucide/svelte/icons/server';
-	import { m } from '$lib/paraglide/messages.js';
-	import type { Server } from '$lib/api/generated';
-	import { serverState } from '$lib/states/serverState.svelte';
+	import { m } from '#lib/paraglide/messages.js';
+	import type { Server } from '#lib/api/generated/index.js';
+	import { serverState } from '#lib/states/serverState.svelte.js';
 
 	let { servers = [] }: { servers: Server[] } = $props();
 

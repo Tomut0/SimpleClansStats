@@ -1,6 +1,6 @@
 <script lang="ts">
-	import * as Table from '$lib/components/ui/table';
-	import { m } from '$lib/paraglide/messages.js';
+	import * as Table from '#lib/components/ui/table/index.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import type { Clan } from './types';
 	let { clans }: { clans: Clan[] } = $props();
 	const data = $derived(

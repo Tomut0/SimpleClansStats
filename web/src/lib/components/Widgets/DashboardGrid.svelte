@@ -12,9 +12,9 @@
 	import { GridStack, type GridStackWidget } from 'gridstack';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import type { DashboardData, DashboardLayout } from '$lib/api/generated';
+	import type { DashboardData, DashboardLayout } from '#lib/api/generated/index.js';
 	import 'gridstack/dist/gridstack.min.css';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import WidgetCatalogDialog from './WidgetCatalogDialog.svelte';
 	import DashboardWidgetContent from './DashboardWidgetContent.svelte';
 	import {

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
-	import type { DashboardWidget } from '$lib/api/generated';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { m } from '$lib/paraglide/messages.js';
+	import type { DashboardWidget } from '#lib/api/generated/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import {
 		configurableFields,
 		configurableTypes,

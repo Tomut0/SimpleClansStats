@@ -1,7 +1,7 @@
 <script>
-	import BrandIcon from '$lib/components/BrandIcon.svelte';
-	import LoginForm from '$lib/components/LoginForm.svelte';
-	import { m } from '$lib/paraglide/messages.js';
+	import BrandIcon from '#lib/components/BrandIcon.svelte';
+	import LoginForm from '#lib/components/LoginForm.svelte';
+	import { m } from '#lib/paraglide/messages.js';
 	import { resolve } from '$app/paths';
 </script>
 

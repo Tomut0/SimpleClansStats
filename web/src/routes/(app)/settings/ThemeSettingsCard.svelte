@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import { API_URL } from '$app/env/public';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import * as Field from '$lib/components/ui/field/index.js';
-	import { Spinner } from '$lib/components/ui/spinner/index.js';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import type { AppSettings, ThemePresetRequest } from '$lib/api/generated';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import * as Field from '#lib/components/ui/field/index.js';
+	import { Spinner } from '#lib/components/ui/spinner/index.js';
+	import Separator from '#lib/components/ui/separator/separator.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import type { AppSettings, ThemePresetRequest } from '#lib/api/generated/index.js';
 
 	const defaultPreset = 'b2pklPa1A';
 	let {

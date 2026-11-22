@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 	import type { Player } from './types';
 	let { players, avatarUrlTemplate }: { players: Player[]; avatarUrlTemplate: string } = $props();
 </script>

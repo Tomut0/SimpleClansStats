@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getLocale, setLocale } from '$lib/paraglide/runtime.js';
+import { getLocale, setLocale } from '#lib/paraglide/runtime.js';
 import {
 	defaultWidgets,
 	serializeLayout,
