@@ -5,7 +5,7 @@ import { resolve } from '$app/paths';
 export const load: PageLoad = async ({ parent }) => {
 	const { servers } = await parent();
 
-	if (servers?.length == 0) {
-		throw redirect(303, resolve('/(app)/settings'));
+	if (servers.length === 0) {
+		redirect(303, resolve('/(app)/settings'));
 	}
 };

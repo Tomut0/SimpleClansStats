@@ -115,7 +115,12 @@
 			<Dialog.Description class="text-base">
 				{#if credentials}
 					{m['pages.settings.categories.servers.dialog.description']()}
-					<a href="https://github.com/Tomut0/sccollector" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary underline dark:text-primary-foreground">SCCollector</a>.
+					<a
+						href="https://github.com/Tomut0/sccollector"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="font-semibold text-primary underline dark:text-primary-foreground">SCCollector</a
+					>.
 				{:else}
 					{m['pages.settings.categories.servers.dialog.register_description']()}
 				{/if}

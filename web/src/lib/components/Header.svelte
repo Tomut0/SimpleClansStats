@@ -35,7 +35,7 @@
 			});
 
 			if (res.ok) {
-				refreshAll();
+				await refreshAll();
 			}
 		} catch {
 			errorMessage = m['errors.http_error']();

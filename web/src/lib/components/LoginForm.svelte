@@ -2,11 +2,7 @@
 	import { API_URL } from '$app/env/public';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import {
-		FieldGroup,
-		Field,
-		FieldLabel
-	} from '$lib/components/ui/field/index.js';
+	import { FieldGroup, Field, FieldLabel } from '$lib/components/ui/field/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -66,7 +62,7 @@
 					/>
 				</Field>
 				<Field>
-				    <FieldLabel for="password-{id}">{m['pages.login.form.password']()}</FieldLabel>
+					<FieldLabel for="password-{id}">{m['pages.login.form.password']()}</FieldLabel>
 					<Input
 						id="password-{id}"
 						name="password"

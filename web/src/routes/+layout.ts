@@ -1,6 +1,6 @@
 import { API_URL } from '$app/env/public';
 import { asset } from '$app/paths';
-import type { AppSettings, Server } from '$lib/api/generated';
+import type { AppSettings, Server, User } from '$lib/api/generated';
 import type { LayoutLoad } from './$types';
 
 export const ssr = false;
@@ -14,14 +14,12 @@ export const load: LayoutLoad = async ({ fetch, depends }) => {
 		fetch(`${API_URL}/auth/me`, { credentials: 'include' }),
 		fetch(`${API_URL}/servers`, { cache: 'no-store' }),
 		fetch(`${API_URL}/settings`)
-			.then(async (response): Promise<AppSettings | null> =>
-				response.ok ? await response.json() : null
-			)
+			.then(async (response) => (response.ok ? ((await response.json()) as AppSettings) : null))
 			.catch(() => null)
 	]);
 
-	const user = meRes.ok ? await meRes.json() : null;
-	const servers: Server[] = serversRes.ok ? await serversRes.json() : [];
+	const user = meRes.ok ? ((await meRes.json()) as User) : null;
+	const servers = serversRes.ok ? ((await serversRes.json()) as Server[]) : [];
 
 	const logoUrl = settings?.logoVersion
 		? `${API_URL}/settings/logo?v=${settings.logoVersion}`
