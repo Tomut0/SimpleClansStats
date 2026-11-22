@@ -69,6 +69,95 @@ docker run -d --name simpleclansstats `
 
 Now visit `http://localhost:4000/` to see your web dashboard.
 
+### Nginx (Production)
+
+Run SimpleClansStats in web mode on the Nginx host using [Standalone](#standalone) or [Docker](#docker).
+Point your domain at that host and set both `APP_URL` and `CORS_ALLOWED_ORIGINS` to your HTTPS origin,
+such as `https://stats.example.com`. With Docker, publish the app on loopback using
+`-p 127.0.0.1:4000:4000`. With the standalone binary, block external access to port `4000` in the host firewall.
+
+On Debian 13, install Nginx and its [Brotli filter](https://packages.debian.org/trixie/libnginx-mod-http-brotli-filter).
+
+```bash
+sudo apt update
+sudo apt install nginx libnginx-mod-http-brotli-filter
+```
+
+Save this as `/etc/nginx/conf.d/simpleclansstats.conf`, which Nginx includes inside its `http` block.
+Use your domain and the paths to its TLS certificate and private key.
+[Nginx HTTPS setup](https://nginx.org/en/docs/http/configuring_https_servers.html)
+
+```nginx
+map $request_method $scstats_login_key {
+    default "";
+    POST    $binary_remote_addr;
+}
+
+limit_req_zone $scstats_login_key zone=scstats_login:10m rate=10r/m;
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name stats.example.com;
+
+    return 308 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name stats.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/stats.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/stats.example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # Allow the collector's 8 MiB snapshots.
+    client_max_body_size 8m;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    location = /api/v1/auth/login {
+        limit_req zone=scstats_login burst=5 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:4000;
+    }
+
+    location /_app/immutable/ {
+        brotli on;
+        brotli_types application/javascript text/javascript text/css image/svg+xml;
+        gzip_vary on;
+        proxy_pass http://127.0.0.1:4000;
+    }
+
+    location = /api/v1/settings/theme {
+        # Theme builds can take up to five minutes.
+        proxy_read_timeout 320s;
+        proxy_pass http://127.0.0.1:4000;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:4000;
+    }
+}
+```
+
+The `/login` form submits to `POST /api/v1/auth/login`. Nginx limits submissions to 10 per minute
+per client IP with a burst of 5 and returns `429` when the limit is exceeded.
+SimpleClansStats sees Nginx as one client, so proxied traffic shares the app's built-in 300 requests per minute limit.
+If a CDN or load balancer sits in front of Nginx, configure Nginx to restore client IPs using the proxy's trusted addresses.
+[Nginx real IP module](https://nginx.org/en/docs/http/ngx_http_realip_module.html)
+
+Nginx compresses versioned frontend assets with Brotli and passes through the app's `Cache-Control` headers.
+
+Apply the configuration and open your HTTPS URL.
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
 ## Support
 
 If you have faced any issues, I'll answer on any questions in official
