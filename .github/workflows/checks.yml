@@ -26,6 +26,10 @@ jobs:
       - run: npm run lint
       - run: npm run check
       - run: npm run test:unit -- --run
+        env:
+          APP_NAME: SCStats
+          API_URL: /api/v1
+          PAGE_SEPARATOR: ' - '
 
   go:
     name: Go format, vet, and tests
