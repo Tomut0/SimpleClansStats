@@ -7,38 +7,49 @@ import (
 	"strings"
 )
 
+type searchSnapshot struct {
+	Clans   []json.RawMessage `json:"clans"`
+	Players []json.RawMessage `json:"players"`
+}
+
 func indexSearchDocuments(ctx context.Context, tx *sql.Tx, serverID, payload string) error {
-	var snapshot struct {
-		Clans   []json.RawMessage `json:"clans"`
-		Players []json.RawMessage `json:"players"`
-	}
+	var snapshot searchSnapshot
 	if err := json.Unmarshal([]byte(payload), &snapshot); err != nil {
 		return err
 	}
 	if _, err := tx.ExecContext(ctx, `DELETE FROM search_documents WHERE server_id = ?`, serverID); err != nil {
 		return err
 	}
-	insert := `INSERT INTO search_documents (server_id, entity_type, entity_id, name, payload, search_text) VALUES (?, ?, ?, ?, ?, ?)`
+	const insert = `
+		INSERT INTO search_documents (server_id, entity_type, entity_id, name, payload, search_text)
+		VALUES (?, ?, ?, ?, ?, ?)
+	`
 	for _, group := range []struct {
-		kind string
-		rows []json.RawMessage
-	}{{"clan", snapshot.Clans}, {"player", snapshot.Players}} {
+		kind        string
+		rows        []json.RawMessage
+		idField     string
+		nameField   string
+		extraFields []string
+	}{
+		{
+			kind: "clan", rows: snapshot.Clans, idField: "externalId", nameField: "tag",
+			extraFields: []string{"name"},
+		},
+		{
+			kind: "player", rows: snapshot.Players, idField: "uuid", nameField: "name",
+			extraFields: []string{"clanTag", "clanName"},
+		},
+	} {
 		for _, raw := range group.rows {
 			var fields map[string]any
 			if err := json.Unmarshal(raw, &fields); err != nil {
 				return err
 			}
-			idKey, nameKey := "externalId", "tag"
-			if group.kind == "player" {
-				idKey, nameKey = "uuid", "name"
-			}
-			id, _ := fields[idKey].(string)
-			name, _ := fields[nameKey].(string)
+			id := stringField(fields, group.idField)
+			name := stringField(fields, group.nameField)
 			searchText := []string{name}
-			if group.kind == "clan" {
-				searchText = append(searchText, stringField(fields, "name"))
-			} else {
-				searchText = append(searchText, stringField(fields, "clanTag"), stringField(fields, "clanName"))
+			for _, field := range group.extraFields {
+				searchText = append(searchText, stringField(fields, field))
 			}
 			if _, err := tx.ExecContext(ctx, insert, serverID, group.kind, id, name, string(raw), strings.Join(searchText, " ")); err != nil {
 				return err

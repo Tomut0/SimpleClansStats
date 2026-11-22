@@ -16,42 +16,38 @@
 	let selected = $state<SearchResult | null>(null);
 	let open = $state(false);
 	let loading = $state(false);
-	let controller: AbortController | undefined;
-	let debounce: ReturnType<typeof setTimeout> | undefined;
+	const hasSearchQuery = $derived(query.trim().length >= 2);
 
 	$effect(() => {
 		const value = query;
 		const serverId = serverState.selectedId;
-		controller?.abort();
-		if (debounce) clearTimeout(debounce);
-		if (value.trim().length < 2 || !serverId) {
+		if (!hasSearchQuery || !serverId) {
 			results = [];
 			loading = false;
 			return;
 		}
+
+		const controller = new AbortController();
 		loading = true;
-		debounce = setTimeout(() => void search(value, serverId), 250);
+		const debounce = setTimeout(() => void search(value, serverId, controller.signal), 250);
 		return () => {
-			if (debounce) clearTimeout(debounce);
-			controller?.abort();
+			clearTimeout(debounce);
+			controller.abort();
 		};
 	});
 
-	async function search(value: string, serverId: string) {
-		const requestController = (controller = new AbortController());
+	async function search(value: string, serverId: string, signal: AbortSignal) {
+		let matches: SearchResult[] = [];
 		try {
 			const params = new URLSearchParams({ q: value, serverId, limit: '10' });
-			const response = await fetch(`${API_URL}/search?${params}`, {
-				credentials: 'omit',
-				signal: requestController.signal
-			});
-			const matches = response.ok ? await response.json() : [];
-			if (!requestController.signal.aborted) results = matches;
+			const response = await fetch(`${API_URL}/search?${params}`, { credentials: 'omit', signal });
+			if (response.ok) matches = await response.json();
 		} catch {
-			if (!requestController.signal.aborted) results = [];
-		} finally {
-			if (!requestController.signal.aborted) loading = false;
+			// Failed searches show the same empty state as searches with no matches.
 		}
+		if (signal.aborted) return;
+		results = matches;
+		loading = false;
 	}
 </script>
 
@@ -65,7 +61,7 @@
 		/>
 		<InputGroup.Addon><SearchIcon /></InputGroup.Addon>
 	</InputGroup.Root>
-	{#if query.trim().length >= 2}
+	{#if hasSearchQuery}
 		<div
 			class="absolute top-full right-0 left-0 z-40 mt-1 max-h-80 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
 		>

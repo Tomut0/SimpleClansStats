@@ -35,19 +35,24 @@ func (r *searchRepository) Search(ctx context.Context, serverID, query string, l
 		return data, err
 	}
 	if statePayload != "" {
-		var snapshot struct {
-			Clans   []json.RawMessage `json:"clans"`
-			Players []json.RawMessage `json:"players"`
-		}
+		var snapshot searchSnapshot
 		if err := json.Unmarshal([]byte(statePayload), &snapshot); err != nil {
 			return data, err
 		}
 		data.Clans, data.Players = snapshot.Clans, snapshot.Players
 	}
-	for i, term := range terms {
-		terms[i] = `"` + strings.ReplaceAll(term, `"`, `""`) + `"*`
+	// Quote user text as FTS5 phrases and match each phrase by prefix.
+	for index, term := range terms {
+		terms[index] = `"` + strings.ReplaceAll(term, `"`, `""`) + `"*`
 	}
-	rows, err := tx.QueryContext(ctx, `SELECT entity_type, entity_id, name FROM search_documents WHERE server_id = ? AND search_text MATCH ? ORDER BY rank LIMIT ?`, serverID, strings.Join(terms, " AND "), limit)
+	const findMatches = `
+		SELECT entity_type, entity_id, name
+		FROM search_documents
+		WHERE server_id = ? AND search_text MATCH ?
+		ORDER BY rank
+		LIMIT ?
+	`
+	rows, err := tx.QueryContext(ctx, findMatches, serverID, strings.Join(terms, " AND "), limit)
 	if err != nil {
 		return data, err
 	}

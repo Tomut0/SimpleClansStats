@@ -3,6 +3,8 @@ package domain
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 )
 
@@ -55,21 +57,18 @@ func ResolveSearchResults(matches []SearchMatch, clans, players []json.RawMessag
 	}
 	results := make([]SearchResult, 0, len(matches))
 	for _, match := range matches {
-		var fields map[string]any = lookup.clansByID[match.ID]
+		var fields map[string]any
 		if match.Type == "player" {
 			fields = lookup.playersByID[match.ID]
+		} else {
+			fields = lookup.clansByID[match.ID]
 		}
 		if fields == nil {
 			continue
 		}
-		encoded, err := json.Marshal(fields)
-		if err != nil {
-			return nil, err
-		}
-		fields = map[string]any{}
-		if err := json.Unmarshal(encoded, &fields); err != nil {
-			return nil, err
-		}
+
+		// Other results may still need the original fields to resolve their relationships.
+		fields = maps.Clone(fields)
 		data, err := searchDetails(match.Type, fields, lookup)
 		if err != nil {
 			return nil, err
@@ -85,14 +84,20 @@ type searchLookup struct {
 	clansByID     map[string]Clan
 }
 
+var playerIDFields = []string{"uuid", "externalId", "id"}
+
 func buildSearchLookup(clans, players []json.RawMessage) (searchLookup, error) {
-	lookup := searchLookup{playersByID: map[string]Player{}, playersByClan: map[string][]Player{}, clansByID: map[string]Clan{}}
+	lookup := searchLookup{
+		playersByID:   make(map[string]Player),
+		playersByClan: make(map[string][]Player),
+		clansByID:     make(map[string]Clan, len(clans)),
+	}
 	for _, raw := range players {
 		var player Player
 		if err := json.Unmarshal(raw, &player); err != nil {
 			return lookup, err
 		}
-		for _, key := range []string{"uuid", "externalId", "id"} {
+		for _, key := range playerIDFields {
 			if value := player[key]; value != nil {
 				lookup.playersByID[fmt.Sprint(value)] = player
 			}
@@ -129,42 +134,47 @@ func searchDetails(kind string, fields map[string]any, lookup searchLookup) (jso
 	return json.Marshal(fields)
 }
 
-func clanMembers(clan Clan, playersByID map[string]Player, playersByClan map[string][]Player) []map[string]string {
-	members, matched := []map[string]string{}, 0
-	if ids, ok := clan["memberExternalIds"].([]any); ok {
-		for _, value := range ids {
-			id := fmt.Sprint(value)
-			player := playersByID[id]
-			if player == nil {
-				continue
-			}
-			matched++
-			role := stringField(player, "role")
-			if role == "" {
-				role = "member"
-			}
-			if id == fmt.Sprint(clan["leaderExternalId"]) {
-				role = "leader"
-			}
-			members = append(members, map[string]string{"name": stringField(player, "name"), "role": role})
+type searchClanMember struct {
+	Name string `json:"name"`
+	Role string `json:"role"`
+}
+
+func clanMembers(clan Clan, playersByID map[string]Player, playersByClan map[string][]Player) []searchClanMember {
+	leaderID := fmt.Sprint(clan["leaderExternalId"])
+	memberIDs, _ := clan["memberExternalIds"].([]any)
+	members := make([]searchClanMember, 0, len(memberIDs))
+	for _, value := range memberIDs {
+		id := fmt.Sprint(value)
+		if player := playersByID[id]; player != nil {
+			members = append(members, describeClanMember(player, id == leaderID))
 		}
 	}
-	if matched == 0 {
+
+	// Some snapshots only record membership on the player.
+	if len(members) == 0 {
 		for _, player := range playersByClan[stringField(clan, "externalId")] {
-			role := stringField(player, "role")
-			if role == "" {
-				role = "member"
-			}
-			for _, key := range []string{"uuid", "externalId", "id"} {
-				if fmt.Sprint(player[key]) == fmt.Sprint(clan["leaderExternalId"]) {
-					role = "leader"
-				}
-			}
-			members = append(members, map[string]string{"name": stringField(player, "name"), "role": role})
+			isLeader := slices.ContainsFunc(playerIDFields, func(field string) bool {
+				return fmt.Sprint(player[field]) == leaderID
+			})
+			members = append(members, describeClanMember(player, isLeader))
 		}
 	}
-	sort.SliceStable(members, func(i, j int) bool { return members[i]["role"] == "leader" && members[j]["role"] != "leader" })
+
+	sort.SliceStable(members, func(i, j int) bool {
+		return members[i].Role == "leader" && members[j].Role != "leader"
+	})
 	return members
+}
+
+func describeClanMember(player Player, isLeader bool) searchClanMember {
+	role := stringField(player, "role")
+	switch {
+	case isLeader:
+		role = "leader"
+	case role == "":
+		role = "member"
+	}
+	return searchClanMember{Name: stringField(player, "name"), Role: role}
 }
 
 func clanRelations(ids any, clansByID map[string]Clan) []string {

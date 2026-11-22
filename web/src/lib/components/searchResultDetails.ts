@@ -1,4 +1,4 @@
-import { getLocale } from '$lib/paraglide/runtime.js';
+import { formatDateTime } from '$lib/date-time';
 import { m } from '$lib/paraglide/messages.js';
 import type { AppSettings } from '$lib/api/generated';
 
@@ -91,33 +91,10 @@ export function orderedResultDetails(
 	});
 }
 
-export function formatDateTime(value: unknown, settings: AppSettings | null) {
+function formatDateDetail(value: unknown, settings: AppSettings | null) {
 	if (typeof value !== 'string') return String(value ?? '—');
 	const date = new Date(value);
-	if (Number.isNaN(date.getTime())) return String(value);
-	const locale = getLocale();
-	const timeZone = settings?.timeZone || 'Europe/Moscow';
-	const parts = Object.fromEntries(
-		new Intl.DateTimeFormat(locale, {
-			timeZone,
-			year: 'numeric',
-			month: '2-digit',
-			day: '2-digit'
-		})
-			.formatToParts(date)
-			.map(({ type, value }) => [type, value])
-	);
-	const dateText = (settings?.dateFormat || 'DD.MM.YYYY')
-		.replace('YYYY', parts.year)
-		.replace('MM', parts.month)
-		.replace('DD', parts.day);
-	const timeText = new Intl.DateTimeFormat(locale, {
-		timeZone,
-		hour: '2-digit',
-		minute: '2-digit',
-		hourCycle: settings?.timeFormat === '12h' ? 'h12' : 'h23'
-	}).format(date);
-	return `${dateText}, ${timeText}`;
+	return Number.isNaN(date.getTime()) ? value : formatDateTime(date, settings);
 }
 
 export function formatRole(role: unknown) {
@@ -137,7 +114,7 @@ function formatNested(value: unknown, settings: AppSettings | null): string {
 }
 
 function formatValue(key: string, value: unknown, settings: AppSettings | null): string {
-	if (dateFields.has(key)) return formatDateTime(value, settings);
+	if (dateFields.has(key)) return formatDateDetail(value, settings);
 	if (key === 'role' || key === 'currentRole') return formatRole(value);
 	if (Array.isArray(value) || (value && typeof value === 'object'))
 		return formatNested(value, settings);
